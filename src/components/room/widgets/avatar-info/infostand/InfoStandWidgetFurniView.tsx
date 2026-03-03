@@ -1,6 +1,7 @@
-import { CrackableDataType, CreateLinkEvent, FurnitureFloorUpdateEvent, GetRoomEngine, GetSoundManager, GroupInformationComposer, GroupInformationEvent, NowPlayingEvent, RoomControllerLevel, RoomObjectCategory, RoomObjectOperationType, RoomObjectVariable, RoomWidgetEnumItemExtradataParameter, RoomWidgetFurniInfoUsagePolicyEnum, SetObjectDataMessageComposer, SongInfoReceivedEvent, StringDataType } from '@nitrots/nitro-renderer';
+import { CrackableDataType, CreateLinkEvent, FurnitureFloorUpdateEvent, GetRoomEngine, GetSoundManager, GroupInformationComposer, GroupInformationEvent, NowPlayingEvent, RoomControllerLevel, RoomObjectCategory, RoomObjectOperationType, RoomObjectVariable, RoomWidgetEnumItemExtradataParameter, RoomWidgetFurniInfoUsagePolicyEnum, SetObjectDataMessageComposer, SongInfoReceivedEvent, StringDataType, UpdateFurniturePositionComposer } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useState } from 'react';
 import { FaCrosshairs, FaRulerVertical, FaTimes } from 'react-icons/fa';
+import { GrFormNextLink, GrRotateLeft, GrRotateRight } from 'react-icons/gr';
 import { AvatarInfoFurni, GetGroupInformation, LocalizeText, SendMessageComposer } from '../../../../../api';
 import { Button, Column, Flex, LayoutBadgeImageView, LayoutLimitedEditionCompactPlateView, LayoutRarityLevelView, LayoutRoomObjectImageView, Text, UserProfileIconView } from '../../../../../common';
 import { useMessageEvent, useNitroEvent, useRoom } from '../../../../../hooks';
@@ -41,6 +42,113 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
     const [ songName, setSongName ] = useState<string>('');
     const [ songCreator, setSongCreator ] = useState<string>('');
     const [ itemLocation, setItemLocation ] = useState<{ x: number; y: number; z: number }>({ x: -1, y: -1, z: -1 });
+    const [ dropdownOpen, setDropdownOpen ] = useState(sessionStorage.getItem('dropdownOpen') === 'true');
+    const [ furniLocationZ, setFurniLocationZ ] = useState<number>(null);
+
+    const sendUpdate = useCallback((deltaX: number, deltaY: number, newZ: number = 0, deltaDirection: number = 0) =>
+    {
+        if(!avatarInfo) return;
+
+        const roomId = GetRoomEngine().activeRoomId;
+        const roomObject = GetRoomEngine().getRoomObject(roomId, avatarInfo.id, avatarInfo.category);
+
+        if(!roomObject) return;
+
+        const newX = roomObject.getLocation().x + deltaX;
+        const newY = roomObject.getLocation().y + deltaY;
+        const currentDirection = roomObject.getDirection().x;
+
+        const newDirection = (deltaDirection !== 0)
+            ? getValidRoomObjectDirection(roomObject, deltaDirection > 0) / 45
+            : currentDirection / 45;
+
+        SendMessageComposer(new UpdateFurniturePositionComposer(avatarInfo.id, newX, newY, Math.round(newZ * 10000), newDirection));
+    }, [ avatarInfo ]);
+
+    function getValidRoomObjectDirection(roomObject: any, isPositive: boolean)
+    {
+        if(!roomObject || !roomObject.model) return 0;
+
+        let allowedDirections: number[] = [];
+
+        if(roomObject.type === 'monster_plant')
+        {
+            allowedDirections = roomObject.model.getValue('pet_allowed_directions');
+        }
+        else
+        {
+            allowedDirections = roomObject.model.getValue('furniture_allowed_directions');
+        }
+
+        let direction = roomObject.getDirection().x;
+
+        if(allowedDirections && allowedDirections.length)
+        {
+            let index = allowedDirections.indexOf(direction);
+
+            if(index < 0)
+            {
+                index = 0;
+
+                for(let i = 0; i < allowedDirections.length; i++)
+                {
+                    if(direction <= allowedDirections[i]) break;
+
+                    index++;
+                }
+
+                index = index % allowedDirections.length;
+            }
+
+            if(isPositive)
+            {
+                index = (index + 1) % allowedDirections.length;
+            }
+            else
+            {
+                index = (index - 1 + allowedDirections.length) % allowedDirections.length;
+            }
+
+            direction = allowedDirections[index];
+        }
+
+        return direction;
+    }
+
+    const handleHeightChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) =>
+    {
+        let newZ = parseFloat(event.target.value);
+
+        if(isNaN(newZ) || newZ < 0) newZ = 0;
+        else if(newZ > 40) newZ = 40;
+
+        setFurniLocationZ(newZ);
+        sendUpdate(0, 0, newZ, 0);
+    }, [ sendUpdate ]);
+
+    const handleHeightBlur = useCallback((event: React.FocusEvent<HTMLInputElement>) =>
+    {
+        let newZ = parseFloat(event.target.value);
+
+        if(isNaN(newZ) || newZ < 0) newZ = 0;
+        else if(newZ > 40) newZ = 40;
+
+        newZ = parseFloat(newZ.toFixed(4));
+        setFurniLocationZ(newZ);
+        sendUpdate(0, 0, newZ, 0);
+    }, [ sendUpdate ]);
+
+    const adjustHeight = useCallback((amount: number) =>
+    {
+        let newZ = (furniLocationZ ?? 0) + amount;
+
+        if(newZ < 0) newZ = 0;
+        else if(newZ > 40) newZ = 40;
+
+        newZ = parseFloat(newZ.toFixed(4));
+        setFurniLocationZ(newZ);
+        sendUpdate(0, 0, newZ, 0);
+    }, [ furniLocationZ, sendUpdate ]);
 
     useNitroEvent<NowPlayingEvent>(NowPlayingEvent.NPE_SONG_CHANGED, event =>
     {
@@ -80,7 +188,12 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
 
         const roomObjForLocation = GetRoomEngine().getRoomObject(roomSession.roomId, avatarInfo.id, avatarInfo.isWallItem ? RoomObjectCategory.WALL : RoomObjectCategory.FLOOR);
         const location = roomObjForLocation?.getLocation();
-        if(location) setItemLocation({ x: location.x, y: location.y, z: location.z });
+
+        if(location)
+        {
+            setItemLocation({ x: location.x, y: location.y, z: location.z });
+            setFurniLocationZ(location.z);
+        }
 
         const isValidController = (avatarInfo.roomControllerLevel >= RoomControllerLevel.GUEST);
 
@@ -218,6 +331,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
         if(!avatarInfo || item.itemId !== avatarInfo.id) return;
 
         setItemLocation({ x: item.x, y: item.y, z: item.z });
+        setFurniLocationZ(item.z);
     });
 
     useEffect(() =>
@@ -439,6 +553,91 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                             <>
                                 <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
                                 { canSeeFurniId && <Text small wrap variant="white">ID: { avatarInfo.id }</Text> }
+                                { (!avatarInfo.isWallItem && canMove) &&
+                                    <>
+                                        <button
+                                            className="w-full text-white text-xs bg-[#2a2a3a] hover:bg-[#3a3a4a] border border-[#ffffff33] rounded px-2 py-1 cursor-pointer transition-colors"
+                                            onClick={ () => setDropdownOpen(!dropdownOpen) }>
+                                            { dropdownOpen ? `${LocalizeText('widget.furni.present.close')} Buildtools` : `${LocalizeText('navigator.roomsettings.doormode.open')} Buildtools` }
+                                        </button>
+                                        { dropdownOpen &&
+                                            <div className="flex gap-[4px] w-full">
+                                                { /* Left panel: position + rotation */ }
+                                                <div className="flex-1 bg-[#3D5D63] rounded-[6px] border border-white p-[2px] flex flex-col gap-1">
+                                                    <Text small variant="white">{ LocalizeText('group.edit.badge.position') }</Text>
+                                                    <div className="flex flex-col items-center gap-[2px]">
+                                                        <div className="flex gap-[0.6em]">
+                                                            <div className="bg-[#E55959] text-white w-[25px] h-[25px] border border-white cursor-pointer rounded-[3px] flex justify-center items-center transition-[filter] duration-300 hover:brightness-150 rotate-[225deg]"
+                                                                onClick={ () => sendUpdate(-1, 0, furniLocationZ ?? 0, 0) }>
+                                                                <GrFormNextLink size="1.7em" />
+                                                            </div>
+                                                            <div className="bg-[#E55959] text-white w-[25px] h-[25px] border border-white cursor-pointer rounded-[3px] flex justify-center items-center transition-[filter] duration-300 hover:brightness-150 rotate-[315deg]"
+                                                                onClick={ () => sendUpdate(0, -1, furniLocationZ ?? 0, 0) }>
+                                                                <GrFormNextLink size="1.7em" />
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex gap-[0.6em]">
+                                                            <div className="bg-[#E55959] text-white w-[25px] h-[25px] border border-white cursor-pointer rounded-[3px] flex justify-center items-center transition-[filter] duration-300 hover:brightness-150 rotate-[135deg]"
+                                                                onClick={ () => sendUpdate(0, 1, furniLocationZ ?? 0, 0) }>
+                                                                <GrFormNextLink size="1.7em" />
+                                                            </div>
+                                                            <div className="bg-[#E55959] text-white w-[25px] h-[25px] border border-white cursor-pointer rounded-[3px] flex justify-center items-center transition-[filter] duration-300 hover:brightness-150 rotate-[45deg]"
+                                                                onClick={ () => sendUpdate(1, 0, furniLocationZ ?? 0, 0) }>
+                                                                <GrFormNextLink size="1.7em" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <Text small variant="white">{ LocalizeText('infostand.button.rotate') }</Text>
+                                                    <div className="flex justify-center gap-[0.6em]">
+                                                        <div className="bg-[#D1A245] text-black w-[28px] h-[28px] border-2 border-[#eee] cursor-pointer rounded-full flex justify-center items-center transition-[filter] duration-300 hover:brightness-150"
+                                                            onClick={ () => sendUpdate(0, 0, furniLocationZ ?? 0, -1) }>
+                                                            <GrRotateLeft size="1.4em" />
+                                                        </div>
+                                                        <div className="bg-[#D1A245] text-black w-[28px] h-[28px] border-2 border-[#eee] cursor-pointer rounded-full flex justify-center items-center transition-[filter] duration-300 hover:brightness-150"
+                                                            onClick={ () => sendUpdate(0, 0, furniLocationZ ?? 0, 1) }>
+                                                            <GrRotateRight size="1.4em" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                { /* Right panel: height */ }
+                                                <div className="flex-1 bg-[#3D5D63] rounded-[6px] border border-white p-[2px] flex flex-col gap-1">
+                                                    <Text small variant="white">{ LocalizeText('stack.magic.tile.height.label') }</Text>
+                                                    <input
+                                                        spellCheck={ false }
+                                                        type="number"
+                                                        className="w-full text-xs bg-[#1a1a2a] text-white border border-[#ffffff44] rounded px-1 py-0.5"
+                                                        value={ furniLocationZ !== null ? furniLocationZ.toString() : '' }
+                                                        onChange={ handleHeightChange }
+                                                        onBlur={ handleHeightBlur }
+                                                        min={ 0 }
+                                                        max={ 40 }
+                                                        step={ 0.1 } />
+                                                    <div className="flex justify-center gap-1">
+                                                        <div className="flex flex-col items-center gap-[2px]">
+                                                            <div className="bg-[#247FD1] text-white w-[24px] h-[24px] border border-white cursor-pointer rounded-[3px] leading-none flex justify-center items-center transition-[filter] duration-300 hover:brightness-150"
+                                                                onClick={ () => adjustHeight(1) }>↑</div>
+                                                            <Text small variant="white" align="center">█</Text>
+                                                            <div className="bg-[#44A750] text-white w-[24px] h-[24px] border border-white cursor-pointer rounded-[3px] leading-none flex justify-center items-center transition-[filter] duration-300 hover:brightness-150"
+                                                                onClick={ () => adjustHeight(-1) }>↓</div>
+                                                        </div>
+                                                        <div className="flex flex-col items-center gap-[2px]">
+                                                            <div className="bg-[#247FD1] text-white w-[24px] h-[24px] border border-white cursor-pointer rounded-[3px] leading-none flex justify-center items-center transition-[filter] duration-300 hover:brightness-150"
+                                                                onClick={ () => adjustHeight(0.1) }>↑</div>
+                                                            <Text small variant="white" align="center">▄</Text>
+                                                            <div className="bg-[#44A750] text-white w-[24px] h-[24px] border border-white cursor-pointer rounded-[3px] leading-none flex justify-center items-center transition-[filter] duration-300 hover:brightness-150"
+                                                                onClick={ () => adjustHeight(-0.1) }>↓</div>
+                                                        </div>
+                                                        <div className="flex flex-col items-center gap-[2px]">
+                                                            <div className="bg-[#247FD1] text-white w-[24px] h-[24px] border border-white cursor-pointer rounded-[3px] leading-none flex justify-center items-center transition-[filter] duration-300 hover:brightness-150"
+                                                                onClick={ () => adjustHeight(0.01) }>↑</div>
+                                                            <Text small variant="white" align="center">_</Text>
+                                                            <div className="bg-[#44A750] text-white w-[24px] h-[24px] border border-white cursor-pointer rounded-[3px] leading-none flex justify-center items-center transition-[filter] duration-300 hover:brightness-150"
+                                                                onClick={ () => adjustHeight(-0.01) }>↓</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div> }
+                                    </> }
                                 { (furniKeys.length > 0) &&
                                     <>
                                         <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />

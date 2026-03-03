@@ -46,6 +46,13 @@
         }
     }
 
+    .nitro-room-tools-side-container {
+        display: flex;
+        flex-direction: column;
+        margin-left: 10px;
+        gap: 10px;
+    }
+
     .nitro-room-history {
         background: #212131;
         box-shadow: inset 0px 5px lighten(rgba(#000, .6), 2.5), inset 0 -4px darken(rgba(#000, .6), 4);
