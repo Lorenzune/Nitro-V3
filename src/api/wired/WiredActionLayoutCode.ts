@@ -30,4 +30,5 @@ export class WiredActionLayoutCode
     public static FURNI_NEIGHBORHOOD_SELECTOR: number = 29;
     public static FURNI_BYTYPE_SELECTOR: number = 30;
     public static USERS_AREA_SELECTOR: number = 31;
+    public static USERS_NEIGHBORHOOD_SELECTOR: number = 32;
 }

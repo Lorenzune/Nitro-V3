@@ -4,6 +4,7 @@ import { WiredActionFurniAreaView } from '../selectors/WiredActionFurniAreaView'
 import { WiredSelectorFurniNeighborhoodView } from '../selectors/WiredSelectorFurniNeighborhoodView';
 import { WiredSelectorFurniByTypeView } from '../selectors/WiredSelectorFurniByTypeView';
 import { WiredSelectorUsersAreaView } from '../selectors/WiredSelectorUsersAreaView';
+import { WiredSelectorUsersNeighborhoodView } from '../selectors/WiredSelectorUsersNeighborhoodView';
 import { WiredActionBotFollowAvatarView } from './WiredActionBotFollowAvatarView';
 import { WiredActionBotGiveHandItemView } from './WiredActionBotGiveHandItemView';
 import { WiredActionBotMoveView } from './WiredActionBotMoveView';
@@ -91,6 +92,8 @@ export const WiredActionLayoutView = (code: number) =>
             return <WiredSelectorFurniByTypeView />;
         case WiredActionLayoutCode.USERS_AREA_SELECTOR:
             return <WiredSelectorUsersAreaView />;
+        case WiredActionLayoutCode.USERS_NEIGHBORHOOD_SELECTOR:
+            return <WiredSelectorUsersNeighborhoodView />;
     }
 
     return null;
