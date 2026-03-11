@@ -1,4 +1,4 @@
-import { ConditionDefinition, GetRoomEngine, GetSessionDataManager, OpenMessageComposer, RoomObjectCategory, RoomObjectVariable, Triggerable, TriggerDefinition, UpdateActionMessageComposer, UpdateConditionMessageComposer, UpdateTriggerMessageComposer, WiredActionDefinition, WiredFurniActionEvent, WiredFurniConditionEvent, WiredFurniTriggerEvent, WiredOpenEvent, WiredSaveSuccessEvent } from '@nitrots/nitro-renderer';
+import { ConditionDefinition, GetRoomEngine, GetSessionDataManager, OpenMessageComposer, RoomObjectCategory, RoomObjectVariable, Triggerable, TriggerDefinition, UpdateActionMessageComposer, UpdateConditionMessageComposer, UpdateTriggerMessageComposer, WiredActionDefinition, WiredFurniActionEvent, WiredFurniConditionEvent, WiredFurniTriggerEvent, WiredOpenEvent, WiredSaveSuccessEvent, WiredValidationErrorEvent } from '@nitrots/nitro-renderer';
 import { useEffect, useState } from 'react';
 import { useBetween } from 'use-between';
 import { GetRoomSession, IsOwnerOfFloorFurniture, LocalizeText, SendMessageComposer, WiredFurniType, WiredSelectionVisualizer } from '../../api';
@@ -17,7 +17,7 @@ const useWiredState = () =>
     const [ invertSelection, setInvertSelection ] = useState<boolean>(false);
     const [ neighborhoodTiles, setNeighborhoodTiles ] = useState<{ x: number; y: number }[] | null>(null);
     const [ neighborhoodInvert, setNeighborhoodInvert ] = useState<boolean>(false);
-    const { showConfirm = null } = useNotification();
+    const { showConfirm = null, simpleAlert = null } = useNotification();
 
     const saveWired = () =>
     {
@@ -167,6 +167,16 @@ const useWiredState = () =>
         const parser = event.getParser();
 
         setTrigger(null);
+    });
+
+    useMessageEvent<WiredValidationErrorEvent>(WiredValidationErrorEvent, event =>
+    {
+        const parser = event.getParser();
+
+        if(parser.info && parser.info.length)
+        {
+            simpleAlert(parser.info, null, null, null, LocalizeText('wiredfurni.title'));
+        }
     });
 
     useMessageEvent<WiredFurniActionEvent>(WiredFurniActionEvent, event =>

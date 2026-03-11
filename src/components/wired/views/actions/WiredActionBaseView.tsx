@@ -10,13 +10,14 @@ export interface WiredActionBaseViewProps
     hasSpecialInput: boolean;
     requiresFurni: number;
     save: () => void;
+    validate?: () => boolean;
     cardStyle?: CSSProperties;
     hideDelay?: boolean;
 }
 
 export const WiredActionBaseView: FC<PropsWithChildren<WiredActionBaseViewProps>> = props =>
 {
-    const { requiresFurni = WiredFurniType.STUFF_SELECTION_OPTION_NONE, save = null, hasSpecialInput = false, children = null, cardStyle = undefined, hideDelay = false } = props;
+    const { requiresFurni = WiredFurniType.STUFF_SELECTION_OPTION_NONE, save = null, validate = null, hasSpecialInput = false, children = null, cardStyle = undefined, hideDelay = false } = props;
     const { trigger = null, actionDelay = 0, setActionDelay = null } = useWired();
 
     useEffect(() =>
@@ -25,7 +26,7 @@ export const WiredActionBaseView: FC<PropsWithChildren<WiredActionBaseViewProps>
     }, [ trigger, setActionDelay ]);
 
     return (
-        <WiredBaseView hasSpecialInput={ hasSpecialInput } requiresFurni={ requiresFurni } save={ save } wiredType="action" cardStyle={ cardStyle }>
+        <WiredBaseView hasSpecialInput={ hasSpecialInput } requiresFurni={ requiresFurni } save={ save } validate={ validate } wiredType="action" cardStyle={ cardStyle }>
             { children }
             { !hideDelay && !!children && <hr className="m-0 bg-dark" /> }
             { !hideDelay && <div className="flex flex-col">

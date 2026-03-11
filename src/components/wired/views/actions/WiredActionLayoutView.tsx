@@ -1,5 +1,6 @@
 import { WiredActionLayoutCode } from '../../../../api';
 import { WiredActionBotChangeFigureView } from './WiredActionBotChangeFigureView';
+import { WiredActionSendSignalView } from './WiredActionSendSignalView';
 import { WiredActionFurniAreaView } from '../selectors/WiredActionFurniAreaView';
 import { WiredSelectorFurniNeighborhoodView } from '../selectors/WiredSelectorFurniNeighborhoodView';
 import { WiredSelectorFurniByTypeView } from '../selectors/WiredSelectorFurniByTypeView';
@@ -94,6 +95,8 @@ export const WiredActionLayoutView = (code: number) =>
             return <WiredSelectorUsersAreaView />;
         case WiredActionLayoutCode.USERS_NEIGHBORHOOD_SELECTOR:
             return <WiredSelectorUsersNeighborhoodView />;
+        case WiredActionLayoutCode.SEND_SIGNAL:
+            return <WiredActionSendSignalView />;
     }
 
     return null;
