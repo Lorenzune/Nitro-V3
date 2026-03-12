@@ -15,9 +15,7 @@ export const FriendsContainerView: FC<FriendsContainerViewProps> = props =>
 
     return (
         <div className="flex flex-col gap-1">
-            <p className="text-sm">
-                <b>{ LocalizeText('extendedprofile.friends.count') }</b> { friendsCount }
-            </p>
+            <p className="text-sm" dangerouslySetInnerHTML={{ __html: LocalizeText('extendedprofile.friends.count', ['count'], [friendsCount.toString()]) }} />
             <div className="flex flex-col gap-1">
                 <p className="text-sm font-bold">{ LocalizeText('extendedprofile.relstatus') }</p>
                 <RelationshipsContainerView relationships={ relationships } />

@@ -12,6 +12,10 @@ export const UserContainerView: FC<{
     const isOwnProfile = (userProfile.id === GetSessionDataManager().userId);
     const canSendFriendRequest = !requestSent && (!isOwnProfile && !userProfile.isMyFriend && !userProfile.requestSent);
 
+    const infostandBackgroundClass = `background-${userProfile.backgroundId ?? 'default'}`;
+    const infostandStandClass = `stand-${userProfile.standId ?? 'default'}`;
+    const infostandOverlayClass = `overlay-${userProfile.overlayId ?? 'default'}`;
+
     const addFriend = () =>
     {
         setRequestSent(true);
@@ -26,8 +30,10 @@ export const UserContainerView: FC<{
 
     return (
         <div className="flex gap-2">
-            <div className="flex flex-col justify-center items-center w-[75px] h-[120px]">
+            <div className={`flex flex-col justify-center items-center w-[75px] h-[120px] rounded-sm relative overflow-hidden profile-background ${infostandBackgroundClass}`}>
+                <div className={`absolute inset-0 profile-stand ${infostandStandClass}`} />
                 <LayoutAvatarImageView direction={ 2 } figure={ userProfile.figure } />
+                <div className={`absolute inset-0 profile-overlay ${infostandOverlayClass}`} />
             </div>
             <div className="flex flex-col gap-2">
                 <div className="flex flex-col gap-0">
@@ -35,12 +41,8 @@ export const UserContainerView: FC<{
                     <p className="text-sm italic leading-tight">{ userProfile.motto }</p>
                 </div>
                 <div className="flex flex-col gap-1">
-                    <p className="text-sm leading-none">
-                        <b>{ LocalizeText('extendedprofile.created') }</b> { userProfile.registration }
-                    </p>
-                    <p className="text-sm leading-none">
-                        <b>{ LocalizeText('extendedprofile.last.login') }</b> { FriendlyTime.format(userProfile.secondsSinceLastVisit, '.ago', 2) }
-                    </p>
+                    <p className="text-sm leading-none" dangerouslySetInnerHTML={{ __html: LocalizeText('extendedprofile.created', ['created'], [userProfile.registration]) }} />
+                    <p className="text-sm leading-none" dangerouslySetInnerHTML={{ __html: LocalizeText('extendedprofile.last.login', ['lastlogin'], [FriendlyTime.format(userProfile.secondsSinceLastVisit, '.ago', 2)]) }} />
                     <p className="text-sm leading-none">
                         <b>{ LocalizeText('extendedprofile.achievementscore') }</b> { userProfile.achievementPoints }
                     </p>
