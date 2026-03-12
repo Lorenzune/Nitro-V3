@@ -89,7 +89,7 @@
   }
 
   &.background-1 {
-    background-image: url('@/assets/images/backgrounds/background/bg_1.gif');
+    background-image: url('@/assets/images/backgrounds/background/bg_1.png');
   }
 
   &.background-2 {
@@ -844,70 +844,70 @@
   width: 68px;
 
   &.stand-0 {
-    background-image: url('@/assets/images/backgrounds/stand_0.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_0.png');
   }
   &.stand-1 {
-    background-image: url('@/assets/images/backgrounds/stand_1.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_1.png');
   }
   &.stand-2 {
-    background-image: url('@/assets/images/backgrounds/stand_2.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_2.png');
   }
   &.stand-3 {
-    background-image: url('@/assets/images/backgrounds/stand_3.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_3.png');
   }
   &.stand-4 {
-    background-image: url('@/assets/images/backgrounds/stand_4.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_4.png');
   }
   &.stand-5 {
-    background-image: url('@/assets/images/backgrounds/stand_5.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_5.png');
   }
   &.stand-6 {
-    background-image: url('@/assets/images/backgrounds/stand_6.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_6.png');
   }
   &.stand-7 {
-    background-image: url('@/assets/images/backgrounds/stand_7.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_7.png');
   }
   &.stand-8 {
-    background-image: url('@/assets/images/backgrounds/stand_8.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_8.png');
   }
   &.stand-9 {
-    background-image: url('@/assets/images/backgrounds/stand_9.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_9.png');
   }
   &.stand-10 {
-    background-image: url('@/assets/images/backgrounds/stand_10.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_10.png');
   }
   &.stand-11 {
-    background-image: url('@/assets/images/backgrounds/stand_11.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_11.png');
   }
   &.stand-12 {
-    background-image: url('@/assets/images/backgrounds/stand_12.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_12.png');
   }
   &.stand-13 {
-    background-image: url('@/assets/images/backgrounds/stand_13.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_13.png');
   }
   &.stand-14 {
-    background-image: url('@/assets/images/backgrounds/stand_14.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_14.png');
   }
   &.stand-15 {
-    background-image: url('@/assets/images/backgrounds/stand_15.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_15.png');
   }
   &.stand-16 {
-    background-image: url('@/assets/images/backgrounds/stand_16.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_16.png');
   }
   &.stand-17 {
-    background-image: url('@/assets/images/backgrounds/stand_17.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_17.png');
   }
   &.stand-18 {
-    background-image: url('@/assets/images/backgrounds/stand_18.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_18.png');
   }
   &.stand-19 {
-    background-image: url('@/assets/images/backgrounds/stand_19.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_19.png');
   }
   &.stand-20 {
-    background-image: url('@/assets/images/backgrounds/stand_20.png');
+    background-image: url('@/assets/images/backgrounds/stand/stand_20.png');
   }
   &.stand-21 {
-    background-image: url('@/assets/images/backgrounds/stand_21.gif');
+    background-image: url('@/assets/images/backgrounds/stand/stand_21.gif');
   }
 }
 

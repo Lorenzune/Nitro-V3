@@ -70,12 +70,16 @@
                 display: none;
             }
 
+            .chat-content {
+                color: #fff;
+            }
+
             .username {
-                color: rgba(#FFF, 1);
+                color: #fff;
             }
 
             .message {
-                color: rgba(#FFF, 1) !important;
+                color: #fff !important;
             }
 
             .pointer {
