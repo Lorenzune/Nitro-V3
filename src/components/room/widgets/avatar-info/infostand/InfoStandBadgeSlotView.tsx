@@ -81,9 +81,10 @@ export const InfoStandBadgeSlotView: FC<InfoStandBadgeSlotProps> = ({ slotIndex,
     const [ isDragOver, setIsDragOver ] = useState(false);
     const [ showPicker, setShowPicker ] = useState(false);
 
-    // For own user, use activeBadgeCodes from the hook (updates immediately on drag/drop)
-    // For other users, use the badge code from props (from server via avatarInfo)
-    const badgeCode = isOwnUser ? (activeBadgeCodes[slotIndex] ?? null) : badgeCodeFromProps;
+    // For own user: use hook data if loaded, otherwise fall back to props (avatarInfo)
+    // For other users: always use props
+    const hookBadge = activeBadgeCodes.length > 0 ? (activeBadgeCodes[slotIndex] ?? null) : null;
+    const badgeCode = isOwnUser ? (hookBadge ?? badgeCodeFromProps ?? null) : (badgeCodeFromProps ?? null);
 
     const onDragStart = useCallback((event: React.DragEvent) =>
     {
