@@ -3,6 +3,7 @@ import { LocalizeText, WiredFurniType } from '../../../../api';
 import { Slider, Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
 import { WiredActionBaseView } from './WiredActionBaseView';
+import { WiredSourcesSelector } from '../WiredSourcesSelector';
 
 const directionOptions: { value: number, icon: string }[] = [
     {
@@ -28,8 +29,13 @@ export const WiredActionMoveFurniToView: FC<{}> = props =>
     const [ spacing, setSpacing ] = useState(-1);
     const [ movement, setMovement ] = useState(-1);
     const { trigger = null, setIntParams = null } = useWired();
+    const [ furniSource, setFurniSource ] = useState<number>(() =>
+    {
+        if(trigger?.intData?.length > 2) return trigger.intData[2];
+        return (trigger?.selectedItems?.length ?? 0) > 0 ? 100 : 0;
+    });
 
-    const save = () => setIntParams([ movement, spacing ]);
+    const save = () => setIntParams([ movement, spacing, furniSource ]);
 
     useEffect(() =>
     {
@@ -43,10 +49,21 @@ export const WiredActionMoveFurniToView: FC<{}> = props =>
             setSpacing(-1);
             setMovement(-1);
         }
+
+        if(trigger.intData.length > 2) setFurniSource(trigger.intData[2]);
+        else setFurniSource((trigger.selectedItems?.length ?? 0) > 0 ? 100 : 0);
     }, [ trigger ]);
 
+    const onChangeFurniSource = (next: number) => setFurniSource(next);
+
+    const requiresFurni = WiredFurniType.STUFF_SELECTION_OPTION_BY_ID_OR_BY_TYPE;
+
     return (
-        <WiredActionBaseView hasSpecialInput={ true } requiresFurni={ WiredFurniType.STUFF_SELECTION_OPTION_BY_ID_OR_BY_TYPE } save={ save }>
+        <WiredActionBaseView
+            hasSpecialInput={ true }
+            requiresFurni={ requiresFurni }
+            save={ save }
+            footer={ <WiredSourcesSelector showFurni={ true } furniSource={ furniSource } onChangeFurni={ onChangeFurniSource } /> }>
             <div className="flex flex-col gap-1">
                 <Text bold>{ LocalizeText('wiredfurni.params.emptytiles', [ 'tiles' ], [ spacing.toString() ]) }</Text>
                 <Slider

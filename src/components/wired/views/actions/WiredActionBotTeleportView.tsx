@@ -4,21 +4,45 @@ import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
 import { NitroInput } from '../../../../layout';
 import { WiredActionBaseView } from './WiredActionBaseView';
+import { WiredSourcesSelector } from '../WiredSourcesSelector';
 
 export const WiredActionBotTeleportView: FC<{}> = props =>
 {
     const [ botName, setBotName ] = useState('');
-    const { trigger = null, setStringParam = null } = useWired();
+    const { trigger = null, setStringParam = null, setIntParams = null } = useWired();
 
-    const save = () => setStringParam(botName);
+    const [ furniSource, setFurniSource ] = useState<number>(() =>
+    {
+        if(trigger?.intData?.length >= 1) return trigger.intData[0];
+        return (trigger?.selectedItems?.length ?? 0) > 0 ? 100 : 0;
+    });
+
+    const save = () =>
+    {
+        setStringParam(botName);
+        setIntParams([ furniSource ]);
+    };
 
     useEffect(() =>
     {
+        if(!trigger) return;
+
         setBotName(trigger.stringData);
+
+        if(trigger.intData.length >= 1) setFurniSource(trigger.intData[0]);
+        else setFurniSource((trigger.selectedItems?.length ?? 0) > 0 ? 100 : 0);
     }, [ trigger ]);
 
+    const onChangeFurniSource = (next: number) => setFurniSource(next);
+
+    const requiresFurni = WiredFurniType.STUFF_SELECTION_OPTION_BY_ID;
+
     return (
-        <WiredActionBaseView hasSpecialInput={ true } requiresFurni={ WiredFurniType.STUFF_SELECTION_OPTION_BY_ID } save={ save }>
+        <WiredActionBaseView
+            hasSpecialInput={ true }
+            requiresFurni={ requiresFurni }
+            save={ save }
+            footer={ <WiredSourcesSelector showFurni={ true } furniSource={ furniSource } onChangeFurni={ onChangeFurniSource } /> }>
             <div className="flex flex-col gap-1">
                 <Text bold>{ LocalizeText('wiredfurni.params.bot.name') }</Text>
                 <NitroInput maxLength={ 32 } type="text" value={ botName } onChange={ event => setBotName(event.target.value) } />
