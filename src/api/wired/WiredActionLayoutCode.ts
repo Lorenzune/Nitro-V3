@@ -39,4 +39,6 @@ export class WiredActionLayoutCode
     public static FURNI_TO_FURNI: number = 38;
     public static SET_ALTITUDE: number = 39;
     public static RELATIVE_MOVE: number = 40;
+    public static CONTROL_CLOCK: number = 41;
+    public static ADJUST_CLOCK: number = 42;
 }

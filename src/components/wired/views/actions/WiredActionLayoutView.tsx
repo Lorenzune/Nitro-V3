@@ -1,6 +1,8 @@
 import { WiredActionLayoutCode } from '../../../../api';
 import { WiredActionBotChangeFigureView } from './WiredActionBotChangeFigureView';
+import { WiredActionAdjustClockView } from './WiredActionAdjustClockView';
 import { WiredActionFreezeView } from './WiredActionFreezeView';
+import { WiredActionControlClockView } from './WiredActionControlClockView';
 import { WiredActionFurniToFurniView } from './WiredActionFurniToFurniView';
 import { WiredActionSetAltitudeView } from './WiredActionSetAltitudeView';
 import { WiredActionSendSignalView } from './WiredActionSendSignalView';
@@ -42,6 +44,8 @@ export const WiredActionLayoutView = (code: number) =>
     {
         case WiredActionLayoutCode.BOT_CHANGE_FIGURE:
             return <WiredActionBotChangeFigureView />;
+        case WiredActionLayoutCode.ADJUST_CLOCK:
+            return <WiredActionAdjustClockView />;
         case WiredActionLayoutCode.BOT_FOLLOW_AVATAR:
             return <WiredActionBotFollowAvatarView />;
         case WiredActionLayoutCode.BOT_GIVE_HAND_ITEM:
@@ -64,6 +68,8 @@ export const WiredActionLayoutView = (code: number) =>
             return <WiredActionFleeView />;
         case WiredActionLayoutCode.FREEZE:
             return <WiredActionFreezeView />;
+        case WiredActionLayoutCode.CONTROL_CLOCK:
+            return <WiredActionControlClockView />;
         case WiredActionLayoutCode.FURNI_TO_USER:
             return <WiredActionTeleportView />;
         case WiredActionLayoutCode.FURNI_TO_FURNI:

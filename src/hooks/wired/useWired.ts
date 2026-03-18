@@ -17,6 +17,7 @@ const useWiredState = () =>
     const [ neighborhoodTiles, setNeighborhoodTiles ] = useState<{ x: number; y: number }[] | null>(null);
     const [ neighborhoodInvert, setNeighborhoodInvert ] = useState<boolean>(false);
     const [ allowedInteractionTypes, setAllowedInteractionTypes ] = useState<string[] | null>(null);
+    const [ allowedInteractionErrorKey, setAllowedInteractionErrorKey ] = useState<string | null>(null);
     const { showConfirm = null, simpleAlert = null } = useNotification();
 
     const saveWired = () =>
@@ -84,6 +85,11 @@ const useWiredState = () =>
             return allowedInteractionTypes.some(type => (type && type.toLowerCase() === interactionType));
         };
 
+        const handleDisallowedInteraction = () =>
+        {
+            if(allowedInteractionErrorKey) simpleAlert(LocalizeText(allowedInteractionErrorKey), null, null, null, LocalizeText('wiredfurni.title'));
+        };
+
         if(selectByType && category === RoomObjectCategory.FLOOR)
         {
             const roomId = GetRoomSession().roomId;
@@ -97,6 +103,7 @@ const useWiredState = () =>
             if(!sourceFurniData) return;
             if(!isAllowedInteraction(sourceFurniData))
             {
+                handleDisallowedInteraction();
                 setFurniIds(prevValue =>
                 {
                     if(!prevValue.includes(objectId)) return prevValue;
@@ -185,6 +192,7 @@ const useWiredState = () =>
             if(!sourceFurniData) return;
             if(!isAllowedInteraction(sourceFurniData))
             {
+                handleDisallowedInteraction();
                 setFurniIds(prevValue =>
                 {
                     if(!prevValue.includes(objectId)) return prevValue;
@@ -245,7 +253,9 @@ const useWiredState = () =>
 
         if(parser.info && parser.info.length)
         {
-            simpleAlert(parser.info, null, null, null, LocalizeText('wiredfurni.title'));
+            const message = (/^[a-z0-9_.]+$/i.test(parser.info) ? LocalizeText(parser.info) : parser.info);
+
+            simpleAlert(message, null, null, null, LocalizeText('wiredfurni.title'));
         }
     });
 
@@ -291,10 +301,11 @@ const useWiredState = () =>
             setNeighborhoodTiles(null);
             setNeighborhoodInvert(false);
             setAllowedInteractionTypes(null);
+            setAllowedInteractionErrorKey(null);
         };
     }, [ trigger ]);
 
-    return { trigger, setTrigger, intParams, setIntParams, stringParam, setStringParam, furniIds, setFurniIds, actionDelay, setActionDelay, setAllowsFurni, saveWired, selectObjectForWired, setSelectByType, setNeighborhoodTiles, setNeighborhoodInvert, setAllowedInteractionTypes };
+    return { trigger, setTrigger, intParams, setIntParams, stringParam, setStringParam, furniIds, setFurniIds, actionDelay, setActionDelay, setAllowsFurni, saveWired, selectObjectForWired, setSelectByType, setNeighborhoodTiles, setNeighborhoodInvert, setAllowedInteractionTypes, setAllowedInteractionErrorKey };
 };
 
 export const useWired = () => useBetween(useWiredState);

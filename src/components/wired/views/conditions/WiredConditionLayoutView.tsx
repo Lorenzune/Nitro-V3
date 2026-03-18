@@ -5,6 +5,7 @@ import { WiredConditionActorIsOnFurniView } from './WiredConditionActorIsOnFurni
 import { WiredConditionActorIsTeamMemberView } from './WiredConditionActorIsTeamMemberView';
 import { WiredConditionActorIsWearingBadgeView } from './WiredConditionActorIsWearingBadgeView';
 import { WiredConditionActorIsWearingEffectView } from './WiredConditionActorIsWearingEffectView';
+import { WiredConditionCounterTimeMatchesView } from './WiredConditionCounterTimeMatchesView';
 import { WiredConditionDateRangeView } from './WiredConditionDateRangeView';
 import { WiredConditionFurniHasAvatarOnView } from './WiredConditionFurniHasAvatarOnView';
 import { WiredConditionFurniHasFurniOnView } from './WiredConditionFurniHasFurniOnView';
@@ -58,6 +59,8 @@ export const WiredConditionLayoutView = (code: number) =>
         case WiredConditionlayout.USER_COUNT_IN:
         case WiredConditionlayout.NOT_USER_COUNT_IN:
             return <WiredConditionUserCountInRoomView />;
+        case WiredConditionlayout.COUNTER_TIME_MATCHES:
+            return <WiredConditionCounterTimeMatchesView />;
     }
 
     return null;

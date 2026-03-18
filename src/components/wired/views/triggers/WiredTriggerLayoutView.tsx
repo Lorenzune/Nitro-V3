@@ -9,6 +9,7 @@ import { WiredTriggerBotReachedStuffView } from './WiredTriggerBotReachedStuffVi
 import { WiredTriggerClickFurniView } from './WiredTriggerClickFurniView';
 import { WiredTriggerClickTileView } from './WiredTriggerClickTileView';
 import { WiredTriggerClickUserView } from './WiredTriggerClickUserView';
+import { WiredTriggerClockCounterView } from './WiredTriggerClockCounterView';
 import { WiredTriggerCollisionView } from './WiredTriggerCollisionView';
 import { WiredTriggerUserPerformsActionView } from './WiredTriggerUserPerformsActionView';
 import { WiredTriggeExecuteOnceView } from './WiredTriggerExecuteOnceView';
@@ -45,6 +46,8 @@ export const WiredTriggerLayoutView = (code: number) =>
             return <WiredTriggerClickTileView />;
         case WiredTriggerLayout.CLICK_USER:
             return <WiredTriggerClickUserView />;
+        case WiredTriggerLayout.CLOCK_COUNTER:
+            return <WiredTriggerClockCounterView />;
         case WiredTriggerLayout.USER_PERFORMS_ACTION:
             return <WiredTriggerUserPerformsActionView />;
         case WiredTriggerLayout.COLLISION:
