@@ -37,4 +37,6 @@ export class WiredActionLayoutCode
     public static FURNI_TO_USER: number = 36;
     public static USER_TO_FURNI: number = 37;
     public static FURNI_TO_FURNI: number = 38;
+    public static SET_ALTITUDE: number = 39;
+    public static RELATIVE_MOVE: number = 40;
 }
