@@ -1,4 +1,4 @@
-import { AddLinkEventTracker, GetCommunication, HabboWebTools, ILinkEventTracker, RemoveLinkEventTracker, RoomSessionEvent } from '@nitrots/nitro-renderer';
+import { AddLinkEventTracker, GetCommunication, GetRoomSessionManager, HabboWebTools, ILinkEventTracker, RemoveLinkEventTracker, RoomSessionEvent } from '@nitrots/nitro-renderer';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FC, useEffect, useState } from 'react';
 import { useNitroEvent } from '../hooks';
@@ -40,6 +40,8 @@ export const MainView: FC<{}> = props =>
     useEffect(() =>
     {
         setIsReady(true);
+
+        GetRoomSessionManager().tryRestoreSession();
 
         GetCommunication().connection.ready();
     }, []);
