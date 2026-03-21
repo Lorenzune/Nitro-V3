@@ -20,6 +20,16 @@ export const ReconnectView: FC<{}> = props =>
 
     const onReconnected = useCallback(() =>
     {
+        // Socket is open but not yet re-authenticated.
+        // Update attempt display but keep the overlay visible until
+        // re-authentication completes (SOCKET_REAUTHENTICATED).
+        setHasFailed(false);
+    }, []);
+
+    const onReauthenticated = useCallback(() =>
+    {
+        // Fully re-authenticated — dismiss the overlay so the room view
+        // (which stayed alive behind the overlay) is visible again.
         setIsReconnecting(false);
         setHasFailed(false);
         setAttempt(0);
@@ -33,6 +43,7 @@ export const ReconnectView: FC<{}> = props =>
 
     useNitroEvent<ReconnectEvent>(NitroEventType.SOCKET_RECONNECTING, onReconnecting);
     useNitroEvent(NitroEventType.SOCKET_RECONNECTED, onReconnected);
+    useNitroEvent(NitroEventType.SOCKET_REAUTHENTICATED, onReauthenticated);
     useNitroEvent(NitroEventType.SOCKET_RECONNECT_FAILED, onReconnectFailed);
 
     const handleReload = useCallback(() =>
@@ -42,8 +53,8 @@ export const ReconnectView: FC<{}> = props =>
 
     const handleGoHome = useCallback(() =>
     {
-        sessionStorage.removeItem('nitro_last_room');
-        sessionStorage.removeItem('nitro_last_room_password');
+        sessionStorage.removeItem('nitro.session.lastRoomId');
+        sessionStorage.removeItem('nitro.session.lastRoomPassword');
         window.location.reload();
     }, []);
 
