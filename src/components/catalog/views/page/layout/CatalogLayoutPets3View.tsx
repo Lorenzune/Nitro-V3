@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import { FaPaw } from 'react-icons/fa';
+import { SanitizeHtml } from '../../../../../api';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 
 export const CatalogLayoutPets3View: FC<CatalogLayoutProps> = props =>
@@ -16,20 +17,20 @@ export const CatalogLayoutPets3View: FC<CatalogLayoutProps> = props =>
                 <div>
                     <div className="flex items-center gap-1.5 mb-0.5">
                         <FaPaw className="text-primary text-xs" />
-                        <span className="text-sm font-bold" dangerouslySetInnerHTML={ { __html: page.localization.getText(1) } } />
+                        <span className="text-sm font-bold" dangerouslySetInnerHTML={ { __html: SanitizeHtml(page.localization.getText(1)) } } />
                     </div>
                 </div>
             </div>
 
             { /* Content */ }
             <div className="flex-1 overflow-auto bg-white rounded border-2 border-card-grid-item-border p-3">
-                <div className="text-[11px] leading-relaxed" dangerouslySetInnerHTML={ { __html: page.localization.getText(2) } } />
+                <div className="text-[11px] leading-relaxed" dangerouslySetInnerHTML={ { __html: SanitizeHtml(page.localization.getText(2)) } } />
             </div>
 
             { /* Footer */ }
             { !!page.localization.getText(3) &&
                 <div className="p-2 bg-card-grid-item rounded border border-card-grid-item-border">
-                    <span className="text-[11px] font-bold" dangerouslySetInnerHTML={ { __html: page.localization.getText(3) } } />
+                    <span className="text-[11px] font-bold" dangerouslySetInnerHTML={ { __html: SanitizeHtml(page.localization.getText(3)) } } />
                 </div> }
         </div>
     );

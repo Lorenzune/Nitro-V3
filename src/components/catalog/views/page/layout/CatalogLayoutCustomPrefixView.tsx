@@ -1,6 +1,6 @@
 import { PurchasePrefixComposer } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { LocalizeText, SendMessageComposer, PRESET_PREFIX_EFFECTS, parsePrefixColors, getPrefixEffectStyle, PREFIX_EFFECT_KEYFRAMES } from '../../../../../api';
+import { LocalizeText, SanitizeHtml, SendMessageComposer, PRESET_PREFIX_EFFECTS, parsePrefixColors, getPrefixEffectStyle, PREFIX_EFFECT_KEYFRAMES } from '../../../../../api';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
@@ -137,7 +137,7 @@ export const CatalogLayoutCustomPrefixView: FC<CatalogLayoutProps> = props =>
             { page.localization.getImage(0) &&
                 <img alt="" className="w-full rounded" src={ page.localization.getImage(0) } /> }
             { page.localization.getText(0) &&
-                <div className="text-sm mb-1" dangerouslySetInnerHTML={ { __html: page.localization.getText(0) } } /> }
+                <div className="text-sm mb-1" dangerouslySetInnerHTML={ { __html: SanitizeHtml(page.localization.getText(0)) } } /> }
 
             { /* Live Preview */ }
             <div className="relative flex items-center justify-center p-4 rounded-lg min-h-[56px]"

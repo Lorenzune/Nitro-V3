@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { FaEdit, FaPlus } from 'react-icons/fa';
-import { GetConfigurationValue, LocalizeText, ProductTypeEnum } from '../../../../../api';
+import { GetConfigurationValue, LocalizeText, ProductTypeEnum, SanitizeHtml } from '../../../../../api';
 import { Text } from '../../../../../common';
 import { useCatalog } from '../../../../../hooks';
 import { useCatalogAdmin } from '../../../CatalogAdminContext';
@@ -90,7 +90,7 @@ export const CatalogLayoutDefaultView: FC<CatalogLayoutProps> = props =>
                 <div className="flex items-center gap-3 p-2.5 bg-white rounded border-2 border-card-grid-item-border">
                     { !!page.localization.getImage(1) &&
                         <img className="w-[70px] h-[70px] object-contain rounded shrink-0" src={ page.localization.getImage(1) } /> }
-                    <Text className="text-[11px]! text-muted" dangerouslySetInnerHTML={ { __html: page.localization.getText(0) } } />
+                    <Text className="text-[11px]! text-muted" dangerouslySetInnerHTML={ { __html: SanitizeHtml(page.localization.getText(0)) } } />
                 </div> }
 
             { /* Item grid */ }

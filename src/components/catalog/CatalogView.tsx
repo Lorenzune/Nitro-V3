@@ -5,9 +5,9 @@ import { CatalogModernView } from './CatalogModernView';
 
 export const CatalogView: FC<{}> = () =>
 {
-    const style = GetConfigurationValue<string>('catalog.style', 'classic');
+    const useNewStyle = GetConfigurationValue<boolean>('catalog.style.new', false);
 
-    if(style === 'new') return <CatalogModernView />;
+    if(useNewStyle) return <CatalogModernView />;
 
     return <CatalogClassicView />;
 };

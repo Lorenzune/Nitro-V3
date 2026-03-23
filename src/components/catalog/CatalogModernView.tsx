@@ -228,7 +228,7 @@ const CatalogModernViewInner: FC<{}> = () =>
                                         <FaStar className="text-[9px] text-primary shrink-0" />
                                         { activeNodes && activeNodes.length > 0
                                             ? activeNodes.map((node, i) => (
-                                                <span key={ node.pageId } className="flex items-center gap-1 min-w-0">
+                                                <span key={ `${ node.pageId }-${ i }` } className="flex items-center gap-1 min-w-0">
                                                     { i > 0 && <span className="text-[8px] opacity-30">›</span> }
                                                     <span className={ `truncate ${ i === activeNodes.length - 1 ? 'font-bold text-dark' : 'cursor-pointer hover:text-primary' }` }
                                                         onClick={ i < activeNodes.length - 1 ? () => activateNode(node) : undefined }>

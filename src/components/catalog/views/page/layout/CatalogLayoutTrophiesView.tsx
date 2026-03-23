@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { FaEdit, FaPen, FaPlus, FaTrophy } from 'react-icons/fa';
-import { LocalizeText, ProductTypeEnum } from '../../../../../api';
+import { LocalizeText, ProductTypeEnum, SanitizeHtml } from '../../../../../api';
 import { Text } from '../../../../../common';
 import { useCatalog } from '../../../../../hooks';
 import { useCatalogAdmin } from '../../../CatalogAdminContext';
@@ -99,7 +99,7 @@ export const CatalogLayoutTrophiesView: FC<CatalogLayoutProps> = props =>
                             <FaTrophy className="text-warning text-[11px]" />
                             <span className="text-[12px] font-bold">{ LocalizeText('catalog.trophies.title') }</span>
                         </div>
-                        <Text className="text-[10px]! text-muted leading-relaxed" dangerouslySetInnerHTML={ { __html: page.localization.getText(0) } } />
+                        <Text className="text-[10px]! text-muted leading-relaxed" dangerouslySetInnerHTML={ { __html: SanitizeHtml(page.localization.getText(0)) } } />
                     </div>
                 </div> }
 

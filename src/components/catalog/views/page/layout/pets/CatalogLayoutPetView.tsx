@@ -1,7 +1,7 @@
 import { ApproveNameMessageComposer, ApproveNameMessageEvent, ColorConverter, GetSellablePetPalettesComposer, PurchaseFromCatalogComposer, SellablePetPaletteData } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaCheck, FaEdit, FaFillDrip, FaPaw, FaPlus, FaTimes } from 'react-icons/fa';
-import { DispatchUiEvent, GetPetAvailableColors, GetPetIndexFromLocalization, LocalizeText, SendMessageComposer } from '../../../../../../api';
+import { DispatchUiEvent, GetPetAvailableColors, GetPetIndexFromLocalization, LocalizeText, SanitizeHtml, SendMessageComposer } from '../../../../../../api';
 import { LayoutGridItem, LayoutPetImageView } from '../../../../../../common';
 import { CatalogPurchaseFailureEvent } from '../../../../../../events';
 import { useCatalog, useMessageEvent } from '../../../../../../hooks';
@@ -249,7 +249,7 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = props =>
                                 <span className="text-[8px] font-mono text-white bg-primary px-1 py-px rounded">Offer: { currentOffer.offerId }</span>
                             </div> }
                         { !!page.localization.getText(0) &&
-                            <p className="text-[10px] text-muted mt-0.5" dangerouslySetInnerHTML={ { __html: page.localization.getText(0) } } /> }
+                            <p className="text-[10px] text-muted mt-0.5" dangerouslySetInnerHTML={ { __html: SanitizeHtml(page.localization.getText(0)) } } /> }
                     </div>
 
                     { /* Name input */ }
