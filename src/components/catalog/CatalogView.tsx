@@ -11,3 +11,12 @@ export const CatalogView: FC<{}> = () =>
 
     return <CatalogClassicView />;
 };
+
+export const CatalogView: FC<{}> = () =>
+{
+    return (
+        <CatalogAdminProvider>
+            <CatalogViewInner />
+        </CatalogAdminProvider>
+    );
+};
