@@ -65,6 +65,8 @@ const useAvatarEditorState = () =>
 
         if(GetClubMemberLevel() < partItem.partSet.clubLevel) return;
 
+        if(partItem.isSellableNotOwned) return;
+
         setMaxPaletteCount(partItem.maxPaletteCount || 1);
 
         selectPart(setType, partId);
@@ -271,13 +273,15 @@ const useAvatarEditorState = () =>
 
                 if(!partSet || !partSet.isSelectable || ((partSet.gender !== gender) && (partSet.gender !== AvatarFigurePartType.UNISEX))) continue;
 
-                if(partSet.isSellable && figureSetIds.indexOf(partSet.id) === -1) continue;
+                const isSellableNotOwned = partSet.isSellable && figureSetIds.indexOf(partSet.id) === -1;
+
+                if(isSellableNotOwned && setType !== AvatarFigurePartType.PET) continue;
 
                 let maxPaletteCount = 0;
 
                 for(const part of partSet.parts) maxPaletteCount = Math.max(maxPaletteCount, part.colorLayerIndex);
 
-                partItems.push({ id: partSet.id, partSet, usesColor, maxPaletteCount });
+                partItems.push({ id: partSet.id, partSet, usesColor, maxPaletteCount, isSellableNotOwned });
             }
 
             partItems.sort(AvatarEditorPartSorter(false));

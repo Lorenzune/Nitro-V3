@@ -1232,6 +1232,27 @@ body {
     overflow: hidden !important;
 }
 
+.pet-sellable-locked {
+    opacity: 0.5;
+    cursor: not-allowed !important;
+    position: relative;
+}
+
+.pet-sellable-badge {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 3px;
+    padding: 1px 3px;
+    font-size: 9px;
+    color: #ffd700;
+    font-weight: bold;
+}
+
 .pet-remove-btn {
     background: none;
     border: none;
