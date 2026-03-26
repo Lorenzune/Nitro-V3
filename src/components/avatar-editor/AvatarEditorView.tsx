@@ -6,6 +6,7 @@ import { Button, ButtonGroup, NitroCardContentView, NitroCardHeaderView, NitroCa
 import { useAvatarEditor } from '../../hooks';
 import { AvatarEditorFigurePreviewView } from './AvatarEditorFigurePreviewView';
 import { AvatarEditorModelView } from './AvatarEditorModelView';
+import { AvatarEditorNftView } from './AvatarEditorNftView';
 import { AvatarEditorPetView } from './AvatarEditorPetView';
 import { AvatarEditorWardrobeView } from './AvatarEditorWardrobeView';
 
@@ -16,6 +17,7 @@ export const AvatarEditorView: FC<{}> = props =>
 
     const isWardrobeOpen = (activeModelKey === AvatarEditorFigureCategory.WARDROBE);
     const isPetsOpen = (activeModelKey === AvatarEditorFigureCategory.PETS);
+    const isNftOpen = (activeModelKey === AvatarEditorFigureCategory.NFT);
 
     const processAction = (action: string) =>
     {
@@ -85,10 +87,12 @@ export const AvatarEditorView: FC<{}> = props =>
                     const isActive = (activeModelKey === modelKey);
                     const isWardrobe = (modelKey === AvatarEditorFigureCategory.WARDROBE);
                     const isPets = (modelKey === AvatarEditorFigureCategory.PETS);
+                    const isNft = (modelKey === AvatarEditorFigureCategory.NFT);
 
                     let tabClass = `tab ${ modelKey }`;
                     if(isWardrobe) tabClass = 'tab-wardrobe';
                     else if(isPets) tabClass = 'tab-pets';
+                    else if(isNft) tabClass = 'tab-nft';
 
                     return (
                         <NitroCardTabsItemView key={ modelKey } isActive={ isActive } onClick={ event => setActiveModelKey(modelKey) }>
@@ -101,12 +105,14 @@ export const AvatarEditorView: FC<{}> = props =>
                 <div className="flex gap-2 overflow-hidden h-full">
                     { /* left: model view or wardrobe */ }
                     <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-                        { (activeModelKey.length > 0 && !isWardrobeOpen && !isPetsOpen) &&
+                        { (activeModelKey.length > 0 && !isWardrobeOpen && !isPetsOpen && !isNftOpen) &&
                             <AvatarEditorModelView categories={ avatarModels[activeModelKey] } name={ activeModelKey } /> }
                         { isWardrobeOpen &&
                             <AvatarEditorWardrobeView /> }
                         { isPetsOpen &&
                             <AvatarEditorPetView categories={ avatarModels[activeModelKey] } /> }
+                        { isNftOpen &&
+                            <AvatarEditorNftView categories={ avatarModels[activeModelKey] } /> }
                     </div>
                     { /* right: preview + actions */ }
                     <div className="flex flex-col shrink-0 w-[120px] gap-1 overflow-hidden">

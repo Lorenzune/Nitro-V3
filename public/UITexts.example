@@ -22,6 +22,21 @@
     "widget.room.youtube.open_video": "Open de video",
     "wiredfurni.params.area_selection.selected": "Geselecteerd gebied: Lengte=%x%, Breedte=%y%, breedte=%w%, hoogte=%h%",
     "wiredfurni.params.sources.users.11": "L'utente cliccato",
-    "wiredfurni.params.setexecutions": "Quantità di esecuzioni: %amount%",
-    "wiredfurni.params.settimewindow": "Tempo massimo consentito: %timewindow% secondi"
+    "wiredfurni.params.setexecutions": "QuantitÃƒÂ  di esecuzioni: %amount%",
+    "wiredfurni.params.settimewindow": "Tempo massimo consentito: %timewindow% secondi",
+    "wiredfurni.params.eval_mode": "Condizioni che devono corrispondere:",
+    "wiredfurni.params.eval_mode.0": "Tutte",
+    "wiredfurni.params.eval_mode.1": "Almeno una",
+    "wiredfurni.params.eval_mode.2": "Non tutte",
+    "wiredfurni.params.eval_mode.3": "Nessuna",
+    "wiredfurni.params.eval_mode.cmp.0": "Meno di:",
+    "wiredfurni.params.eval_mode.cmp.1": "Esattamente:",
+    "wiredfurni.params.eval_mode.cmp.2": "Più di:",
+    "wiredfurni.error.condition_evaluation_furni": "Puoi selezionare solo la Condizione e i componenti aggiuntivi!",
+    "wiredfurni.params.texts.placeholder_name": "Nome del segnaposto:",
+    "wiredfurni.params.texts.placeholder_preview": "Usalo digitando <font color=\"#ffffaa\">%placeholder%</font> nei testi dei Wired.",
+    "wiredfurni.params.texts.placeholder_type": "Tipo di segnaposto:",
+    "wiredfurni.params.texts.placeholder_type.1": "Singolo",
+    "wiredfurni.params.texts.placeholder_type.2": "Multiplo",
+    "wiredfurni.params.texts.select_delimiter": "Seleziona il delimitatore:"
 }

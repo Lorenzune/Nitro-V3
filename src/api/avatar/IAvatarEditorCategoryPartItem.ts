@@ -7,4 +7,5 @@ export interface IAvatarEditorCategoryPartItem
     usesColor?: boolean;
     maxPaletteCount?: number;
     isClear?: boolean;
+    isSellableNotOwned?: boolean;
 }

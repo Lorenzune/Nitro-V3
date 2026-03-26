@@ -75,14 +75,37 @@ const useWiredState = () =>
             return rawValue.toLowerCase();
         };
 
+        const getComparableInteractionNames = (furniData: any): string[] =>
+        {
+            if(!furniData) return [];
+
+            const values = [
+                getInteractionTypeName(furniData),
+                (typeof (furniData as any).className === 'string') ? (furniData as any).className.toLowerCase() : null,
+                (typeof (furniData as any).fullName === 'string') ? (furniData as any).fullName.toLowerCase() : null,
+                (typeof (furniData as any).name === 'string') ? (furniData as any).name.toLowerCase() : null
+            ];
+
+            return values.filter((value, index, array): value is string => !!value && (array.indexOf(value) === index));
+        };
+
+        const matchesAllowedPattern = (value: string, pattern: string) =>
+        {
+            const normalizedPattern = pattern.toLowerCase();
+
+            if(normalizedPattern.endsWith('*')) return value.startsWith(normalizedPattern.slice(0, -1));
+
+            return (normalizedPattern === value);
+        };
+
         const isAllowedInteraction = (furniData: any): boolean =>
         {
             if(!allowedInteractionTypes || !allowedInteractionTypes.length) return true;
 
-            const interactionType = getInteractionTypeName(furniData);
-            if(!interactionType) return true;
+            const comparableNames = getComparableInteractionNames(furniData);
+            if(!comparableNames.length) return true;
 
-            return allowedInteractionTypes.some(type => (type && type.toLowerCase() === interactionType));
+            return comparableNames.some(value => allowedInteractionTypes.some(type => !!type && matchesAllowedPattern(value, type)));
         };
 
         const handleDisallowedInteraction = () =>

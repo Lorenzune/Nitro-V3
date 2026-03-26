@@ -20,6 +20,7 @@ export const AvatarEditorFigureSetItemView: FC<{
     const clubLevel = partItem.partSet?.clubLevel ?? 0;
     const isHC = !GetConfigurationValue<boolean>('hc.disabled', false) && (clubLevel > 0);
     const isLocked = isHC && (GetClubMemberLevel() < clubLevel);
+    const isSellableNotOwned = partItem.isSellableNotOwned ?? false;
 
     useEffect(() =>
     {
@@ -35,26 +36,36 @@ export const AvatarEditorFigureSetItemView: FC<{
 
             if(setType === AvatarFigurePartType.HEAD)
             {
-                url = await AvatarEditorThumbnailsHelper.buildForFace(getFigureStringWithFace(partItem.id), partIsLocked);
+                url = await AvatarEditorThumbnailsHelper.buildForFace(getFigureStringWithFace(partItem.id), partIsLocked || isSellableNotOwned);
             }
             else
             {
-                url = await AvatarEditorThumbnailsHelper.build(setType, partItem, partItem.usesColor, selectedColorParts[setType] ?? null, partIsLocked);
+                url = await AvatarEditorThumbnailsHelper.build(
+                    setType,
+                    partItem,
+                    partItem.usesColor,
+                    selectedColorParts[setType] ?? null,
+                    partIsLocked || isSellableNotOwned
+                );
             }
 
             if(url && url.length) setAssetUrl(url);
         };
 
         loadImage();
-    }, [ setType, partItem, selectedColorParts, getFigureStringWithFace ]);
+    }, [ setType, partItem, selectedColorParts, getFigureStringWithFace, isSellableNotOwned ]);
 
     if(!partItem) return null;
 
     return (
-        <InfiniteGrid.Item itemActive={ isSelected } itemImage={ (partItem.isClear ? undefined : assetUrl) } className={ `avatar-parts mx-auto${ isSelected ? ' part-selected' : '' }` } style={ { backgroundPosition: (setType === AvatarFigurePartType.HEAD) ? 'center -35px' : 'center' } } { ...rest }>
+        <InfiniteGrid.Item itemActive={ isSelected } itemImage={ (partItem.isClear ? undefined : assetUrl) } className={ `avatar-parts mx-auto${ isSelected ? ' part-selected' : '' }${ isSellableNotOwned ? ' pet-sellable-locked' : '' }` } style={ { backgroundPosition: (setType === AvatarFigurePartType.HEAD) ? 'center -35px' : 'center' } } { ...rest }>
             { !partItem.isClear && isHC && <LayoutCurrencyIcon className="absolute inset-e-1 bottom-1" type="hc" /> }
             { partItem.isClear && <AvatarEditorIcon icon="clear" /> }
-            { !partItem.isClear && partItem.partSet.isSellable && <AvatarEditorIcon className="inset-e-1 bottom-1 absolute" icon="sellable" /> }
+            { !partItem.isClear && partItem.partSet.isSellable && !isSellableNotOwned && <AvatarEditorIcon className="inset-e-1 bottom-1 absolute" icon="sellable" /> }
+            { isSellableNotOwned &&
+                <div className="pet-sellable-badge">
+                    <LayoutCurrencyIcon type={ -1 } />
+                </div> }
         </InfiniteGrid.Item>
     );
 };
