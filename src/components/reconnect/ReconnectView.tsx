@@ -48,14 +48,14 @@ export const ReconnectView: FC<{}> = props =>
 
     const handleReload = useCallback(() =>
     {
-        window.location.reload();
+        window.location.href = window.location.origin + '/';
     }, []);
 
     const handleGoHome = useCallback(() =>
     {
         sessionStorage.removeItem('nitro.session.lastRoomId');
         sessionStorage.removeItem('nitro.session.lastRoomPassword');
-        window.location.reload();
+        window.location.href = window.location.origin + '/';
     }, []);
 
     if(!isReconnecting && !hasFailed) return null;
@@ -92,24 +92,18 @@ export const ReconnectView: FC<{}> = props =>
                     <>
                         <Text fontSizeCustom={ 36 } className="text-center text-red-500">&#9888;</Text>
                         <Text fontSizeCustom={ 18 } variant="white" className="text-center font-semibold">
-                            Connection failed
+                            Session expired
                         </Text>
                         <Text fontSizeCustom={ 14 } variant="white" className="text-center opacity-70">
-                            Unable to reconnect to the server after multiple attempts.
+                            Your session has expired. Please log in again to enter the hotel.
                         </Text>
                         <Base className="mt-2 flex gap-3">
-                            <Base
-                                className="px-6 py-2 rounded-lg bg-[#4dabf7] text-white font-semibold cursor-pointer hover:bg-[#339af0] transition-colors"
-                                onClick={ handleReload }
+                            <a
+                                href={ window.location.origin + '/' }
+                                className="px-6 py-2 rounded-lg bg-[#3b82f6] text-white font-semibold cursor-pointer hover:bg-[#2563eb] transition-colors no-underline"
                             >
-                                Reload Page
-                            </Base>
-                            <Base
-                                className="px-6 py-2 rounded-lg bg-white/10 text-white font-semibold cursor-pointer hover:bg-white/20 transition-colors"
-                                onClick={ handleGoHome }
-                            >
-                                Go to Home
-                            </Base>
+                                Back to Hotel
+                            </a>
                         </Base>
                     </>
                 ) }
