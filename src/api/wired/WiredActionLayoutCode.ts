@@ -64,4 +64,6 @@ export class WiredActionLayoutCode
     public static RANDOM_EXTRA: number = 63;
     public static EXEC_IN_ORDER_EXTRA: number = 64;
     public static EXECUTION_LIMIT_EXTRA: number = 65;
+    public static OR_EVAL_EXTRA: number = 66;
+    public static TEXT_OUTPUT_USERNAME_EXTRA: number = 67;
 }

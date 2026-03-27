@@ -15,7 +15,7 @@ export interface LayoutAvatarImageViewProps extends BaseProps<HTMLDivElement>
 
 export const LayoutAvatarImageView: FC<LayoutAvatarImageViewProps> = props =>
 {
-    const { figure = '', gender = 'M', headOnly = false, direction = 0, scale = 1, classNames = [], style = {}, ...rest } = props;
+    const { figure = '', gender = '', headOnly = false, direction = 0, scale = 1, classNames = [], style = {}, ...rest } = props;
     const [ avatarUrl, setAvatarUrl ] = useState<string>(null);
     const [ isReady, setIsReady ] = useState<boolean>(false);
     const isDisposed = useRef(false);

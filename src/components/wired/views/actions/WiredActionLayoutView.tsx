@@ -57,8 +57,10 @@ import { WiredExtraMoveCarryUsersView } from '../extras/WiredExtraMoveCarryUsers
 import { WiredExtraExecuteInOrderView } from '../extras/WiredExtraExecuteInOrderView';
 import { WiredExtraExecutionLimitView } from '../extras/WiredExtraExecutionLimitView';
 import { WiredExtraMoveNoAnimationView } from '../extras/WiredExtraMoveNoAnimationView';
+import { WiredExtraOrEvalView } from '../extras/WiredExtraOrEvalView';
 import { WiredExtraMovePhysicsView } from '../extras/WiredExtraMovePhysicsView';
 import { WiredExtraRandomView } from '../extras/WiredExtraRandomView';
+import { WiredExtraTextOutputUsernameView } from '../extras/WiredExtraTextOutputUsernameView';
 import { WiredExtraUnseenView } from '../extras/WiredExtraUnseenView';
 
 export const WiredActionLayoutView = (code: number) =>
@@ -189,6 +191,10 @@ export const WiredActionLayoutView = (code: number) =>
             return <WiredExtraExecuteInOrderView />;
         case WiredActionLayoutCode.EXECUTION_LIMIT_EXTRA:
             return <WiredExtraExecutionLimitView />;
+        case WiredActionLayoutCode.OR_EVAL_EXTRA:
+            return <WiredExtraOrEvalView />;
+        case WiredActionLayoutCode.TEXT_OUTPUT_USERNAME_EXTRA:
+            return <WiredExtraTextOutputUsernameView />;
         case WiredActionLayoutCode.SEND_SIGNAL:
             return <WiredActionSendSignalView />;
     }

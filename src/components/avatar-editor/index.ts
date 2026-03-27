@@ -1,6 +1,7 @@
 export * from './AvatarEditorFigurePreviewView';
 export * from './AvatarEditorIcon';
 export * from './AvatarEditorModelView';
+export * from './AvatarEditorNftView';
 export * from './AvatarEditorPetView';
 export * from './AvatarEditorView';
 export * from './AvatarEditorWardrobeView';

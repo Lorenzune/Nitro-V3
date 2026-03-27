@@ -15,6 +15,7 @@ const useAvatarEditorState = () =>
     const [ maxPaletteCount, setMaxPaletteCount ] = useState<number>(1);
     const [ figureSetIds, setFigureSetIds ] = useState<number[]>([]);
     const [ boundFurnitureNames, setBoundFurnitureNames ] = useState<string[]>([]);
+    const [ figureSetNames, setFigureSetNames ] = useState<Record<number, string>>({});
     const [ savedFigures, setSavedFigures ] = useState<[ IAvatarFigureContainer, string ][]>(null);
     const { selectedColors, gender, setGender, loadAvatarData, selectPart, selectColor, getFigureString, getFigureStringWithFace, selectedParts } = useFigureData();
 
@@ -64,6 +65,8 @@ const useAvatarEditorState = () =>
         }
 
         if(GetClubMemberLevel() < partItem.partSet.clubLevel) return;
+
+        if(partItem.isSellableNotOwned) return;
 
         setMaxPaletteCount(partItem.maxPaletteCount || 1);
 
@@ -194,12 +197,27 @@ const useAvatarEditorState = () =>
         loadAvatarData(figureContainer.getFigureString(), gender);
     }, [ figureSetIds, gender, loadAvatarData, selectedColors, selectedParts ]);
 
+    const nftFigureSetIds = useMemo(() =>
+    {
+        const nftSetIds = new Set<number>();
+
+        for(const [ setId, furnitureName ] of Object.entries(figureSetNames))
+        {
+            if(!furnitureName?.toLowerCase().includes('nft')) continue;
+
+            nftSetIds.add(Number(setId));
+        }
+
+        return nftSetIds;
+    }, [ figureSetNames ]);
+
     useMessageEvent<FigureSetIdsMessageEvent>(FigureSetIdsMessageEvent, event =>
     {
         const parser = event.getParser();
 
         setFigureSetIds(parser.figureSetIds);
         setBoundFurnitureNames(parser.boundsFurnitureNames);
+        setFigureSetNames(parser.figureSetNameMap);
     });
 
     useMessageEvent<UserWardrobePageEvent>(UserWardrobePageEvent, event =>
@@ -236,8 +254,10 @@ const useAvatarEditorState = () =>
         if(!isVisible) return;
 
         const newAvatarModels: { [index: string]: IAvatarEditorCategory[] } = {};
+        const buildModeDefault = 'default';
+        const buildModeNft = 'nft';
 
-        const buildCategory = (setType: string) =>
+        const buildCategory = (setType: string, buildMode: string = buildModeDefault) =>
         {
             const partItems: IAvatarEditorCategoryPartItem[] = [];
             const colorItems: IPartColor[][] = [];
@@ -245,12 +265,9 @@ const useAvatarEditorState = () =>
             for(let i = 0; i < MAX_PALETTES; i++) colorItems.push([]);
 
             const set = GetAvatarRenderManager().structureData.getSetType(setType);
-
-            if(!set) return null;
-
             const palette = GetAvatarRenderManager().structureData.getPalette(set.paletteID);
 
-            if(!palette) return null;
+            if(!set || !palette) return null;
 
             for(const partColor of palette.colors.getValues())
             {
@@ -274,13 +291,22 @@ const useAvatarEditorState = () =>
 
                 if(!partSet || !partSet.isSelectable || ((partSet.gender !== gender) && (partSet.gender !== AvatarFigurePartType.UNISEX))) continue;
 
-                if(partSet.isSellable && figureSetIds.indexOf(partSet.id) === -1) continue;
+                const isNftPartSet = nftFigureSetIds.size > 0
+                    ? nftFigureSetIds.has(partSet.id)
+                    : GetAvatarRenderManager().downloadManager.isNftPartSet(partSet);
+
+                if((buildMode === buildModeDefault) && isNftPartSet) continue;
+                if((buildMode === buildModeNft) && !isNftPartSet) continue;
+
+                const isSellableNotOwned = partSet.isSellable && figureSetIds.indexOf(partSet.id) === -1;
+
+                if(isSellableNotOwned && (buildMode !== buildModeNft) && setType !== AvatarFigurePartType.PET) continue;
 
                 let maxPaletteCount = 0;
 
                 for(const part of partSet.parts) maxPaletteCount = Math.max(maxPaletteCount, part.colorLayerIndex);
 
-                partItems.push({ id: partSet.id, partSet, usesColor, maxPaletteCount });
+                partItems.push({ id: partSet.id, partSet, usesColor, maxPaletteCount, isSellableNotOwned });
             }
 
             partItems.sort(AvatarEditorPartSorter(false));
@@ -290,16 +316,31 @@ const useAvatarEditorState = () =>
             return { setType, partItems, colorItems };
         };
 
-        newAvatarModels[AvatarEditorFigureCategory.GENERIC] = [ AvatarFigurePartType.HEAD ].map(setType => buildCategory(setType)).filter(Boolean);
-        newAvatarModels[AvatarEditorFigureCategory.HEAD] = [ AvatarFigurePartType.HAIR, AvatarFigurePartType.HEAD_ACCESSORY, AvatarFigurePartType.HEAD_ACCESSORY_EXTRA, AvatarFigurePartType.EYE_ACCESSORY, AvatarFigurePartType.FACE_ACCESSORY ].map(setType => buildCategory(setType)).filter(Boolean);
-        newAvatarModels[AvatarEditorFigureCategory.TORSO] = [ AvatarFigurePartType.CHEST, AvatarFigurePartType.CHEST_PRINT, AvatarFigurePartType.COAT_CHEST, AvatarFigurePartType.CHEST_ACCESSORY ].map(setType => buildCategory(setType)).filter(Boolean);
-        newAvatarModels[AvatarEditorFigureCategory.LEGS] = [ AvatarFigurePartType.LEGS, AvatarFigurePartType.SHOES, AvatarFigurePartType.WAIST_ACCESSORY ].map(setType => buildCategory(setType)).filter(Boolean);
+        newAvatarModels[AvatarEditorFigureCategory.GENERIC] = [ AvatarFigurePartType.HEAD ].map(setType => buildCategory(setType, buildModeDefault));
+        newAvatarModels[AvatarEditorFigureCategory.HEAD] = [ AvatarFigurePartType.HAIR, AvatarFigurePartType.HEAD_ACCESSORY, AvatarFigurePartType.HEAD_ACCESSORY_EXTRA, AvatarFigurePartType.EYE_ACCESSORY, AvatarFigurePartType.FACE_ACCESSORY ].map(setType => buildCategory(setType, buildModeDefault));
+        newAvatarModels[AvatarEditorFigureCategory.TORSO] = [ AvatarFigurePartType.CHEST, AvatarFigurePartType.CHEST_PRINT, AvatarFigurePartType.COAT_CHEST, AvatarFigurePartType.CHEST_ACCESSORY ].map(setType => buildCategory(setType, buildModeDefault));
+        newAvatarModels[AvatarEditorFigureCategory.LEGS] = [ AvatarFigurePartType.LEGS, AvatarFigurePartType.SHOES, AvatarFigurePartType.WAIST_ACCESSORY ].map(setType => buildCategory(setType, buildModeDefault));
         newAvatarModels[AvatarEditorFigureCategory.PETS] = [ AvatarFigurePartType.PET ].map(setType => buildCategory(setType)).filter(Boolean);
+        newAvatarModels[AvatarEditorFigureCategory.NFT] = [
+            AvatarFigurePartType.HEAD,
+            AvatarFigurePartType.HAIR,
+            AvatarFigurePartType.HEAD_ACCESSORY,
+            AvatarFigurePartType.HEAD_ACCESSORY_EXTRA,
+            AvatarFigurePartType.EYE_ACCESSORY,
+            AvatarFigurePartType.FACE_ACCESSORY,
+            AvatarFigurePartType.CHEST,
+            AvatarFigurePartType.CHEST_PRINT,
+            AvatarFigurePartType.COAT_CHEST,
+            AvatarFigurePartType.CHEST_ACCESSORY,
+            AvatarFigurePartType.LEGS,
+            AvatarFigurePartType.SHOES,
+            AvatarFigurePartType.WAIST_ACCESSORY
+        ].map(setType => buildCategory(setType, buildModeNft)).filter(Boolean);
         newAvatarModels[AvatarEditorFigureCategory.WARDROBE] = [];
 
         setAvatarModels(newAvatarModels);
         setActiveModelKey(AvatarEditorFigureCategory.GENERIC);
-    }, [ isVisible, gender, figureSetIds ]);
+    }, [ isVisible, gender, figureSetIds, nftFigureSetIds ]);
 
     useEffect(() =>
     {

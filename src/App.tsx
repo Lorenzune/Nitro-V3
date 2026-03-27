@@ -1,17 +1,30 @@
-import { GetAssetManager, GetAvatarRenderManager, GetCommunication, GetConfiguration, GetLocalizationManager, GetRoomEngine, GetRoomSessionManager, GetSessionDataManager, GetSoundManager, GetStage, GetTexturePool, GetTicker, HabboWebTools, LegacyExternalInterface, LoadGameUrlEvent, NitroLogger, NitroVersion, PrepareRenderer } from '@nitrots/nitro-renderer';
-import { FC, useEffect, useState } from 'react';
+import { GetAssetManager, GetAvatarRenderManager, GetCommunication, GetConfiguration, GetLocalizationManager, GetRoomEngine, GetRoomSessionManager, GetSessionDataManager, GetSoundManager, GetStage, GetTexturePool, GetTicker, HabboWebTools, LegacyExternalInterface, LoadGameUrlEvent, NitroEventType, NitroLogger, NitroVersion, PrepareRenderer } from '@nitrots/nitro-renderer';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { GetUIVersion } from './api';
 import { Base } from './common';
 import { LoadingView } from './components/loading/LoadingView';
 import { MainView } from './components/MainView';
 import { ReconnectView } from './components/reconnect/ReconnectView';
-import { useMessageEvent } from './hooks';
+import { useMessageEvent, useNitroEvent } from './hooks';
 
 NitroVersion.UI_VERSION = GetUIVersion();
 
 export const App: FC<{}> = props =>
 {
     const [ isReady, setIsReady ] = useState(false);
+    const [ errorMessage, setErrorMessage ] = useState('');
+    const [ homeUrl, setHomeUrl ] = useState('');
+
+    const showSessionExpired = useCallback(() =>
+    {
+        const baseUrl = window.location.origin + '/';
+        setHomeUrl(baseUrl);
+        setErrorMessage('Your session has expired.\nPlease log in again to enter the hotel.');
+        setIsReady(false);
+    }, []);
+
+    // Listen for socket closed events (code 1000 "Bye" - server rejected SSO)
+    useNitroEvent(NitroEventType.SOCKET_CLOSED, showSessionExpired);
 
     useMessageEvent<LoadGameUrlEvent>(LoadGameUrlEvent, event =>
     {
@@ -29,6 +42,14 @@ export const App: FC<{}> = props =>
             try
             {
                 if(!window.NitroConfig) throw new Error('NitroConfig is not defined!');
+
+                const ssoTicket = window.NitroConfig['sso.ticket'];
+
+                if(!ssoTicket || ssoTicket === '')
+                {
+                    showSessionExpired();
+                    return;
+                }
 
                 const renderer = await PrepareRenderer({
                     width: Math.floor(width),
@@ -83,6 +104,7 @@ export const App: FC<{}> = props =>
             catch(err)
             {
                 NitroLogger.error(err);
+                showSessionExpired();
             }
         };
 
@@ -92,7 +114,7 @@ export const App: FC<{}> = props =>
     return (
         <Base fit overflow="hidden" className={ !(window.devicePixelRatio % 1) && 'image-rendering-pixelated' }>
             { !isReady &&
-                <LoadingView /> }
+                <LoadingView isError={ errorMessage.length > 0 } message={ errorMessage } homeUrl={ homeUrl } /> }
             { isReady && <MainView /> }
             <ReconnectView />
             <Base id="draggable-windows-container" />
