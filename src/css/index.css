@@ -875,12 +875,12 @@ body {
 
 .avatar-parts {
     border: none !important;
-    height: 42px;
-    width: 42px;
-    background-position: center;
-    background-repeat: no-repeat;
+    position: relative;
+    aspect-ratio: 1;
+    width: 100%;
+    max-width: 42px;
     border-radius: 2rem !important;
-    overflow: visible !important;
+    overflow: hidden !important;
     background-color: transparent;
 
     &:hover {
