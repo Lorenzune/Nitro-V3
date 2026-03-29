@@ -1,4 +1,4 @@
-import { GetMessagesMessageComposer, ModerateMessageMessageComposer, ModerateThreadMessageComposer, PostMessageMessageComposer, PostMessageMessageEvent, PostThreadMessageEvent, ThreadMessagesMessageEvent, UpdateMessageMessageEvent, UpdateThreadMessageComposer, UpdateThreadMessageEvent } from '@nitrots/nitro-renderer';
+import { GetMessagesMessageComposer, ModerateMessageMessageComposer, ModerateThreadMessageComposer, PostMessageMessageComposer, PostMessageMessageEvent, PostThreadMessageEvent, ThreadMessagesMessageEvent, UpdateForumReadMarkerMessageComposer, UpdateForumReadMarkerEntry, UpdateMessageMessageEvent, UpdateThreadMessageComposer, UpdateThreadMessageEvent } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { LocalizeText, SendMessageComposer, GetUserProfile } from '../../../../api';
 import { Button, Column, Flex, LayoutAvatarImageView, Text } from '../../../../common';
@@ -48,6 +48,15 @@ export const GroupForumThreadView: FC<GroupForumThreadViewProps> = props =>
         else
         {
             setMessages(prev => [ ...prev, ...parser.messages ]);
+        }
+
+        // Mark messages as read
+        if(parser.messages.length > 0)
+        {
+            const lastMessage = parser.messages[parser.messages.length - 1];
+            SendMessageComposer(new UpdateForumReadMarkerMessageComposer(
+                new UpdateForumReadMarkerEntry(effectiveGroupId, lastMessage.messageId, true)
+            ));
         }
     });
 
@@ -153,6 +162,12 @@ export const GroupForumThreadView: FC<GroupForumThreadViewProps> = props =>
         onBack();
     }, [ effectiveGroupId, threadId, onBack ]);
 
+    const deleteThread = useCallback(() =>
+    {
+        SendMessageComposer(new ModerateThreadMessageComposer(effectiveGroupId, threadId, STATE_DELETED_BY_MODERATOR));
+        onBack();
+    }, [ effectiveGroupId, threadId, onBack ]);
+
     const formatTimeAgo = (seconds: number): string =>
     {
         if(seconds < 60) return `${ seconds }s ${ LocalizeText('messageboard.time.ago') }`;
@@ -202,6 +217,9 @@ export const GroupForumThreadView: FC<GroupForumThreadViewProps> = props =>
                         </Button>
                         <Button variant="outline-danger" className="btn-sm" onClick={ hideThread }>
                             { LocalizeText('groupforum.thread.hide') }
+                        </Button>
+                        <Button variant="danger" className="btn-sm" onClick={ deleteThread }>
+                            { LocalizeText('groupforum.thread.delete') }
                         </Button>
                     </Flex> }
             </Flex>
@@ -291,6 +309,12 @@ export const GroupForumThreadView: FC<GroupForumThreadViewProps> = props =>
             { isLocked &&
                 <Flex className="p-2 border-t bg-warning bg-opacity-10" justifyContent="center">
                     <Text small variant="muted">{ LocalizeText('groupforum.thread.locked') }</Text>
+                </Flex> }
+            { !canPost && !isLocked && forumData &&
+                <Flex className="p-2 border-t bg-muted" justifyContent="center">
+                    <Text small variant="muted">
+                        { LocalizeText('groupforum.view.error.' + forumData.postMessagePermissionError) }
+                    </Text>
                 </Flex> }
         </Column>
     );

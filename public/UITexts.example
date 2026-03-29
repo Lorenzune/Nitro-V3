@@ -38,5 +38,19 @@
     "wiredfurni.params.texts.placeholder_type": "Tipo di segnaposto:",
     "wiredfurni.params.texts.placeholder_type.1": "Singolo",
     "wiredfurni.params.texts.placeholder_type.2": "Multiplo",
-    "wiredfurni.params.texts.select_delimiter": "Seleziona il delimitatore:"
+    "wiredfurni.params.texts.select_delimiter": "Seleziona il delimitatore:",
+    "groupforum.list.tab.most_active": "Meest active threads",
+    "groupforum.list.tab.my_forums": "Mijn group forums",
+    "groupforum.list.no_forums": "Er zijn geen forums",
+    "groupforum.view.threads": "Aantal threads",
+    "groupforum.thread.pin": "Pin hem vast",
+    "groupforum.thread.unpin": "Unpin bericht",
+    "groupforum.thread.lock": "Lock de thread",
+    "groupforum.thread.unlock": "Unlock de thread",
+    "groupforum.thread.hide": "Verberg thread",
+    "groupforum.thread.restore": "Maak thread weer zichtbaar",
+    "groupforum.thread.delete": "Verwijder thread + posts",
+    "groupforum.message.hide": "Verberg bericht",
+    "group.forum.enable.caption": "Enable / Disable Group forum",
+    "group.forum.enable.help": "Als je de group forum disabled dan verwijderen ook alle posts!"
 }

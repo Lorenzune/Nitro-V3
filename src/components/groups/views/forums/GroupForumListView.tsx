@@ -16,7 +16,7 @@ export const GroupForumListView: FC<GroupForumListViewProps> = props =>
 {
     const { onOpenForum = null } = props;
     const [ forums, setForums ] = useState<ForumData[]>([]);
-    const [ listMode, setListMode ] = useState<number>(2); // 2 = most active
+    const [ listMode, setListMode ] = useState<number>(0); // 0 = most active
     const [ startIndex, setStartIndex ] = useState<number>(0);
     const [ totalForums, setTotalForums ] = useState<number>(0);
 
@@ -59,8 +59,8 @@ export const GroupForumListView: FC<GroupForumListViewProps> = props =>
                         className="form-select form-select-sm"
                         value={ listMode }
                         onChange={ e => { setListMode(parseInt(e.target.value)); setStartIndex(0); } }>
-                        <option value={ 2 }>{ LocalizeText('groupforum.list.tab.most_active') }</option>
-                        <option value={ 1 }>{ LocalizeText('groupforum.list.tab.my_forums') }</option>
+                        <option value={ 0 }>{ LocalizeText('groupforum.list.tab.most_active') }</option>
+                        <option value={ 2 }>{ LocalizeText('groupforum.list.tab.my_forums') }</option>
                     </select>
                 </Flex>
             </Flex>

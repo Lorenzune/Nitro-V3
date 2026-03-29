@@ -101,7 +101,7 @@ export const GroupForumThreadListView: FC<GroupForumThreadListViewProps> = props
                         <Button variant="link" className="btn-sm" onClick={ onOpenSettings }>
                             { LocalizeText('groupforum.view.settings.header') }
                         </Button> }
-                    { forumData && forumData.hasPostThreadPermissionError &&
+                    { forumData && forumData.hasReadPermissionError && forumData.hasPostThreadPermissionError &&
                         <Button variant="primary" className="btn-sm" onClick={ onNewThread }>
                             { LocalizeText('messageboard.new.thread.button') }
                         </Button> }
@@ -119,6 +119,16 @@ export const GroupForumThreadListView: FC<GroupForumThreadListViewProps> = props
                         <Text small>{ forumData.totalMessages } { LocalizeText('messageboard.messages') }</Text>
                     </Column>
                 </Flex> }
+            { forumData && !forumData.hasReadPermissionError &&
+                <Flex className="flex-1 p-4" justifyContent="center" alignItems="center">
+                    <Column alignItems="center" gap={ 2 }>
+                        <Text bold>{ LocalizeText('groupforum.view.error.operation_read') }</Text>
+                        <Text small variant="muted">
+                            { LocalizeText('groupforum.view.error.' + forumData.readPermissionError) }
+                        </Text>
+                    </Column>
+                </Flex> }
+            { (!forumData || forumData.hasReadPermissionError) &&
             <Column className="overflow-auto flex-1" gap={ 0 }>
                 { sortedThreads.map((thread, index) =>
                 {
@@ -195,7 +205,7 @@ export const GroupForumThreadListView: FC<GroupForumThreadListViewProps> = props
                             { LocalizeText('groupforum.list.load_more') }
                         </Text>
                     </Flex> }
-            </Column>
+            </Column> }
         </Column>
     );
 };
