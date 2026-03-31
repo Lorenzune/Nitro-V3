@@ -1,6 +1,6 @@
 import { CreateLinkEvent, GetRoomEngine, GetSessionDataManager, MouseEventType, RoomObjectCategory } from '@nitrots/nitro-renderer';
 import { Dispatch, FC, PropsWithChildren, SetStateAction, useEffect, useRef } from 'react';
-import { DispatchUiEvent, GetConfigurationValue, GetRoomSession, GetUserProfile } from '../../api';
+import { DispatchUiEvent, GetConfigurationValue, GetRoomSession, GetUserProfile, LocalizeText } from '../../api';
 import { Flex, LayoutItemCountView } from '../../common';
 import { GuideToolEvent } from '../../events';
 
@@ -43,6 +43,7 @@ export const ToolbarMeView: FC<PropsWithChildren<{
             <div className="navigation-item relative nitro-icon icon-me-rooms cursor-pointer" onClick={ event => CreateLinkEvent('navigator/search/myworld_view') } />
             <div className="navigation-item relative nitro-icon icon-me-clothing cursor-pointer" onClick={ event => CreateLinkEvent('avatar-editor/toggle') } />
             <div className="navigation-item relative nitro-icon icon-me-settings cursor-pointer" onClick={ event => CreateLinkEvent('user-settings/toggle') } />
+            <div className="navigation-item relative nitro-icon icon-me-forums cursor-pointer" onClick={ event => CreateLinkEvent('groupforum/toggle') } title={ LocalizeText('toolbar.icon.label.forums') } />
             { children }
         </Flex>
     );

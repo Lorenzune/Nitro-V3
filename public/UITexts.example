@@ -60,5 +60,19 @@
     "wiredfurni.params.action.sign.14": "Cartello 14",
     "wiredfurni.params.action.sign.15": "Cartello 15",
     "wiredfurni.params.action.sign.16": "Cartello 16",
-    "wiredfurni.params.action.sign.17": "Cartello 17"
+    "wiredfurni.params.action.sign.17": "Cartello 17",
+    "groupforum.list.tab.most_active": "Meest active threads",
+    "groupforum.list.tab.my_forums": "Mijn group forums",
+    "groupforum.list.no_forums": "Er zijn geen forums",
+    "groupforum.view.threads": "Aantal threads",
+    "groupforum.thread.pin": "Pin hem vast",
+    "groupforum.thread.unpin": "Unpin bericht",
+    "groupforum.thread.lock": "Lock de thread",
+    "groupforum.thread.unlock": "Unlock de thread",
+    "groupforum.thread.hide": "Verberg thread",
+    "groupforum.thread.restore": "Maak thread weer zichtbaar",
+    "groupforum.thread.delete": "Verwijder thread + posts",
+    "groupforum.message.hide": "Verberg bericht",
+    "group.forum.enable.caption": "Enable / Disable Group forum",
+    "group.forum.enable.help": "Als je de group forum disabled dan verwijderen ook alle posts!"
 }
