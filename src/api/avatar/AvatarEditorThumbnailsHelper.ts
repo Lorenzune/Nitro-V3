@@ -150,34 +150,39 @@ export class AvatarEditorThumbnailsHelper
 
         if(cached) return cached;
 
-        return new Promise(async (resolve, reject) =>
+        const avatarImage = GetAvatarRenderManager().createAvatarImage(figureString, AvatarScaleType.LARGE, null, null);
+
+        if(avatarImage.isPlaceholder())
         {
-            const resetFigure = async (figure: string) =>
-            {
-                const avatarImage = GetAvatarRenderManager().createAvatarImage(figure, AvatarScaleType.LARGE, null, { resetFigure, dispose: null, disposed: false });
+            avatarImage.dispose();
 
-                if(avatarImage.isPlaceholder()) return;
+            return null;
+        }
 
-                const texture = avatarImage.processAsTexture(AvatarSetType.HEAD, false);
-                const sprite = new NitroSprite(texture);
+        const texture = avatarImage.processAsTexture(AvatarSetType.HEAD, false);
 
-                if(isDisabled) sprite.filters = [ AvatarEditorThumbnailsHelper.ALPHA_FILTER ];
+        if(!texture)
+        {
+            avatarImage.dispose();
 
-                const imageUrl = await TextureUtils.generateImageUrl({
-                    target: sprite,
-                    frame: new NitroRectangle(0, 0, texture.width, texture.height)
-                });
+            return null;
+        }
 
-                sprite.destroy();
-                avatarImage.dispose();
+        const sprite = new NitroSprite(texture);
 
-                AvatarEditorThumbnailsHelper.THUMBNAIL_CACHE.set(thumbnailKey, imageUrl);
+        if(isDisabled) sprite.filters = [ AvatarEditorThumbnailsHelper.ALPHA_FILTER ];
 
-                resolve(imageUrl);
-            };
-
-            resetFigure(figureString);
+        const imageUrl = await TextureUtils.generateImageUrl({
+            target: sprite,
+            frame: new NitroRectangle(0, 0, texture.width, texture.height)
         });
+
+        sprite.destroy();
+        avatarImage.dispose();
+
+        if(imageUrl) AvatarEditorThumbnailsHelper.THUMBNAIL_CACHE.set(thumbnailKey, imageUrl);
+
+        return imageUrl;
     }
 
     private static sortByDrawOrder(a: IFigurePart, b: IFigurePart): number
