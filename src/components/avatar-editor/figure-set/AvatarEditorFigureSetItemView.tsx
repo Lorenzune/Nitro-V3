@@ -26,7 +26,11 @@ export const AvatarEditorFigureSetItemView: FC<{
 
     useNitroEvent(NitroEventType.AVATAR_ASSET_LOADED, () =>
     {
-        if(!assetUrl || !assetUrl.length) setRetryId(prev => prev + 1);
+        if(!assetUrl || !assetUrl.length)
+        {
+            AvatarEditorThumbnailsHelper.clearCache();
+            setRetryId(prev => prev + 1);
+        }
     });
 
     useEffect(() =>

@@ -21,11 +21,15 @@ export const LayoutAvatarImageView: FC<LayoutAvatarImageViewProps> = props =>
     const [ isReady, setIsReady ] = useState<boolean>(false);
     const [ updateId, setUpdateId ] = useState<number>(0);
     const isDisposed = useRef(false);
-    const isPlaceholderRef = useRef(false);
+    const figureKeyRef = useRef<string>(null);
 
     useNitroEvent(NitroEventType.AVATAR_ASSET_LOADED, () =>
     {
-        if(isPlaceholderRef.current) setUpdateId(prev => prev + 1);
+        if(figureKeyRef.current)
+        {
+            AVATAR_IMAGE_CACHE.delete(figureKeyRef.current);
+            setUpdateId(prev => prev + 1);
+        }
     });
 
     const getClassNames = useMemo(() =>
@@ -61,9 +65,10 @@ export const LayoutAvatarImageView: FC<LayoutAvatarImageViewProps> = props =>
 
         const figureKey = [ figure, gender, direction, headOnly ].join('-');
 
+        figureKeyRef.current = figureKey;
+
         if(AVATAR_IMAGE_CACHE.has(figureKey))
         {
-            isPlaceholderRef.current = false;
             setAvatarUrl(AVATAR_IMAGE_CACHE.get(figureKey));
         }
         else
@@ -73,7 +78,7 @@ export const LayoutAvatarImageView: FC<LayoutAvatarImageViewProps> = props =>
                 {
                     if(isDisposed.current) return;
 
-                    isPlaceholderRef.current = false;
+                    AVATAR_IMAGE_CACHE.delete(figureKey);
                     setUpdateId(prev => prev + 1);
                 },
                 dispose: null,
@@ -90,15 +95,7 @@ export const LayoutAvatarImageView: FC<LayoutAvatarImageViewProps> = props =>
 
             if(imageUrl && !isDisposed.current)
             {
-                if(!avatarImage.isPlaceholder())
-                {
-                    AVATAR_IMAGE_CACHE.set(figureKey, imageUrl);
-                    isPlaceholderRef.current = false;
-                }
-                else
-                {
-                    isPlaceholderRef.current = true;
-                }
+                if(!avatarImage.isPlaceholder()) AVATAR_IMAGE_CACHE.set(figureKey, imageUrl);
 
                 setAvatarUrl(imageUrl);
             }
