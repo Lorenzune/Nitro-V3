@@ -2,12 +2,27 @@ import { AvatarFigurePartType, AvatarScaleType, AvatarSetType, GetAvatarRenderMa
 
 export class ChatBubbleUtilities
 {
+    private static MAX_CACHE_SIZE: number = 200;
+
     public static AVATAR_COLOR_CACHE: Map<string, number> = new Map();
     public static AVATAR_IMAGE_CACHE: Map<string, string> = new Map();
     public static PET_IMAGE_CACHE: Map<string, string> = new Map();
     private static PET_IMAGE_PENDING_CACHE: Map<string, Promise<string>> = new Map();
 
     private static placeHolderImageUrl: string = '';
+
+    private static pruneCache<T>(cache: Map<string, T>, maxSize: number = ChatBubbleUtilities.MAX_CACHE_SIZE): void
+    {
+        if(cache.size <= maxSize) return;
+
+        const deleteCount = cache.size - maxSize;
+        const iterator = cache.keys();
+
+        for(let i = 0; i < deleteCount; i++)
+        {
+            cache.delete(iterator.next().value as string);
+        }
+    }
 
     public static async setFigureImage(figure: string): Promise<string>
     {
@@ -33,6 +48,9 @@ export class ChatBubbleUtilities
 
         this.AVATAR_COLOR_CACHE.set(figure, ((color && color.rgb) || 16777215));
         this.AVATAR_IMAGE_CACHE.set(figure, imageUrl);
+
+        this.pruneCache(this.AVATAR_COLOR_CACHE);
+        this.pruneCache(this.AVATAR_IMAGE_CACHE);
 
         avatarImage.dispose();
 
@@ -100,7 +118,11 @@ export class ChatBubbleUtilities
 
             if(!resolvedImage) resolvedImage = await getImageUrl(imageResult);
 
-            if(resolvedImage) this.PET_IMAGE_CACHE.set(cacheKey, resolvedImage);
+            if(resolvedImage)
+            {
+                this.PET_IMAGE_CACHE.set(cacheKey, resolvedImage);
+                this.pruneCache(this.PET_IMAGE_CACHE);
+            }
 
             return resolvedImage;
         })();
