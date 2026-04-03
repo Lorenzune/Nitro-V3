@@ -155,7 +155,7 @@ const CatalogClassicViewInner: FC<{}> = () =>
                             </div> }
                         <Grid>
                             { !navigationHidden &&
-                                <Column overflow="hidden" size={ 3 }>
+                                <Column overflow="auto" size={ 3 }>
                                     { activeNodes && (activeNodes.length > 0) &&
                                         <CatalogNavigationView node={ activeNodes[0] } /> }
                                 </Column> }
