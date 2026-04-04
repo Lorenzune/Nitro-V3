@@ -56,15 +56,23 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = props =
   useNitroEvent<RoomSessionUserBadgesEvent>(RoomSessionUserBadgesEvent.RSUBE_BADGES, event => {
     if (!avatarInfo || avatarInfo.webID !== event.userId) return;
 
+    // Deduplicate badges from server
+    const seen = new Set<string>();
+    const dedupedBadges = event.badges.map(code => {
+      if (!code || seen.has(code)) return '';
+      seen.add(code);
+      return code;
+    });
+
     const oldBadges = avatarInfo.badges.join('');
 
-    if (oldBadges === event.badges.join('')) return;
+    if (oldBadges === dedupedBadges.join('')) return;
 
     setAvatarInfo(prevValue => {
       if (!prevValue) return prevValue;
 
       const newValue = CloneObject(prevValue);
-      newValue.badges = event.badges;
+      newValue.badges = dedupedBadges;
       return newValue;
     });
   });

@@ -102,6 +102,25 @@ module.exports = {
             dropShadow: {
                 'hover': '2px 2px 0 rgba(0,0,0,0.8)'
             },
+            keyframes: {
+                pulseGlow: {
+                    '0%, 100%': { boxShadow: '0 0 6px rgba(59,130,246,0.3)' },
+                    '50%': { boxShadow: '0 0 14px rgba(59,130,246,0.6)' },
+                },
+                pulseGlowRed: {
+                    '0%, 100%': { boxShadow: '0 0 6px rgba(239,68,68,0.3)' },
+                    '50%': { boxShadow: '0 0 14px rgba(239,68,68,0.6)' },
+                },
+                dropSettle: {
+                    '0%': { transform: 'scale(1.15)' },
+                    '100%': { transform: 'scale(1)' },
+                },
+            },
+            animation: {
+                'pulse-glow': 'pulseGlow 1.2s ease-in-out infinite',
+                'pulse-glow-red': 'pulseGlowRed 1.2s ease-in-out infinite',
+                'drop-settle': 'dropSettle 0.3s ease-out',
+            },
         },
     },
     safelist: [
@@ -144,7 +163,10 @@ module.exports = {
         'grid-rows-11',
         'grid-rows-12',
         'justify-end',
-        'items-end'
+        'items-end',
+        'animate-pulse-glow',
+        'animate-pulse-glow-red',
+        'animate-drop-settle'
     ],
     darkMode: 'class',
     variants: {
