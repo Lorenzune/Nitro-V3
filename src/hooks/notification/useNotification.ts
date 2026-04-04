@@ -14,6 +14,7 @@ const getTimeZeroPadded = (time: number) =>
 };
 
 let modDisclaimerTimeout: ReturnType<typeof setTimeout> = null;
+const recentBadgeNotifications = new Set<string>();
 
 const useNotificationState = () =>
 {
@@ -209,17 +210,28 @@ const useNotificationState = () =>
     {
         const parser = event.getParser();
 
-        const text1 = LocalizeText('achievements.levelup.desc');
+        // Skip if BadgeReceivedEvent already showed a notification for this badge
+        if(recentBadgeNotifications.has(parser.data.badgeCode)) return;
+
+        recentBadgeNotifications.add(parser.data.badgeCode);
+        setTimeout(() => recentBadgeNotifications.delete(parser.data.badgeCode), 3000);
+
         const badgeName = LocalizeBadgeName(parser.data.badgeCode);
         const badgeImage = GetSessionDataManager().getBadgeUrl(parser.data.badgeCode);
-        const internalLink = 'questengine/achievements/' + parser.data.category;
 
-        showSingleBubble((text1 + ' ' + badgeName), NotificationBubbleType.ACHIEVEMENT, badgeImage, internalLink);
+        showSingleBubble(badgeName, NotificationBubbleType.BADGE_RECEIVED, badgeImage, parser.data.badgeCode);
     });
 
     useMessageEvent<BadgeReceivedEvent>(BadgeReceivedEvent, event =>
     {
         const parser = event.getParser();
+
+        // Skip if AchievementNotificationMessageEvent already showed a notification for this badge
+        if(recentBadgeNotifications.has(parser.badgeCode)) return;
+
+        recentBadgeNotifications.add(parser.badgeCode);
+        setTimeout(() => recentBadgeNotifications.delete(parser.badgeCode), 3000);
+
         const badgeName = LocalizeBadgeName(parser.badgeCode);
         const badgeImage = GetSessionDataManager().getBadgeUrl(parser.badgeCode);
 
