@@ -4,6 +4,7 @@ import { useBetween } from 'use-between';
 import { GetRoomSession, IsOwnerOfFloorFurniture, LocalizeText, SendMessageComposer, WiredFurniType, WiredSelectionVisualizer } from '../../api';
 import { useMessageEvent } from '../events';
 import { useNotification } from '../notification';
+import { useWiredTools } from '../wired-tools/useWiredTools';
 
 const useWiredState = () =>
 {
@@ -19,6 +20,7 @@ const useWiredState = () =>
     const [ allowedInteractionTypes, setAllowedInteractionTypes ] = useState<string[] | null>(null);
     const [ allowedInteractionErrorKey, setAllowedInteractionErrorKey ] = useState<string | null>(null);
     const { showConfirm = null, simpleAlert = null } = useNotification();
+    const { requestUserVariables = null, roomSettings = null } = useWiredTools();
 
     const saveWired = () =>
     {
@@ -273,6 +275,7 @@ const useWiredState = () =>
         const parser = event.getParser();
 
         WiredSelectionVisualizer.clearAllSelectionShaders();
+        if(roomSettings?.canInspect && requestUserVariables) requestUserVariables();
         setTrigger(null);
     });
 

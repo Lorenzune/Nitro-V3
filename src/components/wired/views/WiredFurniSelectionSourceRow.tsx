@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import { FaChevronLeft, FaChevronRight, FaMousePointer } from 'react-icons/fa';
 import { LocalizeText } from '../../../api';
 import { Button, Text } from '../../../common';
@@ -16,13 +16,14 @@ interface WiredFurniSelectionSourceRowProps
     selectionLimit: number;
     selectionEnabledValues: number[];
     showSelectionToggle?: boolean;
+    headerContent?: ReactNode;
     onChange: (value: number) => void;
     onSelectionActivate?: () => void;
 }
 
 export const WiredFurniSelectionSourceRow: FC<WiredFurniSelectionSourceRowProps> = props =>
 {
-    const { title = '', titleIsLiteral = false, options = [], value = 0, selectionKind = 'primary', selectionActive = false, selectionCount = 0, selectionLimit = 0, selectionEnabledValues = [], showSelectionToggle = true, onChange = null, onSelectionActivate = null } = props;
+    const { title = '', titleIsLiteral = false, options = [], value = 0, selectionKind = 'primary', selectionActive = false, selectionCount = 0, selectionLimit = 0, selectionEnabledValues = [], showSelectionToggle = true, headerContent = null, onChange = null, onSelectionActivate = null } = props;
     const currentIndex = Math.max(0, options.findIndex(option => (option.value === value)));
     const currentOption = options[currentIndex] ?? options[0];
     const canActivateSelection = !!onSelectionActivate && selectionEnabledValues.includes(currentOption?.value);
@@ -45,6 +46,7 @@ export const WiredFurniSelectionSourceRow: FC<WiredFurniSelectionSourceRowProps>
         <div className="nitro-wired__source-row">
             <div className="flex items-center justify-between gap-2">
                 <Text>{ resolvedTitle }</Text>
+                { headerContent }
                 { showSelectionToggle &&
                     <button
                         type="button"

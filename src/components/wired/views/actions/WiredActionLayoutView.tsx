@@ -55,6 +55,7 @@ import { WiredActionSetFurniStateToView } from './WiredActionSetFurniStateToView
 import { WiredActionTeleportView } from './WiredActionTeleportView';
 import { WiredActionToggleFurniStateView } from './WiredActionToggleFurniStateView';
 import { WiredActionUnfreezeView } from './WiredActionUnfreezeView';
+import { WiredActionNegativeCallAnotherStackView } from './WiredActionNegativeCallAnotherStackView';
 import { WiredExtraFilterFurniView } from '../extras/WiredExtraFilterFurniView';
 import { WiredExtraFilterFurniByVariableView } from '../extras/WiredExtraFilterFurniByVariableView';
 import { WiredExtraFilterUserView } from '../extras/WiredExtraFilterUserView';
@@ -103,6 +104,8 @@ export const WiredActionLayoutView = (code: number) =>
             return <WiredActionBotTeleportView />;
         case WiredActionLayoutCode.CALL_ANOTHER_STACK:
             return <WiredActionCallAnotherStackView />;
+        case WiredActionLayoutCode.NEG_CALL_ANOTHER_STACK:
+            return <WiredActionNegativeCallAnotherStackView />;
         case WiredActionLayoutCode.CHASE:
             return <WiredActionChaseView />;
         case WiredActionLayoutCode.CHAT:
@@ -250,6 +253,8 @@ export const WiredActionLayoutView = (code: number) =>
         case WiredActionLayoutCode.TEXT_INPUT_VARIABLE_EXTRA:
             return <WiredExtraTextInputVariableView />;
         case WiredActionLayoutCode.SEND_SIGNAL:
+            return <WiredActionSendSignalView />;
+        case WiredActionLayoutCode.NEG_SEND_SIGNAL:
             return <WiredActionSendSignalView />;
     }
 

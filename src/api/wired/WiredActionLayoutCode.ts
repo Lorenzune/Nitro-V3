@@ -84,4 +84,6 @@ export class WiredActionLayoutCode
     public static VARIABLE_ECHO_EXTRA: number = 83;
     public static CONTEXT_VARIABLE_EXTRA: number = 84;
     public static TEXT_INPUT_VARIABLE_EXTRA: number = 85;
+    public static NEG_CALL_ANOTHER_STACK: number = 86;
+    public static NEG_SEND_SIGNAL: number = 87;
 }

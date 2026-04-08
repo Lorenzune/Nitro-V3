@@ -46,10 +46,10 @@ const FURNI_SOURCE_LABEL_ORDER = [
 const USER_SOURCE_LABEL_ORDER = [
     'wiredfurni.params.sources.users.0',
     'wiredfurni.params.sources.users.11',
-    'wiredfurni.params.sources.users.100',
-    'wiredfurni.params.sources.users.101',
     'wiredfurni.params.sources.users.200',
     'wiredfurni.params.sources.users.201',
+    'wiredfurni.params.sources.users.100',
+    'wiredfurni.params.sources.users.101',
     'wiredfurni.params.sources.users.900'
 ];
 
@@ -219,7 +219,12 @@ export const WiredSourcesSelector: FC<WiredSourcesSelectorProps> = props =>
     const { trigger = null } = useWired();
     const availableUserSources = useAvailableUserSources(trigger, userSources, usersTitle, allowClickedUserSource);
     const orderedFurniSources = useMemo(() => sortWiredSourceOptions(furniSources, 'furni'), [ furniSources ]);
-    const orderedUserSources = useMemo(() => sortWiredSourceOptions(availableUserSources, 'users'), [ availableUserSources ]);
+    const orderedUserSources = useMemo(() =>
+    {
+        if(usersTitle === BOT_SOURCE_TITLE) return [ ...availableUserSources ];
+
+        return sortWiredSourceOptions(availableUserSources, 'users');
+    }, [ availableUserSources, usersTitle ]);
 
     useEffect(() =>
     {
