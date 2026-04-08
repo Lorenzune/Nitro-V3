@@ -99,7 +99,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                     { isMod &&
                         <ToolbarItemView icon="furnieditor" onClick={ event => CreateLinkEvent('furni-editor/toggle') } /> }
                 </Flex>
-                <Flex alignItems="center" justifyContent="center" className="flex-1 min-w-0 max-w-[600px] mx-auto" id="toolbar-chat-input-container" />
+                <Flex alignItems="center" justifyContent="center" className="lg:flex-1 lg:min-w-0 lg:max-w-[600px] lg:mx-auto max-lg:flex-none max-lg:w-0 max-lg:max-w-0 max-lg:overflow-visible" id="toolbar-chat-input-container" />
                 <Flex alignItems="center" gap={ 2 } className="flex-shrink-0">
                     <Flex gap={ 2 }>
                         <ToolbarItemView icon="friendall" onClick={ event => CreateLinkEvent('friends/toggle') }>
