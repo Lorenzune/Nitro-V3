@@ -1,7 +1,7 @@
-import { CreateLinkEvent, Dispose, DropBounce, EaseOut, GetSessionDataManager, JumpBy, Motions, NitroToolbarAnimateIconEvent, PerkAllowancesMessageEvent, PerkEnum, Queue, Wait } from '@nitrots/nitro-renderer';
+import { CreateLinkEvent, Dispose, DropBounce, EaseOut, GetSessionDataManager, JumpBy, Motions, NitroToolbarAnimateIconEvent, PerkAllowancesMessageEvent, PerkEnum, Queue, Wait, YouTubeRoomSettingsEvent } from '@nitrots/nitro-renderer';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FC, useState } from 'react';
-import { GetConfigurationValue, MessengerIconState, OpenMessengerChat, VisitDesktop } from '../../api';
+import { FC, useEffect, useState } from 'react';
+import { GetConfigurationValue, MessengerIconState, OpenMessengerChat, setYoutubeRoomEnabled, VisitDesktop } from '../../api';
 import { Flex, LayoutAvatarImageView, LayoutItemCountView } from '../../common';
 import { useAchievements, useFriends, useInventoryUnseenTracker, useMessageEvent, useMessenger, useNitroEvent, useSessionInfo } from '../../hooks';
 import { ToolbarItemView } from './ToolbarItemView';
@@ -13,12 +13,27 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const { isInRoom } = props;
     const [ isMeExpanded, setMeExpanded ] = useState(false);
     const [ useGuideTool, setUseGuideTool ] = useState(false);
+    const [ youtubeEnabled, setYoutubeEnabled ] = useState(false);
     const { userFigure = null } = useSessionInfo();
     const { getFullCount = 0 } = useInventoryUnseenTracker();
     const { getTotalUnseen = 0 } = useAchievements();
     const { requests = [] } = useFriends();
     const { iconState = MessengerIconState.HIDDEN } = useMessenger();
     const isMod = GetSessionDataManager().isModerator;
+
+    useMessageEvent<YouTubeRoomSettingsEvent>(YouTubeRoomSettingsEvent, event =>
+    {
+        const enabled = event.getParser().youtubeEnabled;
+        setYoutubeEnabled(enabled);
+        setYoutubeRoomEnabled(enabled);
+    });
+
+    useEffect(() => {
+        if (!isInRoom) {
+            setYoutubeEnabled(false);
+            setYoutubeRoomEnabled(false);
+        }
+    }, [isInRoom]);
 
     const openYouTubePlayer = () =>
     {
@@ -71,7 +86,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
 
     return (
         <>
-            <YouTubePlayerView />
+            { youtubeEnabled && <YouTubePlayerView /> }
             <AnimatePresence> { isMeExpanded && ( <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
 					<ToolbarMeView setMeExpanded={ setMeExpanded } unseenAchievementCount={ getTotalUnseen } useGuideTool={ useGuideTool } />
 				</motion.div> )}
@@ -101,7 +116,8 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                     </ToolbarItemView>
                     { isInRoom &&
                         <ToolbarItemView icon="camera" onClick={ event => CreateLinkEvent('camera/toggle') } /> }
-                    <ToolbarItemView icon="youtube" onClick={ openYouTubePlayer } />
+                    { youtubeEnabled &&
+                        <ToolbarItemView icon="youtube" onClick={ openYouTubePlayer } /> }
                     { isMod &&
                         <ToolbarItemView icon="modtools" onClick={ event => CreateLinkEvent('mod-tools/toggle') } /> }
                     { isMod &&

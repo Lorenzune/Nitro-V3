@@ -1,7 +1,7 @@
-import { ControlYoutubeDisplayPlaybackMessageComposer, YouTubeRoomBroadcastEvent, YouTubeRoomPlayComposer, YouTubeRoomWatchersEvent, YouTubeRoomWatchingComposer } from "@nitrots/nitro-renderer";
+import { ControlYoutubeDisplayPlaybackMessageComposer, YouTubeRoomBroadcastEvent, YouTubeRoomPlayComposer, YouTubeRoomSettingsEvent, YouTubeRoomWatchersEvent, YouTubeRoomWatchingComposer } from "@nitrots/nitro-renderer";
 import { FC, useEffect, useRef, useState } from "react";
 import YouTube from "react-youtube";
-import { GetRoomSession, GetSessionDataManager, LocalizeText, SendMessageComposer, YoutubeVideoPlaybackStateEnum } from "../../api";
+import { GetRoomSession, getYoutubeRoomEnabled, GetSessionDataManager, LocalizeText, SendMessageComposer, YoutubeVideoPlaybackStateEnum } from "../../api";
 import { NitroCardContentView, NitroCardHeaderView, NitroCardView, LayoutAvatarImageView } from "../../common";
 import { useFurnitureYoutubeWidget, useMessageEvent } from "../../hooks";
 
@@ -36,14 +36,17 @@ export const YouTubePlayerView: FC<{}> = () => {
     const [history, setHistory] = useState<string[]>([]);
     const [showVolumeSlider, setShowVolumeSlider] = useState(true);
     const playerRef = useRef<any>(null);
-
     const { objectId: youtubeObjectId, videoId: roomVideoId, currentVideoState, hasControl } = useFurnitureYoutubeWidget();
-
     const [spectators, setSpectators] = useState< { id: number; name: string; look: string }[] >([]);
     const [broadcastVideo, setBroadcastVideo] = useState("");
     const [broadcastSender, setBroadcastSender] = useState("");
     const [broadcastPlaylist, setBroadcastPlaylist] = useState<string[]>([]);
     const [watcherIds, setWatcherIds] = useState<Set<number>>(new Set());
+    const [youtubeEnabled, setYoutubeEnabled] = useState(getYoutubeRoomEnabled());
+
+    useMessageEvent<YouTubeRoomSettingsEvent>(YouTubeRoomSettingsEvent, event => {
+        setYoutubeEnabled(event.getParser().youtubeEnabled);
+    });
     useMessageEvent<YouTubeRoomBroadcastEvent>(YouTubeRoomBroadcastEvent, event => {
         const parser = event.getParser();
         setBroadcastVideo(parser.videoId);
@@ -385,7 +388,7 @@ export const YouTubePlayerView: FC<{}> = () => {
                                 className={`flex-1 p-2 rounded text-white text-sm ${(!!broadcastVideo && !isMyRoom) ? "bg-gray-800" : "bg-gray-700"}`}
                                 placeholder="YouTube URL / video ID"
                             />
-                            {isMyRoom && videoId && (
+                            {isMyRoom && youtubeEnabled && videoId && (
                                 <button
                                     onClick={() => {
                                         try {
