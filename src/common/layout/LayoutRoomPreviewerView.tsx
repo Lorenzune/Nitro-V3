@@ -38,10 +38,11 @@ export const LayoutRoomPreviewerView: FC<{
                 clear: true
             });
 
-            let canvas = GetRenderer().texture.generateCanvas(texture);
+            const canvas = GetRenderer().texture.generateCanvas(texture);
             const base64 = canvas.toDataURL('image/png');
 
-            canvas = null;
+            canvas.width = 0;
+            canvas.height = 0;
 
             elementRef.current.style.backgroundImage = `url(${ base64 })`;
         };

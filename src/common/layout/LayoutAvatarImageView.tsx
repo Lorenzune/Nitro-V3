@@ -2,6 +2,7 @@ import { AvatarScaleType, AvatarSetType, GetAvatarRenderManager } from '@nitrots
 import { CSSProperties, FC, useEffect, useMemo, useRef, useState } from 'react';
 import { Base, BaseProps } from '../Base';
 
+const AVATAR_CACHE_MAX_SIZE = 200;
 const AVATAR_IMAGE_CACHE: Map<string, string> = new Map();
 
 export interface LayoutAvatarImageViewProps extends BaseProps<HTMLDivElement>
@@ -75,7 +76,16 @@ export const LayoutAvatarImageView: FC<LayoutAvatarImageViewProps> = props =>
 
                 if(imageUrl && !isDisposed.current)
                 {
-                    if(!avatarImage.isPlaceholder()) AVATAR_IMAGE_CACHE.set(figureKey, imageUrl);
+                    if(!avatarImage.isPlaceholder())
+                    {
+                        if(AVATAR_IMAGE_CACHE.size >= AVATAR_CACHE_MAX_SIZE)
+                        {
+                            const firstKey = AVATAR_IMAGE_CACHE.keys().next().value;
+                            AVATAR_IMAGE_CACHE.delete(firstKey);
+                        }
+
+                        AVATAR_IMAGE_CACHE.set(figureKey, imageUrl);
+                    }
 
                     setAvatarUrl(imageUrl);
                 }
