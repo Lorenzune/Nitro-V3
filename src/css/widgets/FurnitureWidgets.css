@@ -19,6 +19,137 @@
     width: 190px;
 }
 
+.nitro-room-widget-background-color {
+    width: 314px;
+
+    .bgcolor-widget-content {
+        gap: 10px;
+        padding: 8px;
+    }
+
+    .bgcolor-widget-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-height: 154px;
+        padding: 10px;
+        border: 1px solid #9c9c9c;
+        border-radius: 2px;
+        background: #f3f3f1;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .bgcolor-widget-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .bgcolor-widget-info {
+        color: #111;
+        font-size: 12px;
+        line-height: 1.2;
+    }
+
+    .bgcolor-widget-preview {
+        flex-shrink: 0;
+        width: 32px;
+        height: 32px;
+        border: 1px solid #b4b4a3;
+        background: #c8ce8c;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    }
+
+    .bgcolor-widget-slider-group {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .bgcolor-widget-label {
+        color: #000;
+        font-size: 12px;
+        line-height: 1;
+    }
+
+    .bgcolor-widget-slider-shell {
+        position: relative;
+        width: 100%;
+        padding: 2px 0;
+    }
+
+    .bgcolor-widget-slider-shell::before {
+        content: '';
+        position: absolute;
+        left: 4px;
+        right: 4px;
+        top: 50%;
+        height: 8px;
+        transform: translateY(-50%);
+        background:
+            repeating-linear-gradient(
+                to right,
+                transparent 0 9px,
+                #1a1a1a 9px 10px
+            );
+        opacity: 0.75;
+        pointer-events: none;
+    }
+
+    .bgcolor-widget-slider-shell .nitro-slider-wrapper {
+        position: relative;
+        z-index: 1;
+        gap: 0;
+    }
+
+    .bgcolor-widget-slider-shell .nitro-slider {
+        height: 16px;
+    }
+
+    .bgcolor-widget-slider-track {
+        height: 2px !important;
+        border: 0 !important;
+        border-radius: 999px;
+        box-shadow: none !important;
+
+        &.track-0,
+        &.track-1 {
+            background: #000 !important;
+        }
+    }
+
+    .bgcolor-widget-slider-thumb {
+        width: 11px !important;
+        height: 18px !important;
+        margin-top: -1px;
+        border-radius: 4px !important;
+        border: 1px solid #345b72 !important;
+        background: linear-gradient(180deg, #6ba7c7 0%, #4a87a9 100%) !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 0 rgba(0, 0, 0, 0.25);
+        cursor: pointer;
+    }
+
+    .bgcolor-widget-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .bgcolor-widget-button {
+        min-width: 74px;
+        color: #000 !important;
+        border-color: #7f7f7f !important;
+        background: linear-gradient(180deg, #f7f7f7 0%, #d9d9d9 100%) !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 1px 0 rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .bgcolor-widget-button:hover {
+        background: linear-gradient(180deg, #ffffff 0%, #e6e6e6 100%) !important;
+        border-color: #767676 !important;
+    }
+}
+
 .nitro-room-widget-dimmer {
     width: 275px;
 

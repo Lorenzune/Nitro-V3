@@ -12,7 +12,8 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = props =>
     const [ purchaseState, setPurchaseState ] = useState(CatalogPurchaseState.NONE);
     const { currentPage = null, catalogOptions = null } = useCatalog();
     const { purse = null, getCurrencyAmount = null } = usePurse();
-    const { clubOffers = null } = catalogOptions;
+    const { clubOffers = null, clubOffersByWindowId = null } = (catalogOptions || {});
+    const offers = clubOffersByWindowId?.[1] || clubOffers;
     const isPurchasingRef = useRef<boolean>(false);
 
     const onCatalogEvent = useCallback((event: CatalogEvent) =>
@@ -129,14 +130,14 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = props =>
 
     useEffect(() =>
     {
-        if(!clubOffers) SendMessageComposer(new GetClubOffersMessageComposer(1));
-    }, [ clubOffers ]);
+        if(!offers) SendMessageComposer(new GetClubOffersMessageComposer(1));
+    }, [ offers ]);
 
     return (
         <Grid>
             <Column fullHeight justifyContent="between" overflow="hidden" size={ 7 }>
                 <AutoGrid className="nitro-catalog-layout-vip-buy-grid" columnCount={ 1 }>
-                    { clubOffers && (clubOffers.length > 0) && clubOffers.map((offer, index) =>
+                    { offers && (offers.length > 0) && offers.map((offer, index) =>
                     {
                         return (
                             <LayoutGridItem key={ index } alignItems="center" center={ false } className="p-1" column={ false } itemActive={ pendingOffer === offer } justifyContent="between" onClick={ () => setOffer(offer) }>

@@ -6,8 +6,10 @@ import { useFurnitureStackHeightWidget } from '../../../../hooks';
 
 export const FurnitureStackHeightView: FC<{}> = props =>
 {
-    const { objectId = -1, height = 0, maxHeight = 40, onClose = null, updateHeight = null } = useFurnitureStackHeightWidget();
+    const { objectId = -1, height = 0, maxHeight = 40, isWalkHeightHelper = false, onClose = null, updateHeight = null } = useFurnitureStackHeightWidget();
     const [ tempHeight, setTempHeight ] = useState('');
+    const titleKey = isWalkHeightHelper ? 'widget.custom.walk.height.title' : 'widget.custom.stack.height.title';
+    const textKey = isWalkHeightHelper ? 'widget.custom.walk.height.text' : 'widget.custom.stack.height.text';
 
     const updateTempHeight = (value: string) =>
     {
@@ -29,9 +31,9 @@ export const FurnitureStackHeightView: FC<{}> = props =>
 
     return (
         <NitroCardView className="nitro-widget-custom-stack-height" theme="primary-slim">
-            <NitroCardHeaderView headerText={ LocalizeText('widget.custom.stack.height.title') } onCloseClick={ onClose } />
+            <NitroCardHeaderView headerText={ LocalizeText(titleKey) } onCloseClick={ onClose } />
             <NitroCardContentView justifyContent="between">
-                <Text>{ LocalizeText('widget.custom.stack.height.text') }</Text>
+                <Text>{ LocalizeText(textKey) }</Text>
                 <div className="flex gap-2">
                     <Slider
                         max={ maxHeight }

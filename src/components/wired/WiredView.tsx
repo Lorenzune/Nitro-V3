@@ -1,5 +1,5 @@
 import { ConditionDefinition, TriggerDefinition, WiredActionDefinition } from '@nitrots/nitro-renderer';
-import { FC } from 'react';
+import { FC, Fragment } from 'react';
 import { useWired } from '../../hooks';
 import { WiredActionLayoutView } from './views/actions/WiredActionLayoutView';
 import { WiredConditionLayoutView } from './views/conditions/WiredConditionLayoutView';
@@ -11,11 +11,20 @@ export const WiredView: FC<{}> = props =>
 
     if(!trigger) return null;
 
-    if(trigger instanceof WiredActionDefinition) return WiredActionLayoutView(trigger.code);
+    if(trigger instanceof WiredActionDefinition)
+    {
+        return <Fragment key={ `wired-action-${ trigger.id }-${ trigger.code }` }>{ WiredActionLayoutView(trigger.code) }</Fragment>;
+    }
 
-    if(trigger instanceof TriggerDefinition) return WiredTriggerLayoutView(trigger.code);
+    if(trigger instanceof TriggerDefinition)
+    {
+        return <Fragment key={ `wired-trigger-${ trigger.id }-${ trigger.code }` }>{ WiredTriggerLayoutView(trigger.code) }</Fragment>;
+    }
 
-    if(trigger instanceof ConditionDefinition) return WiredConditionLayoutView(trigger.code);
+    if(trigger instanceof ConditionDefinition)
+    {
+        return <Fragment key={ `wired-condition-${ trigger.id }-${ trigger.code }` }>{ WiredConditionLayoutView(trigger.code) }</Fragment>;
+    }
 
     return null;
 };

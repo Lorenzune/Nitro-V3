@@ -67,44 +67,35 @@
             }
         }
 
-        .nitro-card-tabs {
-            background-color: #185D79;
-
-            .nav-item {
-                padding: .2rem .8rm;
-                background-color: #B6BEC5;
-                color: #000;
-                z-index: 1;
-                margin-bottom: -1px;
-
-                &.active {
-                    background-color: #DFDFDF;
-                    border-color: #283F5D #283F5D #DFDFDF !important;
-                    border-bottom: 1px solid black;
-
-                    &:before {
-                        background: #FFF;
-                    }
-                }
-
-                &:before {
-                    content: '';
-                    position: absolute;
-                    width: 93%;
-                    height: 3px;
-                    border-radius: 0.25rem;
-                    top: 1.5px;
-                    left: 0;
-                    right: 0;
-                    margin: auto;
-                    background: #c2c9d1;
-                    z-index: 1;
-                }
-            }
+        .nitro-card-header-text {
+            color: #fff;
+            text-shadow: 1px 1px 1px #000;
+            font-family: UbuntuCondensed, Ubuntu, sans-serif;
+            font-size: 20px;
+            font-weight: 400;
+            line-height: 1;
+            min-height: auto;
         }
 
-        .content-area {
-            background-color: #DFDFDF;
+        .nitro-card-header-close {
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            line-height: 1;
+            border-radius: 4px;
+            border: 2px solid #000;
+            box-shadow: none;
+            background: #bf2c2c;
+
+            &:hover {
+                border-color: #fff;
+                filter: brightness(1.08);
+            }
+
+            &:active {
+                filter: brightness(0.96);
+            }
         }
     }
 
@@ -188,27 +179,47 @@
                 }
             }
         }
+    }
 
-        .nitro-card-tabs {
-            background-color: #185D79;
-        }
-
-        .content-area {
-            background-color: #DFDFDF;
-        }
+    .content-area {
+        height: 100%;
+        overflow: auto;
+        padding: 10px;
+        background: #f2f2eb;
+        border: 0;
+        border-top: 0;
+        border-radius: 0 0 8px 8px;
+        font-family: Ubuntu, sans-serif;
+        color: #111;
     }
 }
 
 .content-area {
-    height: 100%;
-    padding-top: 8px;
-    padding-bottom: 8px;
-    overflow: auto;
-
-    &.theme-dark {
-        background-color: #1C323F !important;
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: Ubuntu, sans-serif;
+        font-weight: 700;
+        line-height: 1.15;
+        color: #111;
     }
-}
+
+    p,
+    span,
+    label,
+    li,
+    td,
+    th,
+    input,
+    textarea,
+    select,
+    button {
+        font-family: Ubuntu, sans-serif;
+        color: #111;
+    }
 
 @media (max-width: 991.98px) {
     .content-area {
@@ -223,15 +234,7 @@
     height: 100%;
 }
 
-.nitro-card-tabs {
-    height: 100%;
-    min-height: 133px;
-    max-height: 133px;
-    border-bottom: 1px solid #283F5D;
-}
-
 .nitro-card-accordion-set {
-
     &.active {
         height: 100%;
         overflow: hidden;
@@ -241,5 +244,56 @@
 
     .nitro-card-accordion-set-header {
         border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    }
+}
+
+@include media-breakpoint-down(lg) {
+    .nitro-card {
+        resize: none !important;
+        max-width: calc(100vw - 16px) !important;
+        max-height: calc(100vh - 16px) !important;
+    }
+
+    .nitro-card {
+        .nitro-card-header {
+            min-height: 32px;
+            max-height: 32px;
+            padding: 4px;
+
+            .nitro-card-header-text {
+                font-size: 17px;
+            }
+        }
+
+        .nitro-card-tabs {
+            padding: 4px 6px 0;
+            gap: 3px;
+
+            .nav-item {
+                padding: 0.25rem 0.55rem;
+                font-size: 12px;
+            }
+        }
+
+        .content-area {
+            padding: 8px;
+        }
+    }
+
+    .content-area {
+        min-height: auto !important;
+        max-height: 100% !important;
+
+        p,
+        label,
+        li,
+        td,
+        th,
+        input,
+        textarea,
+        select,
+        button {
+            font-size: 11.5px;
+        }
     }
 }

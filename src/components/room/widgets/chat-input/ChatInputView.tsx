@@ -14,7 +14,7 @@ export const ChatInputView: FC<{}> = props =>
     const { chatStyleId = 0, updateChatStyleId = null } = useSessionInfo();
     const { selectedUsername = '', floodBlocked = false, floodBlockedSeconds = 0, setIsTyping = null, setIsIdle = null, sendChat = null } = useChatInputWidget();
     const { roomSession = null } = useRoom();
-    const inputRef = useRef<HTMLInputElement>();
+    const inputRef = useRef<HTMLInputElement>(null);
     const { isVisible: commandSelectorVisible, filteredCommands, selectedIndex, setSelectedIndex, moveUp, moveDown, selectCurrent, close: closeCommandSelector } = useChatCommandSelector(chatValue);
 
     const chatModeIdWhisper = useMemo(() => LocalizeText('widgets.chatinput.mode.whisper'), []);
@@ -289,7 +289,7 @@ export const ChatInputView: FC<{}> = props =>
                     /> }
                 <div className="flex-1 items-center input-sizer">
                     { !floodBlocked &&
-                        <input ref={ inputRef } className="[font-size:inherit] placeholder-[#6c757d] bg-transparent border-none focus:border-current focus:shadow-none focus:ring-0	" maxLength={ maxChatLength } placeholder={ LocalizeText('widgets.chatinput.default') } type="text" value={ chatValue } onChange={ event => updateChatInput(event.target.value) } onMouseDown={ event => setInputFocus() } /> }
+                        <input ref={ inputRef } className="w-full border-none bg-transparent px-[10px] text-[0.86rem] text-black placeholder:text-[#6c757d] focus:border-current focus:shadow-none focus:ring-0" maxLength={ maxChatLength } placeholder={ LocalizeText('widgets.chatinput.default') } type="text" value={ chatValue } onChange={ event => updateChatInput(event.target.value) } onMouseDown={ event => setInputFocus() } /> }
                     { floodBlocked &&
                         <Text variant="danger">{ LocalizeText('chat.input.alert.flood', [ 'time' ], [ floodBlockedSeconds.toString() ]) } </Text> }
                 </div>

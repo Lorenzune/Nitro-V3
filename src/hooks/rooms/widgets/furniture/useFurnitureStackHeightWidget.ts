@@ -5,6 +5,7 @@ import { useMessageEvent, useNitroEvent } from '../../../events';
 import { useFurniRemovedEvent } from '../../engine';
 
 const MAX_HEIGHT: number = 40;
+const WALK_HEIGHT_HELPER_MODEL_KEY = 'furniture_is_walk_height_helper';
 
 const useFurnitureStackHeightWidgetState = () =>
 {
@@ -12,6 +13,7 @@ const useFurnitureStackHeightWidgetState = () =>
     const [ category, setCategory ] = useState(-1);
     const [ height, setHeight ] = useState(0);
     const [ pendingHeight, setPendingHeight ] = useState(-1);
+    const [ isWalkHeightHelper, setIsWalkHeightHelper ] = useState(false);
 
     const onClose = () =>
     {
@@ -19,6 +21,7 @@ const useFurnitureStackHeightWidgetState = () =>
         setCategory(-1);
         setHeight(0);
         setPendingHeight(-1);
+        setIsWalkHeightHelper(false);
     };
 
     const updateHeight = (height: number, server: boolean = false) =>
@@ -55,6 +58,7 @@ const useFurnitureStackHeightWidgetState = () =>
         setCategory(event.category);
         setHeight(roomObject.getLocation().z);
         setPendingHeight(-1);
+        setIsWalkHeightHelper(roomObject.model?.getValue<number>(WALK_HEIGHT_HELPER_MODEL_KEY) > 0);
     });
 
     useFurniRemovedEvent(((objectId !== -1) && (category !== -1)), event =>
@@ -73,7 +77,7 @@ const useFurnitureStackHeightWidgetState = () =>
         return () => clearTimeout(timeout);
     }, [ objectId, pendingHeight ]);
 
-    return { objectId, height, maxHeight: MAX_HEIGHT, onClose, updateHeight };
+    return { objectId, height, maxHeight: MAX_HEIGHT, isWalkHeightHelper, onClose, updateHeight };
 };
 
 export const useFurnitureStackHeightWidget = useFurnitureStackHeightWidgetState;
