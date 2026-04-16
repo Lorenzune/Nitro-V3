@@ -88,11 +88,13 @@ export const AvatarEditorView: FC<{}> = props =>
                     const isWardrobe = (modelKey === AvatarEditorFigureCategory.WARDROBE);
                     const isPets = (modelKey === AvatarEditorFigureCategory.PETS);
                     const isNft = (modelKey === AvatarEditorFigureCategory.NFT);
+                    const isMisc = (modelKey === AvatarEditorFigureCategory.MISC);
 
                     let tabClass = `tab ${ modelKey }`;
                     if(isWardrobe) tabClass = 'tab-wardrobe';
                     else if(isPets) tabClass = 'tab-pets';
                     else if(isNft) tabClass = 'tab-nft';
+                    else if(isMisc) tabClass = 'tab-misc';
 
                     return (
                         <NitroCardTabsItemView key={ modelKey } isActive={ isActive } onClick={ event => setActiveModelKey(modelKey) }>

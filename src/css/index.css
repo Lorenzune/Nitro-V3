@@ -1916,6 +1916,15 @@ body {
         background-position: center;
         background-size: 22px 22px;
     }
+
+    .tab-misc {
+        width: 34px;
+        height: 22px;
+        background-image: url('@/assets/images/wardrobe/misc.png');
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 24px 22px;
+    }
 }
 
 .nitro-wired__variable-picker-portal {

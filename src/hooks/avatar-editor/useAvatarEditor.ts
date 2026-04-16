@@ -71,6 +71,10 @@ const useAvatarEditorState = () =>
         setMaxPaletteCount(partItem.maxPaletteCount || 1);
 
         selectPart(setType, partId);
+
+        // Pet (pt) and Misc (mc) cannot be equipped together — equipping one unequips the other.
+        if(setType === AvatarFigurePartType.PET) selectPart(AvatarFigurePartType.MISC, -1);
+        else if(setType === AvatarFigurePartType.MISC) selectPart(AvatarFigurePartType.PET, -1);
     }, [ activeModel, selectPart ]);
 
     const selectEditorColor = useCallback((setType: string, paletteId: number, colorId: number) =>
@@ -316,6 +320,7 @@ const useAvatarEditorState = () =>
         newAvatarModels[AvatarEditorFigureCategory.TORSO] = [ AvatarFigurePartType.CHEST, AvatarFigurePartType.CHEST_PRINT, AvatarFigurePartType.COAT_CHEST, AvatarFigurePartType.CHEST_ACCESSORY ].map(setType => buildCategory(setType, buildModeDefault));
         newAvatarModels[AvatarEditorFigureCategory.LEGS] = [ AvatarFigurePartType.LEGS, AvatarFigurePartType.SHOES, AvatarFigurePartType.WAIST_ACCESSORY ].map(setType => buildCategory(setType, buildModeDefault));
         newAvatarModels[AvatarEditorFigureCategory.PETS] = [ AvatarFigurePartType.PET ].map(setType => buildCategory(setType)).filter(Boolean);
+		newAvatarModels[AvatarEditorFigureCategory.MISC] = [ AvatarFigurePartType.MISC ].map(setType => buildCategory(setType)).filter(Boolean);
         newAvatarModels[AvatarEditorFigureCategory.NFT] = [
             AvatarFigurePartType.HEAD,
             AvatarFigurePartType.HAIR,

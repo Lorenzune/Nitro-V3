@@ -87,6 +87,9 @@ export class AvatarEditorThumbnailsHelper
         AvatarFigurePartType.PET,
         'ptl',
         'ptr',
+		AvatarFigurePartType.MISC,
+        'mcl',
+        'mcr',
     ];
 
     private static getThumbnailKey(setType: string, part: IAvatarEditorCategoryPartItem, partColors?: IPartColor[], isDisabled?: boolean): string
