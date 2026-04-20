@@ -27,6 +27,7 @@
     "guides.enabled": true,
     "toolbar.hide.quests": true,
     "catalog.style.new": true,
+	"show.google.ads": false,
 	"loginview": {
         "images": {
             "background": "${asset.url}/c_images/reception/stretch_blue.png",
