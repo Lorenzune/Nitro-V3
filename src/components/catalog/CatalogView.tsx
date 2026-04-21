@@ -1,13 +1,25 @@
 import { FC } from 'react';
 import { GetConfigurationValue } from '../../api';
+import { useCatalog } from '../../hooks';
 import { CatalogClassicView } from './CatalogClassicView';
 import { CatalogModernView } from './CatalogModernView';
 
 export const CatalogView: FC<{}> = () =>
 {
+    const { catalogLocalizationVersion = 0 } = useCatalog();
     const useNewStyle = GetConfigurationValue<boolean>('catalog.style.new', false);
 
-    if(useNewStyle) return <CatalogModernView />;
+    if(useNewStyle) return (
+        <>
+            <div className="hidden" data-catalog-localization-version={ catalogLocalizationVersion } />
+            <CatalogModernView />
+        </>
+    );
 
-    return <CatalogClassicView />;
+    return (
+        <>
+            <div className="hidden" data-catalog-localization-version={ catalogLocalizationVersion } />
+            <CatalogClassicView />
+        </>
+    );
 };

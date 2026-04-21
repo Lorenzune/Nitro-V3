@@ -384,6 +384,23 @@ const useAvatarInfoWidgetState = () =>
 
     useEffect(() =>
     {
+        const refreshFurnitureInfo = () =>
+        {
+            setAvatarInfo(prevValue =>
+            {
+                if(!(prevValue instanceof AvatarInfoFurni)) return prevValue;
+
+                return AvatarInfoUtilities.getFurniInfo(prevValue.id, prevValue.category) || prevValue;
+            });
+        };
+
+        window.addEventListener('nitro-localization-updated', refreshFurnitureInfo);
+
+        return () => window.removeEventListener('nitro-localization-updated', refreshFurnitureInfo);
+    }, []);
+
+    useEffect(() =>
+    {
 		if(!roomSession) return;
 		
         roomSession.isDecorating = isDecorating;

@@ -1,7 +1,7 @@
 import { GetSessionDataManager, RequestFriendComposer, UserProfileParser } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
 import { FriendlyTime, LocalizeText, SendMessageComposer } from '../../api';
-import { LayoutAvatarImageView, Text } from '../../common';
+import { LayoutAvatarImageView, Text, UserIdentityView } from '../../common';
 
 export const UserContainerView: FC<{
     userProfile: UserProfileParser;
@@ -18,7 +18,6 @@ export const UserContainerView: FC<{
     const infostandBackgroundClass = `background-${userProfile.backgroundId ?? 'default'}`;
     const infostandStandClass = `stand-${userProfile.standId ?? 'default'}`;
     const infostandOverlayClass = `overlay-${userProfile.overlayId ?? 'default'}`;
-
     const addFriend = () =>
     {
         setRequestSent(true);
@@ -41,7 +40,16 @@ export const UserContainerView: FC<{
 
             <div className="flex flex-col gap-2">
                 <div className="flex flex-col gap-0">
-                    <p className="leading-tight font-bold">{ userProfile.username }</p>
+                    <UserIdentityView
+                        className="leading-tight"
+                        displayOrder={ userProfile.displayOrder }
+                        nickIcon={ userProfile.nickIcon }
+                        prefixColor={ userProfile.prefixColor }
+                        prefixEffect={ userProfile.prefixEffect }
+                        prefixFont={ userProfile.prefixFont }
+                        prefixIcon={ userProfile.prefixIcon }
+                        prefixText={ userProfile.prefixText }
+                        username={ userProfile.username } />
                     <p className="text-sm italic leading-tight">{ userProfile.motto }</p>
                 </div>
 

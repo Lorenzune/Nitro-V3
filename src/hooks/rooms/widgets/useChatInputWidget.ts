@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ChatMessageTypeEnum, GetClubMemberLevel, GetConfigurationValue, LocalizeText, SendMessageComposer } from '../../../api';
 import { useNitroEvent } from '../../events';
 import { useNotification } from '../../notification';
+import { useTranslation } from '../../translation';
 import { useObjectSelectedEvent } from '../engine';
 import { useRoom } from '../useRoom';
 
@@ -15,6 +16,7 @@ const useChatInputWidgetState = () =>
     const [ floodBlocked, setFloodBlocked ] = useState(false);
     const [ floodBlockedSeconds, setFloodBlockedSeconds ] = useState(0);
     const { showNitroAlert = null, showConfirm = null } = useNotification();
+    const { settings, translateOutgoing, enqueueOutgoingTranslation } = useTranslation();
     const { roomSession = null } = useRoom();
 
     const sendChat = (text: string, chatType: number, recipientName: string = '', styleId: number = 0) =>
@@ -184,21 +186,56 @@ const useChatInputWidgetState = () =>
                     }
 
                     return null;
+                case ':customize':
+                    CreateLinkEvent('customize/show');
+                    return null;
             }
         }
 
-        switch(chatType)
+        const preserveTrailingSpaces = (message: string) => message.replace(/ +$/g, match => '\u00A0'.repeat(match.length));
+
+        const dispatchChatMessage = (message: string) =>
         {
-            case ChatMessageTypeEnum.CHAT_DEFAULT:
-                roomSession.sendChatMessage(text, styleId);
-                break;
-            case ChatMessageTypeEnum.CHAT_SHOUT:
-                roomSession.sendShoutMessage(text, styleId);
-                break;
-            case ChatMessageTypeEnum.CHAT_WHISPER:
-                roomSession.sendWhisperMessage(recipientName, text, styleId);
-                break;
+            const preservedMessage = preserveTrailingSpaces(message);
+
+            switch(chatType)
+            {
+                case ChatMessageTypeEnum.CHAT_DEFAULT:
+                    roomSession.sendChatMessage(preservedMessage, styleId);
+                    return;
+                case ChatMessageTypeEnum.CHAT_SHOUT:
+                    roomSession.sendShoutMessage(preservedMessage, styleId);
+                    return;
+                case ChatMessageTypeEnum.CHAT_WHISPER:
+                    roomSession.sendWhisperMessage(recipientName, preservedMessage, styleId);
+                    return;
+            }
+        };
+
+        const trimmedText = text.trimStart();
+        const shouldTranslateOutgoing = settings.enabled && !!trimmedText.length && (trimmedText.charAt(0) !== ':');
+
+        if(!shouldTranslateOutgoing)
+        {
+            dispatchChatMessage(text);
+            return null;
         }
+
+        void (async () =>
+        {
+            const translation = await translateOutgoing(text);
+
+            if(translation)
+            {
+                enqueueOutgoingTranslation(translation);
+                dispatchChatMessage(translation.translatedText);
+                return;
+            }
+
+            dispatchChatMessage(text);
+        })();
+
+        return null;
     };
 
     useNitroEvent<RoomSessionChatEvent>(RoomSessionChatEvent.FLOOD_EVENT, event =>

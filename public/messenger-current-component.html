@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="it">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nitro Current Messenger Mockup</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #27313a;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #000;
+        }
+
+        .nitro-card-shell {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 2px solid #000;
+            border-radius: 10px;
+            background: #f2f2eb;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, .28);
+        }
+
+        .nitro-card-header-shell {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 31px;
+            max-height: 31px;
+            border: 2px solid #3c88a6;
+            border-bottom-color: #000;
+            border-radius: 8px 8px 0 0;
+            background: #30728c;
+            padding: 5px;
+        }
+
+        .nitro-card-title {
+            margin: 0 auto;
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1;
+        }
+
+        .nitro-card-close-button {
+            position: absolute;
+            right: 8px;
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            border: 2px solid #000;
+            border-radius: 4px;
+            background: #bf2c2c;
+            cursor: pointer;
+        }
+
+        .nitro-card-close-button::before,
+        .nitro-card-close-button::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 10px;
+            height: 2px;
+            border-radius: 2px;
+            background: #fff;
+            transform-origin: center;
+        }
+
+        .nitro-card-close-button::before {
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .nitro-card-close-button::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+
+        .nitro-card-content-shell {
+            height: 100%;
+            padding: 10px;
+            overflow: auto;
+        }
+
+        .nitro-friends-messenger {
+            width: 800px;
+            height: 720px;
+        }
+
+        .messenger-grid {
+            display: grid;
+            grid-template-columns: 4fr 8fr;
+            gap: 8px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .messenger-column {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .messenger-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow: auto;
+        }
+
+        .layout-grid-item {
+            position: relative;
+            min-height: 50px;
+            padding: 4px 8px;
+            border: 1px solid #7f8b94;
+            border-radius: 4px;
+            background: #d9e4ea;
+            cursor: pointer;
+        }
+
+        .layout-grid-item.active {
+            background: #f7fbff;
+            box-shadow: inset 0 0 0 2px #4d9fc7;
+        }
+
+        .layout-item-count {
+            position: absolute;
+            right: 4px;
+            top: 4px;
+            min-width: 18px;
+            padding: 1px 4px;
+            border-radius: 9px;
+            background: #f2d64b;
+            color: #000;
+            font-size: 11px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .friend-row {
+            display: flex;
+            width: 100%;
+            gap: 4px;
+            min-height: 50px;
+        }
+
+        .avatar-head {
+            position: relative;
+            width: 50px;
+            height: 80px;
+            flex-shrink: 0;
+            align-self: flex-end;
+            overflow: hidden;
+        }
+
+        .avatar-head img {
+            position: absolute;
+            left: -16px;
+            top: -13px;
+            width: 64px;
+            height: auto;
+            image-rendering: auto;
+        }
+
+        .friend-name {
+            align-self: center;
+            min-width: 0;
+            flex: 1;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-size: 13px;
+        }
+
+        .section-title {
+            font-weight: 700;
+        }
+
+        .active-thread-title {
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .actions-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4px;
+        }
+
+        .actions-left {
+            display: flex;
+            gap: 4px;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 28px;
+            padding: 4px 8px;
+            border: 1px solid #1e7295;
+            border-radius: 4px;
+            background: #1e7295;
+            color: #fff;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: inset 0 2px rgba(255,255,255,.15), inset 0 -2px rgba(0,0,0,.10), 0 1px rgba(0,0,0,.10);
+        }
+
+        .button.danger {
+            border-color: #a81a12;
+            background: #a81a12;
+        }
+
+        .button.success {
+            border-color: #00800b;
+            background: #00800b;
+        }
+
+        .mini-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 3px;
+            background: rgba(255,255,255,.25);
+        }
+
+        .chat-messages {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 8px;
+            border-radius: 4px;
+            background: #cfd7dd;
+        }
+
+        .thread-group {
+            display: flex;
+            width: 100%;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .thread-group.own {
+            justify-content: flex-end;
+        }
+
+        .message-avatar {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .message-avatar img {
+            position: absolute;
+            left: -19px;
+            top: -22px;
+            width: 72px;
+            height: auto;
+        }
+
+        .message-bubble {
+            position: relative;
+            max-width: 420px;
+            margin-bottom: 8px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #dfdfdf;
+            color: #000;
+        }
+
+        .message-bubble.left::before {
+            content: "";
+            position: absolute;
+            top: 10px;
+            left: -8px;
+            width: 0;
+            height: 0;
+            border-right: 8px solid #dfdfdf;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+        }
+
+        .message-bubble.right::before {
+            content: "";
+            position: absolute;
+            top: 10px;
+            right: -8px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid #dfdfdf;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+        }
+
+        .message-header {
+            font-weight: 700;
+        }
+
+        .message-time {
+            color: #6b7280;
+            font-size: 11px;
+        }
+
+        .message-line {
+            word-break: break-word;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 4px;
+        }
+
+        .input-row input {
+            flex: 1;
+            min-height: 28px;
+            padding: 4px 8px;
+            border: 1px solid #9aa6ad;
+            border-radius: 4px;
+            outline: none;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="nitro-card-shell nitro-friends-messenger">
+        <div class="nitro-card-header-shell">
+            <span class="nitro-card-title">Le tue chat aperte (2)</span>
+            <div class="nitro-card-close-button"></div>
+        </div>
+
+        <div class="nitro-card-content-shell">
+            <div class="messenger-grid">
+                <div class="messenger-column">
+                    <div class="section-title">Messenger</div>
+                    <div class="messenger-list">
+                        <div class="layout-grid-item active">
+                            <div class="layout-item-count">1</div>
+                            <div class="friend-row">
+                                <div class="avatar-head">
+                                    <img alt="Jarchy" src="https://www.habbo.com/habbo-imaging/avatarimage?figure=hr-831-45.hd-180-1.ch-255-92.lg-275-82.sh-290-92&direction=2&head_direction=2&headonly=1&size=l">
+                                </div>
+                                <div class="friend-name">Jarchy</div>
+                            </div>
+                        </div>
+
+                        <div class="layout-grid-item">
+                            <div class="friend-row">
+                                <div class="avatar-head">
+                                    <img alt=",Homy" src="https://www.habbo.com/habbo-imaging/avatarimage?figure=ha-3409-1413-70.lg-285-89.ch-3032-1334-109.sh-3016-110.hd-185-1359.ca-3225-110-62.wa-3264-62-62.fa-1206-90.hr-3322-1403&direction=2&head_direction=2&headonly=1&size=l">
+                                </div>
+                                <div class="friend-name">,Homy</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="messenger-column">
+                    <div class="active-thread-title">Tu + Jarchy</div>
+
+                    <div class="actions-row">
+                        <div class="actions-left">
+                            <button class="button"><span class="mini-icon"></span></button>
+                            <button class="button"><span class="mini-icon"></span></button>
+                            <button class="button danger">Denuncia</button>
+                        </div>
+                        <button class="button">×</button>
+                    </div>
+
+                    <div class="chat-messages">
+                        <div class="thread-group">
+                            <div class="message-avatar">
+                                <img alt="Jarchy" src="https://www.habbo.com/habbo-imaging/avatarimage?figure=hr-831-45.hd-180-1.ch-255-92.lg-275-82.sh-290-92&direction=2&head_direction=2&size=l">
+                            </div>
+                            <div>
+                                <div class="message-bubble left">
+                                    <div class="message-header">Jarchy</div>
+                                    <div class="message-line">dddove sei?</div>
+                                </div>
+                                <div class="message-time">7 ore fa</div>
+                            </div>
+                        </div>
+
+                        <div class="thread-group own">
+                            <div>
+                                <div class="message-bubble right">
+                                    <div class="message-header">Tu</div>
+                                    <div class="message-line">su</div>
+                                    <div class="message-line">slogga</div>
+                                    <div class="message-line">vieni li</div>
+                                </div>
+                                <div class="message-time">6 ore fa</div>
+                            </div>
+                            <div class="message-avatar own">
+                                <img alt="Tu" src="https://www.habbo.com/habbo-imaging/avatarimage?figure=ha-3409-1413-70.lg-285-89.ch-3032-1334-109.sh-3016-110.hd-185-1359.ca-3225-110-62.wa-3264-62-62.fa-1206-90.hr-3322-1403&direction=4&head_direction=4&size=l">
+                            </div>
+                        </div>
+
+                        <div class="thread-group">
+                            <div class="message-avatar">
+                                <img alt="Jarchy" src="https://www.habbo.com/habbo-imaging/avatarimage?figure=hr-831-45.hd-180-1.ch-255-92.lg-275-82.sh-290-92&direction=2&head_direction=2&size=l">
+                            </div>
+                            <div>
+                                <div class="message-bubble left">
+                                    <div class="message-header">Jarchy</div>
+                                    <div class="message-line">arrivo</div>
+                                </div>
+                                <div class="message-time">6 ore fa</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <input value="" placeholder="Fai clic qui per scrivere a Jarchy">
+                        <button class="button success">Parla</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

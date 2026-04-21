@@ -15,7 +15,6 @@ const normalizeFurniSource = (value: number) => (FURNI_SOURCE_OPTIONS.some(optio
 export const WiredTriggerReceiveSignalView: FC<{}> = () =>
 {
     const [ senderCount, setSenderCount ] = useState(0);
-    const [ maxSenders, setMaxSenders ] = useState(5);
     const [ channel, setChannel ] = useState(0);
     const [ furniSource, setFurniSource ] = useState(100);
 
@@ -30,7 +29,6 @@ export const WiredTriggerReceiveSignalView: FC<{}> = () =>
         const p = trigger.intData;
         if(p.length >= 1) setChannel(p[0]);
         if(p.length >= 2) setSenderCount(p[1]);
-        if(p.length >= 3) setMaxSenders(p[2]);
         if(p.length >= 4) setFurniSource(normalizeFurniSource(p[3]));
         else setFurniSource(100);
     }, [ trigger ]);
@@ -43,7 +41,7 @@ export const WiredTriggerReceiveSignalView: FC<{}> = () =>
             footer={ <WiredSourcesSelector showFurni={ true } furniSource={ furniSource } furniSources={ FURNI_SOURCE_OPTIONS } onChangeFurni={ setFurniSource } /> }>
             <div className="flex items-center justify-between">
                 <Text small>{ LocalizeText('wiredfurni.params.signal.senders_connected') }</Text>
-                <Text bold small>{ senderCount }/{ maxSenders }</Text>
+                <Text bold small>{ senderCount }</Text>
             </div>
         </WiredTriggerBaseView>
     );

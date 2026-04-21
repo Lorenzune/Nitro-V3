@@ -8,6 +8,7 @@ import { CameraWidgetView } from './camera/CameraWidgetView';
 import { CampaignView } from './campaign/CampaignView';
 import { CatalogView } from './catalog/CatalogView';
 import { ChatHistoryView } from './chat-history/ChatHistoryView';
+import { CustomizeNickIconView } from './customize/CustomizeNickIconView';
 import { FloorplanEditorView } from './floorplan-editor/FloorplanEditorView';
 import { FurniEditorView } from './furni-editor/FurniEditorView';
 import { FriendsView } from './friends/FriendsView';
@@ -27,6 +28,8 @@ import { ExternalPluginLoader } from './plugins/ExternalPluginLoader';
 import { RightSideView } from './right-side/RightSideView';
 import { RoomView } from './room/RoomView';
 import { ToolbarView } from './toolbar/ToolbarView';
+import { TranslationBootstrap } from './translation/TranslationBootstrap';
+import { TranslationSettingsView } from './translation/TranslationSettingsView';
 import { UserProfileView } from './user-profile/UserProfileView';
 import { UserSettingsView } from './user-settings/UserSettingsView';
 import { WiredView } from './wired/WiredView';
@@ -37,6 +40,7 @@ export const MainView: FC<{}> = props =>
 {
     const [ isReady, setIsReady ] = useState(false);
     const [ landingViewVisible, setLandingViewVisible ] = useState(true);
+    const [ localizationVersion, setLocalizationVersion ] = useState(0);
 
     useNitroEvent<RoomSessionEvent>(RoomSessionEvent.CREATED, event => setLandingViewVisible(false));
     useNitroEvent<RoomSessionEvent>(RoomSessionEvent.ENDED, event => setLandingViewVisible(event.openLandingView));
@@ -86,8 +90,18 @@ export const MainView: FC<{}> = props =>
         return () => RemoveLinkEventTracker(linkTracker);
     }, []);
 
+    useEffect(() =>
+    {
+        const refreshLocalization = () => setLocalizationVersion(value => (value + 1));
+
+        window.addEventListener('nitro-localization-updated', refreshLocalization);
+
+        return () => window.removeEventListener('nitro-localization-updated', refreshLocalization);
+    }, []);
+
     return (
         <>
+            <div className="hidden" data-localization-version={ localizationVersion } />
             <AnimatePresence>
                 { landingViewVisible &&
                     <motion.div
@@ -98,10 +112,12 @@ export const MainView: FC<{}> = props =>
                     </motion.div> }
             </AnimatePresence>
             <ToolbarView isInRoom={ !landingViewVisible } />
+            <TranslationBootstrap />
             <ModToolsView />
             <WiredCreatorToolsView />
             <RoomView />
             <ChatHistoryView />
+            <CustomizeNickIconView />
             <WiredView />
             <AvatarEditorView />
             <AchievementsView />
@@ -112,6 +128,7 @@ export const MainView: FC<{}> = props =>
             <FriendsView />
             <RightSideView />
             <UserSettingsView />
+            <TranslationSettingsView />
             <UserProfileView />
             <GroupsView />
             <GroupForumView />

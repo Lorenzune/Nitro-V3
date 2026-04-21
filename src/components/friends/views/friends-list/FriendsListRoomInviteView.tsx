@@ -15,13 +15,13 @@ export const FriendsRoomInviteView: FC<FriendsRoomInviteViewProps> = props =>
     const [ roomInviteMessage, setRoomInviteMessage ] = useState<string>('');
 
     return (
-        <NitroCardView className="nitro-friends-room-invite" theme="primary-slim" uniqueKey="nitro-friends-room-invite">
+        <NitroCardView className="nitro-friends-room-invite" theme="primary-slim" uniqueKey="nitro-friends-room-invite" isResizable={ false } style={ { width: 270, height: 225, minWidth: 270, minHeight: 225, maxWidth: 270, maxHeight: 225 } }>
             <NitroCardHeaderView headerText={ LocalizeText('friendlist.invite.title') } onCloseClick={ onCloseClick } />
-            <NitroCardContentView className="text-black">
-                { LocalizeText('friendlist.invite.summary', [ 'count' ], [ selectedFriendsIds.length.toString() ]) }
-                <textarea className="min-h-[calc(1.5em+ .5rem+2px)] px-[.5rem] py-[.25rem]  rounded-[.2rem]" maxLength={ 255 } value={ roomInviteMessage } onChange={ event => setRoomInviteMessage(event.target.value) }></textarea>
-                <Text center className="bg-muted rounded p-1">{ LocalizeText('friendlist.invite.note') }</Text>
-                <div className="flex gap-1">
+            <NitroCardContentView className="nitro-friends-room-invite-content text-black" gap={ 2 }>
+                <Text className="nitro-friends-room-invite-summary">{ LocalizeText('friendlist.invite.summary', [ 'count' ], [ selectedFriendsIds.length.toString() ]) }</Text>
+                <textarea className="nitro-friends-room-invite-textarea" maxLength={ 255 } value={ roomInviteMessage } onChange={ event => setRoomInviteMessage(event.target.value) }></textarea>
+                <Text center className="nitro-friends-room-invite-note">{ LocalizeText('friendlist.invite.note') }</Text>
+                <div className="nitro-friends-room-invite-actions">
                     <Button fullWidth disabled={ ((roomInviteMessage.length === 0) || (selectedFriendsIds.length === 0)) } variant="success" onClick={ () => sendRoomInvite(roomInviteMessage) }>{ LocalizeText('friendlist.invite.send') }</Button>
                     <Button fullWidth onClick={ onCloseClick }>{ LocalizeText('generic.cancel') }</Button>
                 </div>

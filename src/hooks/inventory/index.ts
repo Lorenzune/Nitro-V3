@@ -1,6 +1,7 @@
 export * from './useInventoryBadges';
 export * from './useInventoryBots';
 export * from './useInventoryFurni';
+export * from './useInventoryNickIcons';
 export * from './useInventoryPets';
 export * from './useInventoryPrefixes';
 export * from './useInventoryTrade';

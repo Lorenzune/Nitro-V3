@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=Pixelify+Sans:wght@400..700&family=Vampiro+One&display=swap');
 
 @config "../../tailwind.config.js";
 
@@ -22,6 +23,7 @@ body {
     -webkit-user-select: none;
     user-select: none;
     scrollbar-width: thin;
+    scrollbar-color: #6d7b84 #c8d0d4;
 }
 
 .image-rendering-pixelated {
@@ -35,45 +37,76 @@ body {
 }
 
 ::-webkit-scrollbar {
-    width: .625rem;
+    width: .875rem;
 }
 
 ::-webkit-scrollbar:horizontal {
-    height: .625rem;
+    height: .875rem;
 }
 
 ::-webkit-scrollbar:not(:horizontal) {
-    width: .625rem;
+    width: .875rem;
 }
 
 ::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, .08);
-    border-radius: .5rem;
+    background: linear-gradient(180deg, #dfe5e8 0%, #c9d1d5 100%);
+    border-left: 1px solid #7a858b;
+    border-right: 1px solid #eef3f5;
+    border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(30, 114, 149, .35);
-    border-radius: .5rem;
-    border: 2px solid transparent;
-    background-clip: padding-box;
+    background: linear-gradient(180deg, #8fb5c7 0%, #5d8ea5 100%);
+    border: 1px solid #446879;
+    border-radius: 2px;
+    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.28);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(30, 114, 149, .6);
-    border-radius: .5rem;
-    border: 2px solid transparent;
-    background-clip: padding-box;
+    background: linear-gradient(180deg, #99c2d5 0%, #689ab0 100%);
 }
 
 ::-webkit-scrollbar-thumb:active {
-    background: #185D79;
-    border-radius: .5rem;
-    border: 2px solid transparent;
-    background-clip: padding-box;
+    background: linear-gradient(180deg, #5c889d 0%, #436977 100%);
 }
 
 ::-webkit-scrollbar-corner {
-    background: rgba(0, 0, 0, .08);
+    background: #c9d1d5;
+}
+
+::-webkit-scrollbar-button:single-button {
+    display: block;
+    width: .875rem;
+    height: .875rem;
+    background-color: #d8dfe3;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-left: 1px solid #7a858b;
+    border-right: 1px solid #eef3f5;
+}
+
+::-webkit-scrollbar-button:single-button:vertical:decrement {
+    background-image: linear-gradient(135deg, transparent 50%, #35586a 50%), linear-gradient(225deg, transparent 50%, #35586a 50%);
+    background-size: 6px 6px;
+    background-position: calc(50% - 3px) 55%, calc(50% + 3px) 55%;
+}
+
+::-webkit-scrollbar-button:single-button:vertical:increment {
+    background-image: linear-gradient(315deg, transparent 50%, #35586a 50%), linear-gradient(45deg, transparent 50%, #35586a 50%);
+    background-size: 6px 6px;
+    background-position: calc(50% - 3px) 45%, calc(50% + 3px) 45%;
+}
+
+::-webkit-scrollbar-button:single-button:horizontal:decrement {
+    background-image: linear-gradient(45deg, transparent 50%, #35586a 50%), linear-gradient(135deg, transparent 50%, #35586a 50%);
+    background-size: 6px 6px;
+    background-position: 58% calc(50% - 3px), 58% calc(50% + 3px);
+}
+
+::-webkit-scrollbar-button:single-button:horizontal:increment {
+    background-image: linear-gradient(225deg, transparent 50%, #35586a 50%), linear-gradient(315deg, transparent 50%, #35586a 50%);
+    background-size: 6px 6px;
+    background-position: 42% calc(50% - 3px), 42% calc(50% + 3px);
 }
 
 @layer components {

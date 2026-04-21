@@ -1,13 +1,13 @@
-import { AddLinkEventTracker, AvatarExpressionEnum, FigureUpdateEvent, FurnitureFloorUpdateEvent, FurnitureMultiStateComposer, FurnitureWallMultiStateComposer, FurnitureWallUpdateComposer, FurnitureWallUpdateEvent, GetLocalizationManager, GetRoomEngine, GetSessionDataManager, ILinkEventTracker, RemoveLinkEventTracker, RoomControllerLevel, RoomObjectCategory, RoomObjectType, RoomObjectVariable, RoomUnitDanceEvent, RoomUnitEffectEvent, RoomUnitExpressionEvent, RoomUnitHandItemEvent, RoomUnitInfoEvent, RoomUnitStatusEvent, UpdateFurniturePositionComposer, Vector3d, WiredUserInspectMoveComposer } from '@nitrots/nitro-renderer';
+import { AddLinkEventTracker, AvatarExpressionEnum, FigureUpdateEvent, FurnitureFloorUpdateEvent, FurnitureMultiStateComposer, FurnitureWallMultiStateComposer, FurnitureWallUpdateComposer, FurnitureWallUpdateEvent, GetLocalizationManager, GetRoomEngine, GetSessionDataManager, GetStage, GetTicker, ILinkEventTracker, RemoveLinkEventTracker, RoomControllerLevel, RoomObjectCategory, RoomObjectType, RoomObjectVariable, RoomUnitDanceEvent, RoomUnitEffectEvent, RoomUnitExpressionEvent, RoomUnitHandItemEvent, RoomUnitInfoEvent, RoomUnitStatusEvent, UpdateFurniturePositionComposer, Vector3d, WiredUserInspectMoveComposer } from '@nitrots/nitro-renderer';
 import { WiredMonitorDataEvent, WiredMonitorRequestComposer } from '@nitrots/nitro-renderer';
-import { FC, KeyboardEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { FC, KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import furniInspectionIcon from '../../assets/images/wiredtools/furni.png';
 import globalInspectionIcon from '../../assets/images/wiredtools/global.png';
 import userInspectionIcon from '../../assets/images/wiredtools/user.png';
 import contextInspectionIcon from '../../assets/images/wiredtools/context.png';
 import wiredGlobalPlaceholderImage from '../../assets/images/wiredtools/wired_global_placeholder.png';
 import wiredMonitorImage from '../../assets/images/wiredtools/wired_monitor.png';
-import { AvatarInfoFurni, AvatarInfoUtilities, LocalizeText, NotificationAlertType, SendMessageComposer } from '../../api';
+import { AvatarInfoFurni, AvatarInfoUtilities, GetRoomObjectBounds, GetRoomObjectScreenLocation, LocalizeText, NotificationAlertType, SendMessageComposer, WiredSelectionVisualizer } from '../../api';
 import { Button, DraggableWindowPosition, LayoutAvatarImageView, LayoutPetImageView, LayoutRoomObjectImageView, NitroCardContentView, NitroCardHeaderView, NitroCardTabsItemView, NitroCardTabsView, NitroCardView, Text } from '../../common';
 import { useInventoryTrade, useMessageEvent, useNotification, useObjectSelectedEvent, useRoom, useWiredTools } from '../../hooks';
 import { WiredToolsSettingsTabView } from './WiredToolsSettingsTabView';
@@ -182,6 +182,21 @@ interface VariableManageEntry
     manageLabel: string;
     updatedAt: number;
     value: number | null;
+}
+
+interface VariableHighlightTarget
+{
+    category: number;
+    hasValue: boolean;
+    objectId: number;
+    value: number | null;
+}
+
+interface VariableHighlightOverlay extends VariableHighlightTarget
+{
+    key: string;
+    x: number;
+    y: number;
 }
 
 interface ManagedHolderVariableEntry
@@ -631,6 +646,9 @@ export const WiredCreatorToolsView: FC<{}> = () =>
     const [ isManagedGiveOpen, setIsManagedGiveOpen ] = useState(false);
     const [ managedGiveVariableItemId, setManagedGiveVariableItemId ] = useState(0);
     const [ managedGiveValue, setManagedGiveValue ] = useState('0');
+    const [ isVariableHighlightActive, setIsVariableHighlightActive ] = useState(false);
+    const [ variableHighlightOverlays, setVariableHighlightOverlays ] = useState<VariableHighlightOverlay[]>([]);
+    const variableHighlightObjectsRef = useRef<Array<{ category: number; objectId: number; }>>([]);
     const shouldPauseVariableSnapshotRefresh = (!!editingVariable || !!editingManagedHolderVariableId || isInspectionGiveOpen || isManagedGiveOpen);
     const [ selectedVariableKeys, setSelectedVariableKeys ] = useState<Record<VariablesElementType, string>>({
         furni: VARIABLE_DEFINITIONS.furni[0].key,
@@ -2400,6 +2418,155 @@ export const WiredCreatorToolsView: FC<{}> = () =>
             manageLabel: 'Manage'
         } ];
     }, [ selectedVariableDefinition, variablesType, roomSession, userVariableAssignments, furniVariableAssignments, roomVariableAssignmentMap ]);
+    const canVariableHighlight = !!selectedVariableDefinition?.itemId
+        && (selectedVariableDefinition.type === 'Custom')
+        && ((variablesType === 'user') || (variablesType === 'furni'))
+        && !!roomSession;
+    const variableHighlightTargets = useMemo((): VariableHighlightTarget[] =>
+    {
+        if(!isVariableHighlightActive || !canVariableHighlight || !roomSession || !selectedVariableDefinition?.itemId) return [];
+
+        if(variablesType === 'user')
+        {
+            const targets: VariableHighlightTarget[] = [];
+
+            for(const [ userIdString, assignments ] of Object.entries(userVariableAssignments))
+            {
+                const assignment = assignments.find(entry => (entry.variableItemId === selectedVariableDefinition.itemId));
+
+                if(!assignment) continue;
+
+                const userId = Number(userIdString);
+                const userData = roomSession.userDataManager.getUserData(userId)
+                    ?? roomSession.userDataManager.getBotData(userId)
+                    ?? roomSession.userDataManager.getRentableBotData(userId)
+                    ?? roomSession.userDataManager.getPetData(userId);
+                const roomIndex = Number(userData?.roomIndex ?? -1);
+
+                if(roomIndex < 0) continue;
+
+                targets.push({
+                    category: RoomObjectCategory.UNIT,
+                    objectId: roomIndex,
+                    hasValue: !!assignment.hasValue && !!selectedVariableDefinition.hasValue && (assignment.value !== null) && (assignment.value !== undefined),
+                    value: assignment.value
+                });
+            }
+
+            return targets;
+        }
+
+        if(variablesType === 'furni')
+        {
+            const targets: VariableHighlightTarget[] = [];
+
+            for(const [ furniIdString, assignments ] of Object.entries(furniVariableAssignments))
+            {
+                const assignment = assignments.find(entry => (entry.variableItemId === selectedVariableDefinition.itemId));
+
+                if(!assignment) continue;
+
+                const furniId = Number(furniIdString);
+                const floorObject = GetRoomEngine().getRoomObject(roomSession.roomId, furniId, RoomObjectCategory.FLOOR);
+                const wallObject = floorObject ? null : GetRoomEngine().getRoomObject(roomSession.roomId, furniId, RoomObjectCategory.WALL);
+                const category = floorObject ? RoomObjectCategory.FLOOR : (wallObject ? RoomObjectCategory.WALL : -1);
+
+                if(category < 0) continue;
+
+                targets.push({
+                    category,
+                    objectId: furniId,
+                    hasValue: !!assignment.hasValue && !!selectedVariableDefinition.hasValue && (assignment.value !== null) && (assignment.value !== undefined),
+                    value: assignment.value
+                });
+            }
+
+            return targets;
+        }
+
+        return [];
+    }, [ canVariableHighlight, furniVariableAssignments, isVariableHighlightActive, roomSession, selectedVariableDefinition, userVariableAssignments, variablesType ]);
+    useEffect(() =>
+    {
+        if(isVisible && (activeTab === 'variables') && canVariableHighlight) return;
+
+        setIsVariableHighlightActive(false);
+    }, [ activeTab, canVariableHighlight, isVisible ]);
+    useEffect(() =>
+    {
+        if(variableHighlightObjectsRef.current.length)
+        {
+            WiredSelectionVisualizer.clearVariableHighlightFromObjects(variableHighlightObjectsRef.current);
+            variableHighlightObjectsRef.current = [];
+        }
+
+        if(!isVariableHighlightActive || !variableHighlightTargets.length)
+        {
+
+            setVariableHighlightOverlays([]);
+
+            return;
+        }
+
+        const objects = variableHighlightTargets.map(target => ({
+            category: target.category,
+            objectId: target.objectId
+        }));
+
+        WiredSelectionVisualizer.applyVariableHighlightToObjects(objects);
+        variableHighlightObjectsRef.current = objects;
+
+        return () =>
+        {
+            if(!variableHighlightObjectsRef.current.length) return;
+
+            WiredSelectionVisualizer.clearVariableHighlightFromObjects(variableHighlightObjectsRef.current);
+            variableHighlightObjectsRef.current = [];
+        };
+    }, [ isVariableHighlightActive, variableHighlightTargets ]);
+    useEffect(() =>
+    {
+        if(!isVariableHighlightActive || !roomSession?.roomId || !variableHighlightTargets.length)
+        {
+            setVariableHighlightOverlays([]);
+
+            return;
+        }
+
+        const updateOverlays = () =>
+        {
+            const stage = GetStage();
+            const nextOverlays: VariableHighlightOverlay[] = [];
+
+            for(const target of variableHighlightTargets)
+            {
+                const bounds = GetRoomObjectBounds(roomSession.roomId, target.objectId, target.category);
+                const location = GetRoomObjectScreenLocation(roomSession.roomId, target.objectId, target.category);
+
+                if(!bounds || !location) continue;
+
+                const x = Math.max(8, Math.min(Math.round(location.x), (stage.width - 8)));
+                const y = Math.max(8, Math.min(Math.round(bounds.top), (stage.height - 40)));
+
+                nextOverlays.push({
+                    ...target,
+                    key: `${ target.category }:${ target.objectId }`,
+                    x,
+                    y
+                });
+            }
+
+            setVariableHighlightOverlays(nextOverlays);
+        };
+
+        updateOverlays();
+
+        const ticker = GetTicker();
+
+        ticker.add(updateOverlays);
+
+        return () => ticker.remove(updateOverlays);
+    }, [ isVariableHighlightActive, roomSession?.roomId, variableHighlightTargets ]);
     const variableManageTypeOptions = useMemo(() =>
     {
         switch(variablesType)
@@ -3465,6 +3632,27 @@ export const WiredCreatorToolsView: FC<{}> = () =>
 
     return (
         <>
+        { isVariableHighlightActive && !!variableHighlightOverlays.length &&
+            <div className="pointer-events-none absolute left-0 top-0 z-30">
+                { variableHighlightOverlays.map(overlay => (
+                    <div
+                        key={ overlay.key }
+                        className="pointer-events-none absolute"
+                        style={ {
+                            left: overlay.x,
+                            top: overlay.y,
+                            transform: 'translateX(-50%)'
+                        } }>
+                        { overlay.hasValue &&
+                            <div className="absolute left-1/2 top-[-30px] -translate-x-1/2">
+                                <div className="relative min-w-[24px] rounded-[8px] bg-[#86aebccc] px-[8px] py-[4px] text-center text-[12px] font-bold leading-none text-white shadow-[inset_0_0_0_1px_rgba(176,211,225,.7)]">
+                                    { overlay.value ?? 0 }
+                                    <span className="absolute left-1/2 bottom-[-7px] z-10 h-0 w-0 -translate-x-1/2 border-x-[6px] border-t-[7px] border-x-transparent border-t-[#86aebccc]" />
+                                </div>
+                            </div> }
+                    </div>
+                )) }
+            </div> }
         <NitroCardView className="min-w-[520px] max-w-[520px]" theme="primary-slim" uniqueKey="wired-creator-tools" windowPosition={ DraggableWindowPosition.TOP_LEFT }>
             <NitroCardHeaderView headerText="Wired Creator Tools (:wired)" onCloseClick={ () => setIsVisible(false) } />
             <NitroCardTabsView justifyContent="start">
@@ -3830,7 +4018,12 @@ export const WiredCreatorToolsView: FC<{}> = () =>
                                     </div>
                                 </div>
                                 <div className="flex gap-2">
-                                    <Button disabled variant="secondary">Highlight</Button>
+                                    <Button
+                                        disabled={ !canVariableHighlight }
+                                        variant="secondary"
+                                        onClick={ () => setIsVariableHighlightActive(value => !value) }>
+                                        { isVariableHighlightActive ? 'Undo' : 'Highlight' }
+                                    </Button>
                                     <Button
                                         disabled={ !variableManageCanOpen }
                                         variant="secondary"

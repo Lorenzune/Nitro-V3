@@ -11,6 +11,16 @@ export class ChatBubbleMessage
     public prefixColor: string = '';
     public prefixIcon: string = '';
     public prefixEffect: string = '';
+    public prefixFont: string = '';
+    public nickIcon: string = '';
+    public displayOrder: string = 'icon-prefix-name';
+    public originalText: string = '';
+    public originalFormattedText: string = '';
+    public translatedText: string = '';
+    public translatedFormattedText: string = '';
+    public showTranslation: boolean = false;
+    public translationDetectedLanguage: string = '';
+    public translationTargetLanguage: string = '';
 
     private _top: number = 0;
     private _left: number = 0;
@@ -30,6 +40,8 @@ export class ChatBubbleMessage
     )
     {
         this.id = ++ChatBubbleMessage.BUBBLE_COUNTER;
+        this.originalText = text;
+        this.originalFormattedText = formattedText;
     }
 
     public get top(): number

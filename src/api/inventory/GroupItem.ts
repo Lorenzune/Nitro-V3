@@ -65,6 +65,12 @@ export class GroupItem
         this.setDescription();
     }
 
+    public refreshLocalization(): void
+    {
+        this.setName();
+        this.setDescription();
+    }
+
     public dispose(): void
     {
 

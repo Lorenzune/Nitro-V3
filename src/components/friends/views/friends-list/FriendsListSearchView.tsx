@@ -1,8 +1,10 @@
 import { HabboSearchComposer, HabboSearchResultData, HabboSearchResultEvent } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText, OpenMessengerChat, SendMessageComposer } from '../../../../api';
-import { Column, NitroCardAccordionItemView, NitroCardAccordionSetView, NitroCardAccordionSetViewProps, Text, UserProfileIconView } from '../../../../common';
+import { Column, LayoutAvatarImageView, NitroCardAccordionItemView, NitroCardAccordionSetView, NitroCardAccordionSetViewProps, Text, UserProfileIconView } from '../../../../common';
 import { useFriends, useMessageEvent } from '../../../../hooks';
+import { resolveAvatarFigure } from './resolveAvatarFigure';
+import { resolveAvatarGender } from './resolveAvatarGender';
 
 interface FriendsSearchViewProps extends NitroCardAccordionSetViewProps
 {
@@ -16,6 +18,22 @@ export const FriendsSearchView: FC<FriendsSearchViewProps> = props =>
     const [ friendResults, setFriendResults ] = useState<HabboSearchResultData[]>(null);
     const [ otherResults, setOtherResults ] = useState<HabboSearchResultData[]>(null);
     const { canRequestFriend = null, requestFriend = null } = useFriends();
+
+    const getSearchResultFigure = (result: HabboSearchResultData) =>
+    {
+        if(!result) return null;
+
+        const typedResult = (result as HabboSearchResultData & { figureString?: string; avatarFigure?: string; figure?: string; avatarFigureString?: string });
+
+        return typedResult.figureString || typedResult.avatarFigure || typedResult.figure || typedResult.avatarFigureString || null;
+    };
+
+    const getSearchResultGender = (result: HabboSearchResultData) =>
+    {
+        const typedResult = (result as HabboSearchResultData & { gender?: string | number; avatarGender?: string | number });
+
+        return resolveAvatarGender(typedResult.avatarGender ?? typedResult.gender);
+    };
 
     useMessageEvent<HabboSearchResultEvent>(HabboSearchResultEvent, event =>
     {
@@ -55,10 +73,15 @@ export const FriendsSearchView: FC<FriendsSearchViewProps> = props =>
                                     { friendResults.map(result =>
                                     {
                                         return (
-                                            <NitroCardAccordionItemView key={ result.avatarId } className="px-2 py-1" justifyContent="between">
-                                                <div className="flex items-center gap-1">
-                                                    <UserProfileIconView userId={ result.avatarId } />
-                                                    <div>{ result.avatarName }</div>
+                                            <NitroCardAccordionItemView key={ result.avatarId } className="friends-list-item px-2 py-1" justifyContent="between">
+                                                <div className="friends-list-user">
+                                                    <div className="friends-list-avatar">
+                                                        <LayoutAvatarImageView figure={ resolveAvatarFigure(getSearchResultFigure(result), getSearchResultGender(result)) } gender={ getSearchResultGender(result) } headOnly={ true } direction={ 2 } />
+                                                    </div>
+                                                    <div>
+                                                        <UserProfileIconView userId={ result.avatarId } />
+                                                    </div>
+                                                    <div className="friends-list-name">{ result.avatarName }</div>
                                                 </div>
                                                 <div className="flex items-center gap-1">
                                                     { result.isAvatarOnline &&
@@ -82,10 +105,15 @@ export const FriendsSearchView: FC<FriendsSearchViewProps> = props =>
                                     { otherResults.map(result =>
                                     {
                                         return (
-                                            <NitroCardAccordionItemView key={ result.avatarId } className="px-2 py-1" justifyContent="between">
-                                                <div className="flex items-center gap-1">
-                                                    <UserProfileIconView userId={ result.avatarId } />
-                                                    <div>{ result.avatarName }</div>
+                                            <NitroCardAccordionItemView key={ result.avatarId } className="friends-list-item px-2 py-1" justifyContent="between">
+                                                <div className="friends-list-user">
+                                                    <div className="friends-list-avatar">
+                                                        <LayoutAvatarImageView figure={ resolveAvatarFigure(getSearchResultFigure(result), getSearchResultGender(result)) } gender={ getSearchResultGender(result) } headOnly={ true } direction={ 2 } />
+                                                    </div>
+                                                    <div>
+                                                        <UserProfileIconView userId={ result.avatarId } />
+                                                    </div>
+                                                    <div className="friends-list-name">{ result.avatarName }</div>
                                                 </div>
                                                 <div className="flex items-center gap-1">
                                                     { canRequestFriend(result.avatarId) &&

@@ -34,7 +34,7 @@ export const FriendsListView: FC<{}> = props =>
             userNames.push(existingFriend.name);
         }
 
-        return LocalizeText('friendlist.removefriendconfirm.userlist', [ 'user_names' ], [ userNames.join(', ') ]);
+        return LocalizeText('friendlist.removefriendconfirm.userlist', [ 'user_names' ], [ userNames.join('\n') ]);
     }, [ offlineFriends, onlineFriends, selectedFriendsIds ]);
 
     const selectFriend = useCallback((userId: number) =>
@@ -59,6 +59,27 @@ export const FriendsListView: FC<{}> = props =>
             return newValue;
         });
     }, [ setSelectedFriendsIds ]);
+
+    const toggleSelectFriends = useCallback((friendIds: number[]) =>
+    {
+        if(!friendIds.length) return;
+
+        setSelectedFriendsIds(prevValue =>
+        {
+            const allSelected = friendIds.every(friendId => (prevValue.indexOf(friendId) >= 0));
+
+            if(allSelected) return prevValue.filter(friendId => (friendIds.indexOf(friendId) === -1));
+
+            const nextValue = [ ...prevValue ];
+
+            for(const friendId of friendIds)
+            {
+                if(nextValue.indexOf(friendId) === -1) nextValue.push(friendId);
+            }
+
+            return nextValue;
+        });
+    }, []);
 
     const sendRoomInvite = (message: string) =>
     {
@@ -125,10 +146,24 @@ export const FriendsListView: FC<{}> = props =>
                 <NitroCardHeaderView headerText={ LocalizeText('friendlist.friends') } onCloseClick={ event => setIsVisible(false) } />
                 <NitroCardContentView className="text-black p-0" gap={ 1 } overflow="hidden">
                     <NitroCardAccordionView fullHeight overflow="hidden">
-                        <NitroCardAccordionSetView headerText={ LocalizeText('friendlist.friends') + ` (${ onlineFriends.length })` } isExpanded={ true }>
+                        <NitroCardAccordionSetView className="friends-list-section" headerText={ LocalizeText('friendlist.friends') + ` (${ onlineFriends.length })` } isExpanded={ true }>
+                            <Flex className="friends-list-toolbar px-2 py-1" justifyContent="end">
+                                <span className="friends-list-toolbar-link" onClick={ event => { event.stopPropagation(); toggleSelectFriends(onlineFriends.map(friend => friend.id)); } }>
+                                    { onlineFriends.length && onlineFriends.every(friend => (selectedFriendsIds.indexOf(friend.id) >= 0))
+                                        ? LocalizeText('friendlist.unselect_all')
+                                        : LocalizeText('friendlist.select_all') }
+                                </span>
+                            </Flex>
                             <FriendsListGroupView list={ onlineFriends } selectedFriendsIds={ selectedFriendsIds } selectFriend={ selectFriend } />
                         </NitroCardAccordionSetView>
                         <NitroCardAccordionSetView headerText={ LocalizeText('friendlist.friends.offlinecaption') + ` (${ offlineFriends.length })` }>
+                            <Flex className="friends-list-toolbar px-2 py-1" justifyContent="end">
+                                <span className="friends-list-toolbar-link" onClick={ event => { event.stopPropagation(); toggleSelectFriends(offlineFriends.map(friend => friend.id)); } }>
+                                    { offlineFriends.length && offlineFriends.every(friend => (selectedFriendsIds.indexOf(friend.id) >= 0))
+                                        ? LocalizeText('friendlist.unselect_all')
+                                        : LocalizeText('friendlist.select_all') }
+                                </span>
+                            </Flex>
                             <FriendsListGroupView list={ offlineFriends } selectedFriendsIds={ selectedFriendsIds } selectFriend={ selectFriend } />
                         </NitroCardAccordionSetView>
                         <FriendsListRequestView headerText={ LocalizeText('friendlist.tab.friendrequests') + ` (${ requests.length })` } isExpanded={ true } />

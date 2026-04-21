@@ -11,6 +11,7 @@ export * from './GridContext';
 export * from './HorizontalRule';
 export * from './InfiniteScroll';
 export * from './Text';
+export * from './UserIdentityView';
 export * from './card';
 export * from './card/accordion';
 export * from './card/tabs';

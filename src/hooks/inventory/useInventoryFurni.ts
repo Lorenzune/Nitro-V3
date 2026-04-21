@@ -292,6 +292,41 @@ const useInventoryFurniState = () =>
         setNeedsUpdate(false);
     }, [ isVisible, needsUpdate ]);
 
+    useEffect(() =>
+    {
+        const refreshFurnitureLocalization = () =>
+        {
+            setGroupItems(prevValue =>
+            {
+                if(!prevValue?.length) return prevValue;
+
+                return prevValue.map(groupItem =>
+                {
+                    const nextGroupItem = groupItem.clone();
+
+                    nextGroupItem.refreshLocalization();
+
+                    return nextGroupItem;
+                });
+            });
+
+            setSelectedItem(prevValue =>
+            {
+                if(!prevValue) return prevValue;
+
+                const nextGroupItem = prevValue.clone();
+
+                nextGroupItem.refreshLocalization();
+
+                return nextGroupItem;
+            });
+        };
+
+        window.addEventListener('nitro-localization-updated', refreshFurnitureLocalization);
+
+        return () => window.removeEventListener('nitro-localization-updated', refreshFurnitureLocalization);
+    }, []);
+
     return { isVisible, groupItems, setGroupItems, selectedItem, setSelectedItem, activate, deactivate, getWallItemById, getFloorItemById, getItemsByType };
 };
 

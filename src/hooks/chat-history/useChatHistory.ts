@@ -33,6 +33,26 @@ const useChatHistoryState = () =>
 
             return newValue;
         });
+
+        return entry.id;
+    };
+
+    const updateChatEntry = (entryId: number, partial: Partial<IChatEntry>) =>
+    {
+        if(entryId < 0) return;
+
+        setChatHistory(prevValue =>
+        {
+            const index = prevValue.findIndex(entry => (entry.id === entryId));
+
+            if(index === -1) return prevValue;
+
+            const newValue = [ ...prevValue ];
+
+            newValue[index] = { ...newValue[index], ...partial };
+
+            return newValue;
+        });
     };
 
     const clearChatHistory = () => setChatHistory([]);
@@ -101,7 +121,7 @@ const useChatHistoryState = () =>
         addMessengerEntry({ id: -1, webId: parser.senderId, entityId: -1, name: '', message: parser.messageText, roomId: -1, timestamp: MessengerHistoryCurrentDate(), type: ChatEntryType.TYPE_IM });
     });
 
-    return { addChatEntry, clearChatHistory, chatHistory, roomHistory, messengerHistory };
+    return { addChatEntry, updateChatEntry, clearChatHistory, chatHistory, roomHistory, messengerHistory };
 };
 
 export const useChatHistory = () => useBetween(useChatHistoryState);

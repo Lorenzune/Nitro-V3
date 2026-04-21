@@ -12,6 +12,8 @@ import './css/common/Buttons.css';
 
 import './css/forms/form_select.css';
 
+import './css/friends/FriendsView.css';
+
 import './css/hotelview/HotelView.css';
 
 import './css/icons/icons.css';

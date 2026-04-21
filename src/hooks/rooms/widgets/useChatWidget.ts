@@ -1,7 +1,8 @@
-import { GetGuestRoomResultEvent, GetRoomEngine, PetFigureData, RoomChatSettings, RoomChatSettingsEvent, RoomDragEvent, RoomObjectCategory, RoomObjectType, RoomObjectVariable, RoomSessionChatEvent, RoomUserData, SystemChatStyleEnum } from '@nitrots/nitro-renderer';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { GetGuestRoomResultEvent, GetRoomEngine, GetSessionDataManager, PetFigureData, RoomChatSettings, RoomChatSettingsEvent, RoomDragEvent, RoomObjectCategory, RoomObjectType, RoomObjectVariable, RoomSessionChatEvent, RoomUserData, SystemChatStyleEnum } from '@nitrots/nitro-renderer';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChatBubbleMessage, ChatBubbleUtilities, ChatEntryType, ChatHistoryCurrentDate, GetConfigurationValue, GetRoomObjectScreenLocation, IRoomChatSettings, LocalizeText, PlaySound, RoomChatFormatter } from '../../../api';
 import { useMessageEvent, useNitroEvent } from '../../events';
+import { useTranslation } from '../../translation';
 import { useRoom } from '../useRoom';
 import { useChatHistory } from './../../chat-history';
 
@@ -18,8 +19,58 @@ const useChatWidgetState = () =>
         protection: RoomChatSettings.FLOOD_FILTER_NORMAL
     });
     const { roomSession = null } = useRoom();
-    const { addChatEntry } = useChatHistory();
+    const { addChatEntry, updateChatEntry } = useChatHistory();
+    const { settings, translateIncoming, consumeOutgoingTranslation } = useTranslation();
     const isDisposed = useRef(false);
+    const ownUserId = (GetSessionDataManager()?.userId || -1);
+
+    const applyTranslationToBubble = useCallback((chatMessage: ChatBubbleMessage, originalText: string, translatedText: string, detectedLanguage: string, targetLanguage: string) =>
+    {
+        const resolvedOriginalText = (originalText || chatMessage.text || '');
+        const resolvedTranslatedText = (translatedText || resolvedOriginalText);
+        const originalFormattedText = RoomChatFormatter(resolvedOriginalText);
+        const translatedFormattedText = RoomChatFormatter(resolvedTranslatedText);
+
+        chatMessage.text = resolvedOriginalText;
+        chatMessage.formattedText = originalFormattedText;
+        chatMessage.originalText = resolvedOriginalText;
+        chatMessage.originalFormattedText = originalFormattedText;
+        chatMessage.translatedText = resolvedTranslatedText;
+        chatMessage.translatedFormattedText = translatedFormattedText;
+        chatMessage.translationDetectedLanguage = detectedLanguage || '';
+        chatMessage.translationTargetLanguage = targetLanguage || '';
+        chatMessage.showTranslation = true;
+    }, []);
+
+    const buildTranslatedEntryPatch = useCallback((originalText: string, translatedText: string, detectedLanguage: string, targetLanguage: string) =>
+    {
+        const resolvedOriginalText = (originalText || '');
+        const resolvedTranslatedText = (translatedText || resolvedOriginalText);
+
+        return {
+            showTranslation: true,
+            message: RoomChatFormatter(resolvedOriginalText),
+            originalMessage: RoomChatFormatter(resolvedOriginalText),
+            translatedMessage: RoomChatFormatter(resolvedTranslatedText),
+            detectedLanguage: detectedLanguage || '',
+            targetLanguage: targetLanguage || ''
+        };
+    }, []);
+
+    const applyAsyncTranslation = useCallback((bubbleId: number, chatEntryId: number, originalText: string, translatedText: string, detectedLanguage: string, targetLanguage: string) =>
+    {
+        setChatMessages(prevValue =>
+        {
+            const newValue = [ ...prevValue ];
+            const bubble = newValue.find(chat => (chat.id === bubbleId));
+
+            if(bubble) applyTranslationToBubble(bubble, originalText, translatedText, detectedLanguage, targetLanguage);
+
+            return newValue;
+        });
+
+        updateChatEntry(chatEntryId, buildTranslatedEntryPatch(originalText, translatedText, detectedLanguage, targetLanguage));
+    }, [ applyTranslationToBubble, buildTranslatedEntryPatch, updateChatEntry ]);
 
     const getScrollSpeed = useMemo(() =>
     {
@@ -133,14 +184,17 @@ const useChatWidgetState = () =>
             }
         }
 
-        const formattedText = RoomChatFormatter(text);
+        const isTranslatableChatType = ((chatType === RoomSessionChatEvent.CHAT_TYPE_SPEAK) || (chatType === RoomSessionChatEvent.CHAT_TYPE_WHISPER) || (chatType === RoomSessionChatEvent.CHAT_TYPE_SHOUT));
+        const outgoingTranslation = (isTranslatableChatType && (userData.webID === ownUserId)) ? consumeOutgoingTranslation(text) : null;
+        const originalText = outgoingTranslation?.originalText || text;
+        const formattedText = RoomChatFormatter(originalText);
         const color = (avatarColor && (('#' + (avatarColor.toString(16).padStart(6, '0'))) || null));
 
         const chatMessage = new ChatBubbleMessage(
             userData.roomIndex,
             RoomObjectCategory.UNIT,
             roomSession.roomId,
-            text,
+            originalText,
             formattedText,
             username,
             { x: bubbleLocation.x, y: bubbleLocation.y },
@@ -149,10 +203,18 @@ const useChatWidgetState = () =>
             imageUrl,
             color);
 
+        if(outgoingTranslation)
+        {
+            applyTranslationToBubble(chatMessage, outgoingTranslation.originalText, outgoingTranslation.translatedText, outgoingTranslation.detectedLanguage, outgoingTranslation.targetLanguage);
+        }
+
         chatMessage.prefixText = event.prefixText || '';
         chatMessage.prefixColor = event.prefixColor || '';
         chatMessage.prefixIcon = event.prefixIcon || '';
         chatMessage.prefixEffect = event.prefixEffect || '';
+        chatMessage.prefixFont = event.prefixFont || '';
+        chatMessage.nickIcon = event.nickIcon || '';
+        chatMessage.displayOrder = event.displayOrder || 'icon-prefix-name';
 
         setChatMessages(prevValue =>
         {
@@ -162,7 +224,31 @@ const useChatWidgetState = () =>
 
             return newValue;
         });
-        addChatEntry({ id: -1, webId: userData.webID, entityId: userData.roomIndex, name: username, imageUrl, style: styleId, chatType: chatType, entityType: userData.type, message: formattedText, timestamp: ChatHistoryCurrentDate(), type: ChatEntryType.TYPE_CHAT, roomId: roomSession.roomId, color });
+        const chatEntryId = addChatEntry({
+            id: -1,
+            webId: userData.webID,
+            entityId: userData.roomIndex,
+            name: username,
+            imageUrl,
+            style: styleId,
+            chatType: chatType,
+            entityType: userData.type,
+            message: formattedText,
+            timestamp: ChatHistoryCurrentDate(),
+            type: ChatEntryType.TYPE_CHAT,
+            roomId: roomSession.roomId,
+            color,
+            ...(outgoingTranslation ? buildTranslatedEntryPatch(outgoingTranslation.originalText, outgoingTranslation.translatedText, outgoingTranslation.detectedLanguage, outgoingTranslation.targetLanguage) : {})
+        });
+
+        if(!settings.enabled || outgoingTranslation || !isTranslatableChatType || !text.trim().length) return;
+
+        void translateIncoming(text).then(translation =>
+        {
+            if(!translation || isDisposed.current) return;
+
+            applyAsyncTranslation(chatMessage.id, chatEntryId, translation.originalText, translation.translatedText, translation.detectedLanguage, translation.targetLanguage);
+        });
     });
 
     useNitroEvent<RoomDragEvent>(RoomDragEvent.ROOM_DRAG, event =>

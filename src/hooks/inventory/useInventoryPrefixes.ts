@@ -1,4 +1,4 @@
-import { ActivePrefixUpdatedEvent, PrefixReceivedEvent, RequestPrefixesComposer, SetActivePrefixComposer, DeletePrefixComposer, UserPrefixesEvent } from '@nitrots/nitro-renderer';
+import { ActivePrefixUpdatedEvent, DeletePrefixComposer, PrefixReceivedEvent, RequestPrefixesComposer, SetActivePrefixComposer, UserNickIconsEvent, UserPrefixesEvent } from '@nitrots/nitro-renderer';
 import { useEffect, useState } from 'react';
 import { useBetween } from 'use-between';
 import { IPrefixItem, SendMessageComposer, UnseenItemCategory } from '../../api';
@@ -24,6 +24,7 @@ const useInventoryPrefixesState = () =>
             color: p.color,
             icon: p.icon || '',
             effect: p.effect || '',
+            font: p.font || '',
             active: p.active
         }));
 
@@ -31,6 +32,28 @@ const useInventoryPrefixesState = () =>
 
         const active = newPrefixes.find(p => p.active) || null;
         setActivePrefix(active);
+    });
+
+    useMessageEvent<UserNickIconsEvent>(UserNickIconsEvent, event =>
+    {
+        const parser = event.getParser();
+        const newPrefixes: IPrefixItem[] = parser.ownedPrefixes.map(prefix => ({
+            id: prefix.id,
+            displayName: prefix.displayName,
+            text: prefix.text,
+            color: prefix.color,
+            icon: prefix.icon || '',
+            effect: prefix.effect || '',
+            font: prefix.font || '',
+            active: prefix.active,
+            isCustom: prefix.isCustom,
+            points: prefix.points,
+            pointsType: prefix.pointsType,
+            catalogPrefixId: prefix.catalogPrefixId
+        }));
+
+        setPrefixes(newPrefixes);
+        setActivePrefix(newPrefixes.find(prefix => prefix.active) || null);
     });
 
     useMessageEvent<PrefixReceivedEvent>(PrefixReceivedEvent, event =>
@@ -42,6 +65,7 @@ const useInventoryPrefixesState = () =>
             color: parser.color,
             icon: parser.icon || '',
             effect: parser.effect || '',
+            font: parser.font || '',
             active: false
         };
 
@@ -69,8 +93,8 @@ const useInventoryPrefixesState = () =>
             setActivePrefix(prev =>
             {
                 const found = prefixes.find(p => p.id === parser.prefixId);
-                if(found) return { ...found, active: true };
-                return { id: parser.prefixId, text: parser.text, color: parser.color, icon: parser.icon || '', effect: parser.effect || '', active: true };
+                if(found) return { ...found, active: true, font: parser.font || found.font || '' };
+                return { id: parser.prefixId, text: parser.text, color: parser.color, icon: parser.icon || '', effect: parser.effect || '', font: parser.font || '', active: true };
             });
         }
     });

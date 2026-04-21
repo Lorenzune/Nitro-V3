@@ -4,6 +4,7 @@ export * from './FurnitureUtilities';
 export * from './GroupItem';
 export * from './IBotItem';
 export * from './IFurnitureItem';
+export * from './INickIconItem';
 export * from './IPetItem';
 export * from './IPrefixItem';
 export * from './IUnseenItemTracker';

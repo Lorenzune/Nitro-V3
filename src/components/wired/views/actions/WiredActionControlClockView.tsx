@@ -5,7 +5,14 @@ import { useWired } from '../../../../hooks';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
-const COUNTER_INTERACTION_TYPES = [ 'game_upcounter' ];
+const COUNTER_INTERACTION_TYPES = [
+    'game_upcounter',
+    'game_timer',
+    'wf_game_upcounter*',
+    'fball_counter',
+    'bb_counter',
+    'es_counter'
+];
 
 const CONTROL_OPTIONS = [
     { value: 0, label: 'wiredfurni.params.clock_control.0' },

@@ -1,5 +1,5 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { IPurchasableOffer, ProductTypeEnum } from '../../../../../api';
+import { IPurchasableOffer } from '../../../../../api';
 import { AutoGrid, AutoGridProps } from '../../../../../common';
 import { useCatalog } from '../../../../../hooks';
 import { useCatalogAdmin } from '../../../CatalogAdminContext';
@@ -13,7 +13,7 @@ interface CatalogItemGridWidgetViewProps extends AutoGridProps
 export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = props =>
 {
     const { columnCount = 5, children = null, ...rest } = props;
-    const { currentOffer = null, setCurrentOffer = null, currentPage = null, setPurchaseOptions = null } = useCatalog();
+    const { currentOffer = null, currentPage = null, selectCatalogOffer = null } = useCatalog();
     const catalogAdmin = useCatalogAdmin();
     const adminMode = catalogAdmin?.adminMode ?? false;
     const elementRef = useRef<HTMLDivElement>();
@@ -29,23 +29,7 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = pro
 
     const selectOffer = (offer: IPurchasableOffer) =>
     {
-        offer.activate();
-
-        if(offer.isLazy) return;
-
-        setCurrentOffer(offer);
-
-        if(offer.product && (offer.product.productType === ProductTypeEnum.WALL))
-        {
-            setPurchaseOptions(prevValue =>
-            {
-                const newValue = { ...prevValue };
-
-                newValue.extraData = (offer.product.extraParam || null);
-
-                return newValue;
-            });
-        }
+        selectCatalogOffer(offer);
     };
 
     const handleDragStart = useCallback((index: number) =>

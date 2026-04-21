@@ -1,7 +1,9 @@
 import { FC, MouseEvent, useState } from 'react';
 import { LocalizeText, MessengerFriend, OpenMessengerChat } from '../../../../../api';
-import { NitroCardAccordionItemView, UserProfileIconView } from '../../../../../common';
+import { LayoutAvatarImageView, NitroCardAccordionItemView, UserProfileIconView } from '../../../../../common';
 import { useFriends } from '../../../../../hooks';
+import { resolveAvatarFigure } from '../resolveAvatarFigure';
+import { resolveAvatarGender } from '../resolveAvatarGender';
 
 export const FriendsListGroupItemView: FC<{ friend: MessengerFriend, selected: boolean, selectFriend: (userId: number) => void }> = props =>
 {
@@ -55,14 +57,17 @@ export const FriendsListGroupItemView: FC<{ friend: MessengerFriend, selected: b
     if(!friend) return null;
 
     return (
-        <NitroCardAccordionItemView className={ `px-2 py-1 ${ selected && 'bg-primary text-white' }` } justifyContent="between" onClick={ event => selectFriend(friend.id) }>
-            <div className="flex items-center gap-1">
+        <NitroCardAccordionItemView className={ `friends-list-item ${ selected ? 'selected' : '' }` } justifyContent="between" onClick={ event => selectFriend(friend.id) }>
+            <div className="friends-list-user">
+                <div className="friends-list-avatar">
+                    <LayoutAvatarImageView figure={ resolveAvatarFigure(friend.figure, friend.gender) } gender={ resolveAvatarGender(friend.gender) } headOnly={ true } direction={ 2 } />
+                </div>
                 <div onClick={ event => event.stopPropagation() }>
                     <UserProfileIconView userId={ friend.id } />
                 </div>
-                <div>{ friend.name }</div>
+                <div className="friends-list-name">{ friend.name }</div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="friends-list-actions">
                 { !isRelationshipOpen &&
                     <>
                         { friend.online &&

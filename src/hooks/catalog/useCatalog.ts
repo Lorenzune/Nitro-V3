@@ -40,9 +40,11 @@ const useCatalogState = () =>
     const [ secondsLeft, setSecondsLeft ] = useState(0);
     const [ updateTime, setUpdateTime ] = useState(0);
     const [ secondsLeftWithGrace, setSecondsLeftWithGrace ] = useState(0);
+    const [ catalogLocalizationVersion, setCatalogLocalizationVersion ] = useState(0);
     const [ builderPlacementBlockedByVisitors, setBuilderPlacementBlockedByVisitors ] = useState(false);
     const [ builderPlacementAllowedInCurrentRoom, setBuilderPlacementAllowedInCurrentRoom ] = useState(false);
     const [ builderTrialRoomHideConfirmed, setBuilderTrialRoomHideConfirmed ] = useState(false);
+    const resolvedOffersByProductKey = useRef<Map<string, IPurchasableOffer>>(new Map());
     const { simpleAlert = null, showConfirm = null } = useNotification();
     const requestedPage = useRef(new RequestedPage());
 
@@ -54,6 +56,7 @@ const useCatalogState = () =>
         setOffersToNodes(null);
         setCurrentPage(null);
         setCurrentOffer(null);
+        resolvedOffersByProductKey.current.clear();
         setActiveNodes([]);
         setSearchResult(null);
         setFrontPageItems([]);
@@ -77,6 +80,7 @@ const useCatalogState = () =>
         setOffersToNodes(null);
         setCurrentPage(null);
         setCurrentOffer(null);
+        resolvedOffersByProductKey.current.clear();
         setActiveNodes([]);
         setSearchResult(null);
         setFrontPageItems([]);
@@ -336,6 +340,53 @@ const useCatalogState = () =>
         return offersToNodes.get(offerId);
     }, [ offersToNodes ]);
 
+    const getOfferProductKeys = useCallback((offer: IPurchasableOffer) =>
+    {
+        const product = offer?.product;
+        const keys: string[] = [];
+
+        if(!product) return keys;
+
+        if(product.productType && (product.productClassId >= 0))
+        {
+            keys.push(`${ product.productType }:id:${ product.productClassId }`);
+        }
+
+        if(product.productType && product.furnitureData?.className?.length)
+        {
+            keys.push(`${ product.productType }:class:${ product.furnitureData.className }`);
+        }
+
+        return keys;
+    }, []);
+
+    const cacheResolvedOffer = useCallback((offer: IPurchasableOffer) =>
+    {
+        for(const key of getOfferProductKeys(offer))
+        {
+            resolvedOffersByProductKey.current.set(key, offer);
+        }
+    }, [ getOfferProductKeys ]);
+
+    const applySelectedOffer = useCallback((offer: IPurchasableOffer) =>
+    {
+        if(!offer) return;
+
+        setCurrentOffer(offer);
+
+        if(offer.product && (offer.product.productType === ProductTypeEnum.WALL))
+        {
+            setPurchaseOptions(prevValue =>
+            {
+                const newValue = { ...prevValue };
+
+                newValue.extraData = (offer.product.extraParam || null);
+
+                return newValue;
+            });
+        }
+    }, []);
+
     const loadCatalogPage = useCallback((pageId: number, offerId: number) =>
     {
         if(pageId < 0) return;
@@ -485,6 +536,22 @@ const useCatalogState = () =>
         }
     }, [ isVisible, getNodesByOfferId, activateNode ]);
 
+    const selectCatalogOffer = useCallback((offer: IPurchasableOffer) =>
+    {
+        if(!offer) return;
+
+        if(!offer.isLazy)
+        {
+            applySelectedOffer(offer);
+            return;
+        }
+
+        if(offer.offerId > -1)
+        {
+            offer.activate();
+        }
+    }, [ applySelectedOffer ]);
+
     const refreshBuilderStatus = useCallback(() =>
     {
 
@@ -544,8 +611,12 @@ const useCatalogState = () =>
 
             const purchasableOffer = new Offer(offer.offerId, offer.localizationId, offer.rent, offer.priceCredits, offer.priceActivityPoints, offer.priceActivityPointsType, offer.giftable, offer.clubLevel, products, offer.bundlePurchaseAllowed);
 
+            cacheResolvedOffer(purchasableOffer);
+
             if((currentType === CatalogType.NORMAL) || ((purchasableOffer.pricingModel !== Offer.PRICING_MODEL_BUNDLE) && (purchasableOffer.pricingModel !== Offer.PRICING_MODEL_MULTI))) purchasableOffers.push(purchasableOffer);
         }
+
+        const parsedCatalogPage = new CatalogPage(parser.pageId, parser.layoutCode, new PageLocalization(parser.localization.images.concat(), parser.localization.texts.concat()), purchasableOffers, parser.acceptSeasonCurrencyAsCredits);
 
         if(parser.frontPageItems && parser.frontPageItems.length) setFrontPageItems(parser.frontPageItems);
 
@@ -553,7 +624,7 @@ const useCatalogState = () =>
 
         if(pageId === parser.pageId)
         {
-            showCatalogPage(parser.pageId, parser.layoutCode, new PageLocalization(parser.localization.images.concat(), parser.localization.texts.concat()), purchasableOffers, parser.offerId, parser.acceptSeasonCurrencyAsCredits);
+            showCatalogPage(parsedCatalogPage.pageId, parsedCatalogPage.layoutCode, parsedCatalogPage.localization, parsedCatalogPage.offers, parser.offerId, parsedCatalogPage.acceptSeasonCurrencyAsCredits);
         }
     });
 
@@ -610,24 +681,31 @@ const useCatalogState = () =>
         }
 
         const offer = new Offer(offerData.offerId, offerData.localizationId, offerData.rent, offerData.priceCredits, offerData.priceActivityPoints, offerData.priceActivityPointsType, offerData.giftable, offerData.clubLevel, products, offerData.bundlePurchaseAllowed);
+        cacheResolvedOffer(offer);
+
+        const matchingNodes = getNodesByOfferId(offer.offerId, true) || getNodesByOfferId(offer.offerId);
 
         if(!((currentType === CatalogType.NORMAL) || ((offer.pricingModel !== Offer.PRICING_MODEL_BUNDLE) && (offer.pricingModel !== Offer.PRICING_MODEL_MULTI)))) return;
 
-        offer.page = currentPage;
-
-        setCurrentOffer(offer);
-
-        if(offer.product && (offer.product.productType === ProductTypeEnum.WALL))
+        if(matchingNodes?.length)
         {
-            setPurchaseOptions(prevValue =>
-            {
-                const newValue = { ...prevValue };
+            const referencePage = currentPage;
 
-                newValue.extraData =( offer.product.extraParam || null);
-
-                return newValue;
-            });
+            offer.page = new CatalogPage(
+                matchingNodes[0].pageId,
+                referencePage?.layoutCode || 'default_3x3',
+                referencePage?.localization || new PageLocalization([], []),
+                [],
+                referencePage?.acceptSeasonCurrencyAsCredits || false,
+                referencePage?.mode ?? CatalogPage.MODE_NORMAL
+            );
         }
+        else
+        {
+            offer.page = currentPage;
+        }
+
+        applySelectedOffer(offer);
 
         // (this._isObjectMoverRequested) && (this._purchasableOffer)
     });
@@ -978,6 +1056,44 @@ const useCatalogState = () =>
 
     useEffect(() =>
     {
+        const refreshCatalogLocalization = () =>
+        {
+            setCatalogLocalizationVersion(value => (value + 1));
+            setCurrentOffer(prevValue => (prevValue?.clone ? prevValue.clone() : prevValue));
+            setCurrentPage(prevValue =>
+            {
+                if(!prevValue) return prevValue;
+
+                const offers = prevValue.offers?.map(offer => (offer?.clone ? offer.clone() : offer)) || [];
+
+                return new CatalogPage(prevValue.pageId, prevValue.layoutCode, prevValue.localization, offers, prevValue.acceptSeasonCurrencyAsCredits, prevValue.mode);
+            });
+            setCatalogOptions(prevValue =>
+            {
+                if(!prevValue) return prevValue;
+
+                const clubOffersByWindowId = { ...(prevValue.clubOffersByWindowId || {}) };
+
+                Object.keys(clubOffersByWindowId).forEach(key =>
+                {
+                    const offers = clubOffersByWindowId[key];
+
+                    if(Array.isArray(offers)) clubOffersByWindowId[key] = [ ...offers ];
+                });
+
+                const clubOffers = Array.isArray(prevValue.clubOffers) ? [ ...prevValue.clubOffers ] : prevValue.clubOffers;
+
+                return { ...prevValue, clubOffers, clubOffersByWindowId };
+            });
+        };
+
+        window.addEventListener('nitro-localization-updated', refreshCatalogLocalization);
+
+        return () => window.removeEventListener('nitro-localization-updated', refreshCatalogLocalization);
+    }, []);
+
+    useEffect(() =>
+    {
         if(!currentOffer) return;
 
         setPurchaseOptions({ quantity: 1, extraData: null, extraParamRequired: false, previewStuffData: null });
@@ -1013,7 +1129,7 @@ const useCatalogState = () =>
         };
     }, []);
 
-    return { isVisible, setIsVisible, isBusy, pageId, previousPageId, currentType, rootNode, offersToNodes, currentPage, setCurrentPage, currentOffer, setCurrentOffer, activeNodes, searchResult, setSearchResult, frontPageItems, roomPreviewer, navigationHidden, setNavigationHidden, purchaseOptions, setPurchaseOptions, catalogOptions, setCatalogOptions, getNodeById, getNodeByName, activateNode, openPageById, openPageByName, openPageByOfferId, requestOfferToMover, openCatalogByType, toggleCatalogByType, furniCount, furniLimit, maxFurniLimit, secondsLeft, secondsLeftWithGrace, updateTime, catalogPlaceMultipleObjects, setCatalogPlaceMultipleObjects, getBuilderFurniPlaceableStatus };
+    return { isVisible, setIsVisible, isBusy, pageId, previousPageId, currentType, rootNode, offersToNodes, currentPage, setCurrentPage, currentOffer, setCurrentOffer, activeNodes, searchResult, setSearchResult, frontPageItems, roomPreviewer, navigationHidden, setNavigationHidden, purchaseOptions, setPurchaseOptions, catalogOptions, setCatalogOptions, catalogLocalizationVersion, getNodeById, getNodeByName, activateNode, openPageById, openPageByName, openPageByOfferId, requestOfferToMover, openCatalogByType, toggleCatalogByType, furniCount, furniLimit, maxFurniLimit, secondsLeft, secondsLeftWithGrace, updateTime, catalogPlaceMultipleObjects, setCatalogPlaceMultipleObjects, getBuilderFurniPlaceableStatus, selectCatalogOffer };
 };
 
 export const useCatalog = () => useBetween(useCatalogState);

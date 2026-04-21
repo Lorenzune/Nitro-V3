@@ -1,6 +1,6 @@
 import { CreateLinkEvent, HabboClubLevelEnum } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
-import { FaChevronDown, FaQuestionCircle } from 'react-icons/fa';
+import { FaChevronDown, FaLanguage, FaQuestionCircle } from 'react-icons/fa';
 import { FriendlyTime, GetConfigurationValue, LocalizeText } from '../../api';
 import { Column, Flex, LayoutCurrencyIcon, Text } from '../../common';
 import { usePurse } from '../../hooks';
@@ -91,6 +91,9 @@ export const PurseView: FC<{}> = props => {
                                         </div>
                                     </div> }
                                 <div className="nitro-purse__actions">
+                                    <button type="button" className="nitro-purse__action-button nitro-purse__action-button--translate" onClick={ event => { event.stopPropagation(); CreateLinkEvent('translation-settings/toggle'); } } title="Google Translate">
+                                        <FaLanguage />
+                                    </button>
                                     <button type="button" className="nitro-purse__action-button nitro-purse__action-button--help" onClick={ event => { event.stopPropagation(); CreateLinkEvent('help/show'); } } title={ LocalizeText('help.button.name') }>
                                         <FaQuestionCircle />
                                     </button>

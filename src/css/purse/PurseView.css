@@ -113,6 +113,7 @@
     max-height: 280px;
     opacity: 1;
     transform: translateY(0);
+    background: transparent;
 }
 
 .nitro-purse__content.is-closed {
@@ -200,6 +201,7 @@
     font-weight: 700;
     line-height: 1;
     letter-spacing: 0.01em;
+    color: rgba(255, 255, 255, 0.88) !important;
 }
 
 .nitro-purse .nitro-purse-button.currency--1 .text-white {
@@ -270,10 +272,11 @@
     justify-content: center;
     min-height: 20px;
     padding: 0;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(7, 23, 31, 0.82);
     border-radius: 7px;
     color: rgba(255, 255, 255, 0.88);
     background: rgba(255, 255, 255, 0.05);
+    box-shadow: none;
     transition: background-color 0.18s ease, transform 0.18s ease;
 }
 
@@ -335,7 +338,7 @@
 .seasonal-image {
     display: block;
     width: auto;
-    height: 13px;
+    height: 14px;
     object-fit: contain;
 }
 

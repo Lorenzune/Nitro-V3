@@ -19,6 +19,7 @@ export * from './rooms/promotes';
 export * from './rooms/widgets';
 export * from './rooms/widgets/furniture';
 export * from './session';
+export * from './translation';
 export * from './useLocalStorage';
 export * from './useSharedVisibility';
 export * from './wired';

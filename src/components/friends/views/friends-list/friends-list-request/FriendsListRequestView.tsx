@@ -17,8 +17,11 @@ export const FriendsListRequestView: FC<NitroCardAccordionSetViewProps> = props 
                 <Column gap={ 0 }>
                     { requests.map((request, index) => <FriendsListRequestItemView key={ index } request={ request } />) }
                 </Column>
-                <div className="flex justify-center px-2 py-1">
-                    <Button onClick={ event => requestResponse(-1, false) }>
+                <div className="flex justify-center gap-2 px-2 py-1">
+                    <Button onClick={ event => requests.forEach(request => requestResponse(request.id, true)) }>
+                        { LocalizeText('friendlist.requests.acceptall') }
+                    </Button>
+                    <Button variant="danger" onClick={ event => requestResponse(-1, false) }>
                         { LocalizeText('friendlist.requests.dismissall') }
                     </Button>
                 </div>

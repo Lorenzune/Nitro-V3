@@ -2,7 +2,7 @@ import { GetSessionDataManager, RoomObjectType } from '@nitrots/nitro-renderer';
 import { FC, UIEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChatEntryType, LocalizeText } from '../../../../api';
 import { DraggableWindowPosition, NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../../../common';
-import { useChatHistory, useChatWindow } from '../../../../hooks';
+import { useChatHistory, useChatWindow, useOnClickChat } from '../../../../hooks';
 import { useRoom } from '../../../../hooks/rooms';
 
 const BOTTOM_SCROLL_THRESHOLD = 20;
@@ -19,6 +19,7 @@ export const ChatWidgetWindowView: FC<{}> = () =>
     const { chatHistory = [], clearChatHistory = null } = useChatHistory();
     const [ , setChatWindowEnabled ] = useChatWindow();
     const { roomSession = null } = useRoom();
+    const { onClickChat } = useOnClickChat();
     const ownUserId = (GetSessionDataManager()?.userId || -1);
 
     const roomChatHistory = useMemo(() =>
@@ -33,7 +34,7 @@ export const ChatWidgetWindowView: FC<{}> = () =>
 
             if(!normalizedSearch.length) return true;
 
-            return (`${ chat.name } ${ chat.message }`.toLowerCase().includes(normalizedSearch));
+            return (`${ chat.name } ${ chat.message || '' } ${ chat.originalMessage || '' } ${ chat.translatedMessage || '' }`.toLowerCase().includes(normalizedSearch));
         });
     }, [ chatHistory, roomSession?.roomId, hidePets, search ]);
 
@@ -125,14 +126,27 @@ export const ChatWidgetWindowView: FC<{}> = () =>
                     {
                         const isOwnMessage = (chat.webId === ownUserId);
                         const rowClassName = `mb-1 flex items-start gap-1 break-words ${ isOwnMessage ? 'justify-end' : '' }`;
+                        const messageClassName = `message${ chat.chatType === 1 ? ' italic text-[#595959]' : '' }${ chat.chatType === 2 ? ' font-bold' : '' }`;
 
                         return (
                             <div key={ `${ chat.timestamp }-${ chat.id }` } className={ rowClassName }>
                                 { hideBalloons && !hideAvatars && <div className={ `w-[65px] h-[55px] shrink-0 mt-[-18px] rounded-sm bg-no-repeat bg-center scale-70 ${ isOwnMessage ? 'order-2' : '' }` } style={ chat.imageUrl ? { backgroundImage: `url(${ chat.imageUrl })` } : undefined } /> }
                                 { hideBalloons && (
-                                    <div>
+                                    <div onClick={ onClickChat }>
                                         <b dangerouslySetInnerHTML={ { __html: `${ chat.name }: ` } } />
-                                        <span dangerouslySetInnerHTML={ { __html: chat.message } } />
+                                        { !chat.showTranslation &&
+                                            <span className={ messageClassName } dangerouslySetInnerHTML={ { __html: chat.message } } /> }
+                                        { chat.showTranslation &&
+                                            <div className="mt-[2px] flex flex-col gap-[2px]">
+                                                <div className="flex items-start gap-1 leading-[1.15]">
+                                                    <span className="inline-block min-w-[52px] font-bold opacity-75">original:</span>
+                                                    <span className={ messageClassName } dangerouslySetInnerHTML={ { __html: chat.originalMessage || chat.message || '' } } />
+                                                </div>
+                                                <div className="flex items-start gap-1 leading-[1.15]">
+                                                    <span className="inline-block min-w-[52px] font-bold opacity-75">translate:</span>
+                                                    <span className={ messageClassName } dangerouslySetInnerHTML={ { __html: chat.translatedMessage || chat.message || '' } } />
+                                                </div>
+                                            </div> }
                                     </div>
                                 ) }
                                 { !hideBalloons && (
@@ -148,7 +162,19 @@ export const ChatWidgetWindowView: FC<{}> = () =>
                                             </div>
                                             <div className={ `chat-content py-[5px] px-[6px] leading-none min-h-[25px] ${ !hideAvatars ? (isOwnMessage ? 'mr-[27px]' : 'ml-[27px]') : '' }` }>
                                                 <b className="username" dangerouslySetInnerHTML={ { __html: `${ chat.name }: ` } } />
-                                                <span className="message" dangerouslySetInnerHTML={ { __html: `${ chat.message }` } } />
+                                                { !chat.showTranslation &&
+                                                    <span className={ messageClassName } dangerouslySetInnerHTML={ { __html: `${ chat.message }` } } onClick={ onClickChat } /> }
+                                                { chat.showTranslation &&
+                                                    <div className="mt-[2px] flex flex-col gap-[2px]" onClick={ onClickChat }>
+                                                        <div className="flex items-start gap-1 leading-[1.1]">
+                                                            <span className="inline-block min-w-[52px] font-bold" style={ { opacity: 0.75 } }>original:</span>
+                                                            <span className={ messageClassName } dangerouslySetInnerHTML={ { __html: `${ chat.originalMessage || chat.message || '' }` } } />
+                                                        </div>
+                                                        <div className="flex items-start gap-1 leading-[1.1]">
+                                                            <span className="inline-block min-w-[52px] font-bold" style={ { opacity: 0.75 } }>translate:</span>
+                                                            <span className={ messageClassName } dangerouslySetInnerHTML={ { __html: `${ chat.translatedMessage || chat.message || '' }` } } />
+                                                        </div>
+                                                    </div> }
                                             </div>
                                         </div>
                                     </div>

@@ -2,7 +2,7 @@ import { GetSessionDataManager, RelationshipStatusInfoEvent, RelationshipStatusI
 import { Dispatch, FC, FocusEvent, KeyboardEvent, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { FaPencilAlt, FaTimes } from 'react-icons/fa';
 import { AvatarInfoUser, CloneObject, GetConfigurationValue, GetGroupInformation, GetUserProfile, LocalizeText, SendMessageComposer } from '../../../../../api';
-import { Base, Column, Flex, LayoutAvatarImageView, LayoutBadgeImageView, Text, UserProfileIconView } from '../../../../../common';
+import { Base, Column, Flex, LayoutAvatarImageView, LayoutBadgeImageView, Text, UserIdentityView, UserProfileIconView } from '../../../../../common';
 import { useMessageEvent, useNitroEvent, useRoom } from '../../../../../hooks';
 import { InfoStandBadgeSlotView } from './InfoStandBadgeSlotView';
 import { InfoStandWidgetUserRelationshipsView } from './InfoStandWidgetUserRelationshipsView';
@@ -29,7 +29,6 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = props =
   const infostandBackgroundClass = `background-${backgroundId ?? 'default'}`;
   const infostandStandClass = `stand-${standId ?? 'default'}`;
   const infostandOverlayClass = `overlay-${overlayId ?? 'default'}`;
-
   const handleProfileClick = useCallback(() => { GetUserProfile(avatarInfo.webID); }, [avatarInfo.webID]);
 
   const handleEditClick = useCallback((event: React.MouseEvent) => { event.stopPropagation(); setIsVisible(prev => !prev); }, []);
@@ -79,6 +78,12 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = props =
       newValue.figure = event.figure;
       newValue.motto = event.customInfo;
       newValue.achievementScore = event.activityPoints;
+      newValue.nickIcon = event.nickIcon;
+      newValue.prefixText = event.prefixText;
+      newValue.prefixColor = event.prefixColor;
+      newValue.prefixIcon = event.prefixIcon;
+      newValue.prefixEffect = event.prefixEffect;
+      newValue.displayOrder = event.displayOrder;
       newValue.backgroundId = event.backgroundId;
       newValue.standId = event.standId;
       newValue.overlayId = event.overlayId;
@@ -139,7 +144,17 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = props =
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">
                 <UserProfileIconView userId={avatarInfo.webID} />
-                <Text small wrap variant="white">{avatarInfo.name}</Text>
+                <UserIdentityView
+                  className="text-[12px]"
+                  displayOrder={ avatarInfo.displayOrder }
+                  nameClassName="text-white"
+                  nickIcon={ avatarInfo.nickIcon }
+                  prefixColor={ avatarInfo.prefixColor }
+                  prefixEffect={ avatarInfo.prefixEffect }
+                  prefixFont={ avatarInfo.prefixFont }
+                  prefixIcon={ avatarInfo.prefixIcon }
+                  prefixText={ avatarInfo.prefixText }
+                  username={ avatarInfo.name } />
               </div>
               <FaTimes className="cursor-pointer fa-icon" onClick={onClose} />
             </div>

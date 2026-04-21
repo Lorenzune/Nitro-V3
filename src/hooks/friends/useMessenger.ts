@@ -4,6 +4,7 @@ import { useBetween } from 'use-between';
 import { CloneObject, LocalizeText, MessengerIconState, MessengerThread, MessengerThreadChat, NotificationAlertType, PlaySound, SendMessageComposer, SoundNames } from '../../api';
 import { useMessageEvent } from '../events';
 import { useNotification } from '../notification';
+import { IResolvedTranslation, useTranslation } from '../translation';
 import { useFriends } from './useFriends';
 
 const useMessengerState = () =>
@@ -14,6 +15,7 @@ const useMessengerState = () =>
     const [iconState, setIconState] = useState<number>(MessengerIconState.HIDDEN);
     const { getFriend = null } = useFriends();
     const { simpleAlert = null } = useNotification();
+    const { settings, translateIncoming } = useTranslation();
 
     const visibleThreads = useMemo(() => messageThreads.filter(thread => (hiddenThreadIds.indexOf(thread.threadId) === -1)), [messageThreads, hiddenThreadIds]);
     const activeThread = useMemo(() => ((activeThreadId > 0) && visibleThreads.find(thread => (thread.threadId === activeThreadId) || null)), [activeThreadId, visibleThreads]);
@@ -79,13 +81,15 @@ const useMessengerState = () =>
         if (activeThreadId === threadId) setActiveThreadId(-1);
     };
 
-    const sendMessage = (thread: MessengerThread, senderId: number, messageText: string, secondsSinceSent: number = 0, extraData: string = null, messageType: number = MessengerThreadChat.CHAT) =>
+    const sendMessage = (thread: MessengerThread, senderId: number, messageText: string, secondsSinceSent: number = 0, extraData: string = null, messageType: number = MessengerThreadChat.CHAT, translation: IResolvedTranslation = null) =>
     {
         if (!thread || !messageText || !messageText.length) return;
 
         const ownMessage = (senderId === GetSessionDataManager().userId);
 
         if (ownMessage && (messageText.length <= 255)) SendMessageComposer(new SendMessageComposerPacket(thread.participant.id, messageText));
+
+        let addedChatId = -1;
 
         setMessageThreads(prevValue =>
         {
@@ -98,7 +102,11 @@ const useMessengerState = () =>
 
             if (ownMessage && (thread.groups.length === 1)) PlaySound(SoundNames.MESSENGER_NEW_THREAD);
 
-            thread.addMessage(((messageType === MessengerThreadChat.ROOM_INVITE) ? null : senderId), messageText, secondsSinceSent, extraData, messageType);
+            const addedChat = thread.addMessage(((messageType === MessengerThreadChat.ROOM_INVITE) ? null : senderId), messageText, secondsSinceSent, extraData, messageType);
+
+            addedChatId = addedChat?.id || -1;
+
+            if(translation && (messageType === MessengerThreadChat.CHAT)) addedChat?.setTranslation(translation.originalText, translation.translatedText, translation.detectedLanguage, translation.targetLanguage);
 
             if (activeThreadId === thread.threadId) thread.setRead();
 
@@ -107,6 +115,36 @@ const useMessengerState = () =>
             if (!ownMessage && thread.unread) PlaySound(SoundNames.MESSENGER_MESSAGE_RECEIVED);
 
             return newValue;
+        });
+
+        const canTranslateMessage = !translation
+            && settings.enabled
+            && (messageType === MessengerThreadChat.CHAT)
+            && !!messageText?.trim().length;
+
+        if(!canTranslateMessage || (addedChatId <= 0)) return;
+
+        void translateIncoming(messageText).then(translation =>
+        {
+            if(!translation) return;
+
+            setMessageThreads(prevValue =>
+            {
+                const newValue = [ ...prevValue ];
+                const index = newValue.findIndex(newThread => (newThread.threadId === thread.threadId));
+
+                if(index === -1) return prevValue;
+
+                const clonedThread = CloneObject(newValue[index]);
+                const chat = clonedThread.getChat(addedChatId);
+
+                if(!chat) return prevValue;
+
+                chat.setTranslation(translation.originalText, translation.translatedText, translation.detectedLanguage, translation.targetLanguage);
+                newValue[index] = clonedThread;
+
+                return newValue;
+            });
         });
     };
 

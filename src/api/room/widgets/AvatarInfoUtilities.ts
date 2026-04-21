@@ -32,17 +32,16 @@ export class AvatarInfoUtilities
                 else
                 {
                     let furniData: IFurnitureData = null;
-
-                    const typeId = roomObject.model.getValue<number>(RoomObjectVariable.FURNITURE_TYPE_ID);
+                    const className = roomObject.type;
 
                     if(category === RoomObjectCategory.FLOOR)
                     {
-                        furniData = GetSessionDataManager().getFloorItemData(typeId);
+                        furniData = GetSessionDataManager().getFloorItemDataByName(className);
                     }
 
                     else if(category === RoomObjectCategory.WALL)
                     {
-                        furniData = GetSessionDataManager().getWallItemData(typeId);
+                        furniData = GetSessionDataManager().getWallItemDataByName(className);
                     }
 
                     if(!furniData) break;
@@ -102,18 +101,17 @@ export class AvatarInfoUtilities
         }
         else
         {
-            const typeId = model.getValue<number>(RoomObjectVariable.FURNITURE_TYPE_ID);
-
             let furnitureData: IFurnitureData = null;
+            const className = roomObject.type;
 
             if(category === RoomObjectCategory.FLOOR)
             {
-                furnitureData = GetSessionDataManager().getFloorItemData(typeId);
+                furnitureData = GetSessionDataManager().getFloorItemDataByName(className);
             }
 
             else if(category === RoomObjectCategory.WALL)
             {
-                furnitureData = GetSessionDataManager().getWallItemData(typeId);
+                furnitureData = GetSessionDataManager().getWallItemDataByName(className);
             }
 
             if(furnitureData)
@@ -183,6 +181,13 @@ export class AvatarInfoUtilities
         userInfo.isSpectatorMode = roomSession.isSpectator;
         userInfo.name = userData.name;
         userInfo.motto = userData.custom;
+        userInfo.nickIcon = userData.nickIcon;
+        userInfo.prefixText = userData.prefixText;
+        userInfo.prefixColor = userData.prefixColor;
+        userInfo.prefixIcon = userData.prefixIcon;
+        userInfo.prefixEffect = userData.prefixEffect;
+        userInfo.prefixFont = userData.prefixFont;
+        userInfo.displayOrder = userData.displayOrder;
 		userInfo.backgroundId = userData.background;
         userInfo.standId = userData.stand;
         userInfo.overlayId = userData.overlay;

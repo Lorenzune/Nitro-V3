@@ -1,17 +1,24 @@
 import { GetSessionDataManager, IFurnitureData } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
 import { FaSearch, FaTimes } from 'react-icons/fa';
-import { CatalogPage, CatalogType, FilterCatalogNode, FurnitureOffer, GetOfferNodes, ICatalogNode, ICatalogPage, IPurchasableOffer, LocalizeText, PageLocalization, SearchResult } from '../../../../../api';
+import { CatalogPage, CatalogType, FilterCatalogNode, FurnitureOffer, ICatalogNode, ICatalogPage, IPurchasableOffer, LocalizeText, PageLocalization, SearchResult } from '../../../../../api';
 import { useCatalog } from '../../../../../hooks';
 
 export const CatalogSearchView: FC<{}> = () =>
 {
     const [ searchValue, setSearchValue ] = useState('');
-    const { currentType = null, rootNode = null, offersToNodes = null, searchResult = null, setSearchResult = null, setCurrentPage = null } = useCatalog();
+    const { currentType = null, rootNode = null, searchResult = null, setSearchResult = null, setCurrentPage = null } = useCatalog();
+
+    const normalizeSearchText = (value: string) => (value || '')
+        .toLocaleLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
 
     useEffect(() =>
     {
-        let search = searchValue?.toLocaleLowerCase().replace(' ', '');
+        const search = normalizeSearchText(searchValue);
 
         if(!search || !search.length)
         {
@@ -22,7 +29,7 @@ export const CatalogSearchView: FC<{}> = () =>
 
         const timeout = setTimeout(() =>
         {
-            if(!offersToNodes || !rootNode) return;
+            if(!rootNode) return;
 
             const furnitureDatas = GetSessionDataManager().getAllFurnitureData();
 
@@ -39,34 +46,35 @@ export const CatalogSearchView: FC<{}> = () =>
 
                 if((currentType === CatalogType.NORMAL) && furniture.excludeDynamic) continue;
 
-                const searchValues = [ furniture.className || '', furniture.name || '', furniture.description || '' ].join(' ').replace(/ /gi, '').toLowerCase();
+                const name = normalizeSearchText(furniture.name || '');
+                const matchesSearch = name.includes(search);
 
                 if((currentType === CatalogType.BUILDER) && (furniture.purchaseOfferId === -1) && (furniture.rentOfferId === -1))
                 {
                     if((furniture.furniLine !== '') && (foundFurniLines.indexOf(furniture.furniLine) < 0))
                     {
-                        if(searchValues.indexOf(search) >= 0) foundFurniLines.push(furniture.furniLine);
+                        if(matchesSearch) foundFurniLines.push(furniture.furniLine);
                     }
                 }
-                else
+                else if(matchesSearch)
                 {
-                    const foundNodes = [
-                        ...GetOfferNodes(offersToNodes, furniture.purchaseOfferId),
-                        ...GetOfferNodes(offersToNodes, furniture.rentOfferId)
-                    ];
+                    foundFurniture.push(furniture);
 
-                    if(foundNodes.length)
+                    if(furniture.furniLine && furniture.furniLine.length && (foundFurniLines.indexOf(furniture.furniLine) < 0))
                     {
-                        if(searchValues.indexOf(search) >= 0) foundFurniture.push(furniture);
-
-                        if(foundFurniture.length === 250) break;
+                        foundFurniLines.push(furniture.furniLine);
                     }
+
+                    if(foundFurniture.length === 250) break;
                 }
             }
 
             const offers: IPurchasableOffer[] = [];
 
-            for(const furniture of foundFurniture) offers.push(new FurnitureOffer(furniture));
+            for(const furniture of foundFurniture)
+            {
+                offers.push(new FurnitureOffer(furniture));
+            }
 
             let nodes: ICatalogNode[] = [];
 
@@ -77,7 +85,7 @@ export const CatalogSearchView: FC<{}> = () =>
         }, 300);
 
         return () => clearTimeout(timeout);
-    }, [ offersToNodes, currentType, rootNode, searchValue, setCurrentPage, setSearchResult ]);
+    }, [ currentType, rootNode, searchValue, setCurrentPage, setSearchResult ]);
 
     return (
         <div className="relative w-full">

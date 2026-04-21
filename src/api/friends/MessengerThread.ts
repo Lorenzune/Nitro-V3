@@ -48,6 +48,18 @@ export class MessengerThread
         return chat;
     }
 
+    public getChat(chatId: number): MessengerThreadChat
+    {
+        for(const group of this._groups)
+        {
+            const chat = group.chats.find(existingChat => (existingChat.id === chatId));
+
+            if(chat) return chat;
+        }
+
+        return null;
+    }
+
     private pruneChats(): void
     {
         let totalChats = this._groups.reduce((total, current) => (total + current.chats.length), 0);

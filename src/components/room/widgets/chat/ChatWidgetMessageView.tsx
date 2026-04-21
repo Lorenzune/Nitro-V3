@@ -1,6 +1,7 @@
 import { GetRoomEngine, RoomChatSettings, RoomObjectCategory } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { ChatBubbleMessage, parsePrefixColors, getPrefixEffectStyle, PREFIX_EFFECT_KEYFRAMES } from '../../../../api';
+import { ChatBubbleMessage } from '../../../../api';
+import { UserIdentityView } from '../../../../common';
 import { useOnClickChat } from '../../../../hooks';
 
 interface ChatWidgetMessageViewProps
@@ -38,11 +39,11 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
 
     useEffect(() =>
     {
-        setIsVisible(false);
-
         const element = elementRef.current;
         if(!element) return;
 
+        const previousWidth = chat.width;
+        const previousHeight = chat.height;
         const { offsetWidth: width, offsetHeight: height } = element;
 
         chat.width = width;
@@ -62,10 +63,14 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
 
         setIsReady(true);
 
+        if(isVisible && ((previousWidth !== width) || (previousHeight !== height)) && makeRoom) makeRoom(chat);
+    }, [ chat, chat.formattedText, chat.originalFormattedText, chat.showTranslation, chat.translatedFormattedText, isVisible, makeRoom ]);
+
+    useEffect(() =>
+    {
         return () =>
         {
             chat.elementRef = null;
-            setIsReady(false);
         };
     }, [ chat ]);
 
@@ -76,6 +81,8 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
         if(makeRoom) makeRoom(chat);
         setIsVisible(true);
     }, [ chat, isReady, isVisible, makeRoom ]);
+
+    const messageClassName = `message [overflow-wrap:anywhere] break-words${ chat.type === 1 ? ' italic text-[#595959]' : '' }${ chat.type === 2 ? ' font-bold' : '' }`;
 
     return (
         <div ref={ elementRef } className={ `bubble-container newbubblehe ${ isVisible ? 'visible' : 'invisible' } w-max absolute select-none pointer-events-auto` }
@@ -90,29 +97,33 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = ({
                     ) }
                 </div>
                 <div className="chat-content py-[5px] px-[6px] ml-[27px] leading-none min-h-[25px]">
-                    { chat.prefixEffect === 'pulse' && <style>{ PREFIX_EFFECT_KEYFRAMES }</style> }
-                    { chat.prefixText && (() => {
-                        const colors = parsePrefixColors(chat.prefixText, chat.prefixColor);
-                        const hasMultiColor = colors.length > 1 && new Set(colors).size > 1;
-                        const fxStyle = getPrefixEffectStyle(chat.prefixEffect, colors[0] || '#FFFFFF');
-                        return (
-                            <span className="prefix font-bold mr-1" style={ fxStyle }>
-                                { chat.prefixIcon && <span className="mr-0.5 text-[13px]">{ chat.prefixIcon }</span> }
-                                <span style={ hasMultiColor ? fxStyle : { ...fxStyle, color: colors[0] || '#FFFFFF' } }>
-                                    {'{'}
-                                    { hasMultiColor
-                                        ? [ ...chat.prefixText ].map((char, i) => (
-                                            <span key={ i } style={ { color: colors[i] || colors[colors.length - 1], ...getPrefixEffectStyle(chat.prefixEffect, colors[i]) } }>{ char }</span>
-                                        ))
-                                        : chat.prefixText
-                                    }
-                                    {'}'}
-                                </span>
-                            </span>
-                        );
-                    })() }
-                    <b className="username" dangerouslySetInnerHTML={ { __html: `${ chat.username }: ` } } />
-                    <span className={ `message${ chat.type === 1 ? ' italic text-[#595959]' : '' }` } dangerouslySetInnerHTML={ { __html: `${ chat.formattedText }` } } onClick={ onClickChat } />
+                    <UserIdentityView
+                        className="mr-1 align-middle"
+                        displayOrder={ chat.displayOrder }
+                        iconClassName="inline-block w-auto h-auto align-[-1px]"
+                        nameClassName="username font-bold"
+                        nickIcon={ chat.nickIcon }
+                        prefixClassName=""
+                        prefixColor={ chat.prefixColor }
+                        prefixEffect={ chat.prefixEffect }
+                        prefixFont={ chat.prefixFont }
+                        prefixIcon={ chat.prefixIcon }
+                        prefixText={ chat.prefixText }
+                        showColon={ true }
+                        username={ chat.username } />
+                    { !chat.showTranslation &&
+                        <span className={ `${ messageClassName } align-middle` } dangerouslySetInnerHTML={ { __html: `${ chat.formattedText }` } } onClick={ onClickChat } /> }
+                    { chat.showTranslation &&
+                        <div className="mt-[2px] flex flex-col gap-[2px]" onClick={ onClickChat }>
+                            <div className="flex items-start gap-1 leading-[1.1]">
+                                <span className="inline-block min-w-[52px] font-bold" style={ { opacity: 0.75 } }>original:</span>
+                                <span className={ messageClassName } dangerouslySetInnerHTML={ { __html: `${ chat.originalFormattedText || chat.formattedText }` } } />
+                            </div>
+                            <div className="flex items-start gap-1 leading-[1.1]">
+                                <span className="inline-block min-w-[52px] font-bold" style={ { opacity: 0.75 } }>translate:</span>
+                                <span className={ messageClassName } dangerouslySetInnerHTML={ { __html: `${ chat.translatedFormattedText || chat.formattedText }` } } />
+                            </div>
+                        </div> }
                 </div>
                 <div className="pointer absolute left-[50%] translate-x-[-50%] w-[9px] h-[6px] bottom-[-5px]" />
             </div>

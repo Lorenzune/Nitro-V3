@@ -10,6 +10,10 @@ export class WiredSelectionVisualizer
         lineColor: [ 0.45, 0.78, 1 ],
         color: [ 0.20, 0.52, 0.95 ]
     });
+    private static _variableHighlightShader: WiredFilter = new WiredFilter({
+        lineColor: [ 0.52, 0.92, 1 ],
+        color: [ 0.20, 0.70, 1 ]
+    });
 
     public static show(furniId: number): void
     {
@@ -73,12 +77,37 @@ export class WiredSelectionVisualizer
 
         if(roomId < 0) return;
 
-        const roomObjects = roomEngine.getRoomObjects(roomId, RoomObjectCategory.FLOOR);
+        const roomObjects = [
+            ...roomEngine.getRoomObjects(roomId, RoomObjectCategory.FLOOR),
+            ...roomEngine.getRoomObjects(roomId, RoomObjectCategory.WALL),
+            ...roomEngine.getRoomObjects(roomId, RoomObjectCategory.UNIT)
+        ];
 
         for(const roomObject of roomObjects)
         {
             WiredSelectionVisualizer.clearSelectionShader(roomObject, WiredSelectionVisualizer._selectionShader);
             WiredSelectionVisualizer.clearSelectionShader(roomObject, WiredSelectionVisualizer._secondarySelectionShader);
+            WiredSelectionVisualizer.clearSelectionShader(roomObject, WiredSelectionVisualizer._variableHighlightShader);
+        }
+    }
+
+    public static applyVariableHighlightToObjects(objects: Array<{ category: number; objectId: number; }>): void
+    {
+        for(const object of objects)
+        {
+            WiredSelectionVisualizer.applySelectionShader(
+                WiredSelectionVisualizer.getRoomObjectByCategory(object.objectId, object.category),
+                WiredSelectionVisualizer._variableHighlightShader);
+        }
+    }
+
+    public static clearVariableHighlightFromObjects(objects: Array<{ category: number; objectId: number; }>): void
+    {
+        for(const object of objects)
+        {
+            WiredSelectionVisualizer.clearSelectionShader(
+                WiredSelectionVisualizer.getRoomObjectByCategory(object.objectId, object.category),
+                WiredSelectionVisualizer._variableHighlightShader);
         }
     }
 
@@ -87,6 +116,13 @@ export class WiredSelectionVisualizer
         const roomEngine = GetRoomEngine();
 
         return roomEngine.getRoomObject(roomEngine.activeRoomId, objectId, RoomObjectCategory.FLOOR);
+    }
+
+    private static getRoomObjectByCategory(objectId: number, category: number): IRoomObject
+    {
+        const roomEngine = GetRoomEngine();
+
+        return roomEngine.getRoomObject(roomEngine.activeRoomId, objectId, category);
     }
 
     private static applySelectionShader(roomObject: IRoomObject, filter: WiredFilter): void

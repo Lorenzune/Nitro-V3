@@ -28,14 +28,11 @@ export const FriendsMessengerThreadGroup: FC<{ thread: MessengerThread, group: M
             <>
                 { group.chats.map((chat, index) =>
                 {
+                    if(chat.type === MessengerThreadChat.SECURITY_NOTIFICATION) return null;
+
                     return (
                         <Flex key={ index } fullWidth gap={ 2 } justifyContent="start">
                             <Base className="w-full text-break">
-                                { (chat.type === MessengerThreadChat.SECURITY_NOTIFICATION) &&
-                                    <Flex alignItems="center" className="bg-light rounded mb-2 px-2 py-1 small text-muted" gap={ 2 }>
-                                        <Base className="nitro-friends-spritesheet icon-warning shrink-0" />
-                                        <Base>{ chat.message }</Base>
-                                    </Flex> }
                                 { (chat.type === MessengerThreadChat.ROOM_INVITE) &&
                                     <Flex alignItems="center" className="bg-light rounded mb-2 px-2 py-1 small text-black" gap={ 2 }>
                                         <Base className="messenger-notification-icon shrink-0" />
@@ -50,24 +47,46 @@ export const FriendsMessengerThreadGroup: FC<{ thread: MessengerThread, group: M
     }
 
     return (
-        <Flex fullWidth gap={ 2 } justifyContent={ isOwnChat ? 'end' : 'start' }>
+        <Flex fullWidth gap={ 2 } justifyContent={ isOwnChat ? 'end' : 'start' } className={ 'messenger-message-row ' + (isOwnChat ? 'own' : '') }>
             <Base shrink className="message-avatar">
                 { ((group.type === MessengerGroupType.PRIVATE_CHAT) && !isOwnChat) &&
-                    <LayoutAvatarImageView direction={ 2 } figure={ thread.participant.figure } /> }
+                    <LayoutAvatarImageView direction={ 2 } figure={ thread.participant.figure } headOnly={ true } /> }
                 { (groupChatData && !isOwnChat) &&
-                    <LayoutAvatarImageView direction={ 2 } figure={ groupChatData.figure } /> }
+                    <LayoutAvatarImageView direction={ 2 } figure={ groupChatData.figure } headOnly={ true } /> }
             </Base>
-            <Base className={ 'bg-light text-black border-radius mb-2 rounded py-1 px-2 messages-group-' + (isOwnChat ? 'right' : 'left') }>
-                <Base className="font-bold">
-                    <Base className="small text-muted">{ group.chats[0].date.toLocaleTimeString() }</Base>
+            <Base className="messenger-message-body">
+                <Base className={ 'messenger-message-name ' + (isOwnChat ? 'text-end' : '') }>
                     { isOwnChat && GetSessionDataManager().userName }
                     { !isOwnChat && (groupChatData ? groupChatData.username : thread.participant.name) }
+                    :
                 </Base>
-                { group.chats.map((chat, index) => <Base key={ index } className="text-break">{ chat.message }</Base>) }
+                <Base className={ 'messenger-message-bubble messages-group-' + (isOwnChat ? 'right' : 'left') }>
+                    { group.chats.map((chat, index) =>
+                    {
+                        if(!chat.showTranslation)
+                        {
+                            return <Base key={ index } className="text-break">{ chat.message }</Base>;
+                        }
+
+                        return (
+                            <Base key={ index } className="messenger-translation-block">
+                                <Base className="messenger-translation-row">
+                                    <span className="messenger-translation-label">original:</span>
+                                    <span className="text-break">{ chat.originalMessage || chat.message }</span>
+                                </Base>
+                                <Base className="messenger-translation-row">
+                                    <span className="messenger-translation-label">translate:</span>
+                                    <span className="text-break">{ chat.translatedMessage || chat.message }</span>
+                                </Base>
+                            </Base>
+                        );
+                    }) }
+                </Base>
+                <Base className="messenger-message-time">{ group.chats[0].date.toLocaleTimeString() }</Base>
             </Base>
             { isOwnChat &&
                 <Base shrink className="message-avatar">
-                    <LayoutAvatarImageView direction={ 4 } figure={ GetSessionDataManager().figure } />
+                    <LayoutAvatarImageView direction={ 4 } figure={ GetSessionDataManager().figure } headOnly={ true } />
                 </Base> }
         </Flex>
     );
