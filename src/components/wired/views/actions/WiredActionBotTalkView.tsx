@@ -1,9 +1,10 @@
 import { FC, useEffect, useState } from 'react';
-import { GetConfigurationValue, LocalizeText, WIRED_STRING_DELIMETER, WiredFurniType } from '../../../../api';
+import { LocalizeText, WIRED_STRING_DELIMETER, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
 import { NitroInput } from '../../../../layout';
 import { WiredActionBaseView } from './WiredActionBaseView';
+import { WiredTextCounter, WiredTextFormattingHelp } from '../common/WiredTextFormattingHelp';
 import { BOT_SOURCES, WiredSourcesSelector } from '../WiredSourcesSelector';
 
 const normalizeBotSource = (value: number, hasBotName = false) => (BOT_SOURCES.some(option => (option.value === value)) ? value : (hasBotName ? 100 : 0));
@@ -15,6 +16,7 @@ export const WiredActionBotTalkView: FC<{}> = props =>
     const [ talkMode, setTalkMode ] = useState(-1);
     const [ botSource, setBotSource ] = useState<number>(100);
     const { trigger = null, setStringParam = null, setIntParams = null } = useWired();
+    const maxMessageLength = 100;
 
     const save = () =>
     {
@@ -43,7 +45,14 @@ export const WiredActionBotTalkView: FC<{}> = props =>
                 </div> }
             <div className="flex flex-col gap-1">
                 <Text bold>{ LocalizeText('wiredfurni.params.message') }</Text>
-                <NitroInput maxLength={ GetConfigurationValue<number>('wired.action.bot.talk.max.length', 64) } type="text" value={ message } onChange={ event => setMessage(event.target.value) } />
+                <textarea
+                    className="form-control form-control-sm nitro-wired__resizable-textarea"
+                    maxLength={ maxMessageLength }
+                    rows={ 4 }
+                    value={ message }
+                    onChange={ event => setMessage(event.target.value) } />
+                <WiredTextCounter maxLength={ maxMessageLength } value={ message } />
+                <WiredTextFormattingHelp />
             </div>
             <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-1">

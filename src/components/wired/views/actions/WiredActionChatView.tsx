@@ -1,13 +1,24 @@
 import { FC, useEffect, useMemo, useState } from 'react';
-import { GetConfigurationValue, LocalizeText, WiredFurniType } from '../../../../api';
+import { LocalizeText, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
-import { NitroInput } from '../../../../layout';
 import { WiredActionBaseView } from './WiredActionBaseView';
+import { WiredTextCounter, WiredTextFormattingHelp } from '../common/WiredTextFormattingHelp';
 import { WiredSourcesSelector } from '../WiredSourcesSelector';
 
 const SHOW_MESSAGE_STYLE_IDS = [ 34, 200, 201, 202, 210, 211, 212, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 250, 251, 252 ];
 const DEFAULT_SHOW_MESSAGE_STYLE_ID = 34;
+const SHOW_MESSAGE_MAX_LENGTH = 200;
+const SHOW_MESSAGE_MAX_LINES = 8;
+
+const clampShowMessage = (value: string) =>
+{
+    const normalized = (value ?? '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    const lines = normalized.split('\n').slice(0, SHOW_MESSAGE_MAX_LINES);
+    const joined = lines.join('\n');
+
+    return joined.slice(0, SHOW_MESSAGE_MAX_LENGTH);
+};
 
 export const WiredActionChatView: FC<{}> = props =>
 {
@@ -21,16 +32,17 @@ export const WiredActionChatView: FC<{}> = props =>
         return 0;
     });
     const bubbleStyleIds = useMemo(() => SHOW_MESSAGE_STYLE_IDS, []);
+    const maxMessageLength = SHOW_MESSAGE_MAX_LENGTH;
 
     const save = () =>
     {
-        setStringParam(message);
+        setStringParam(clampShowMessage(message));
         setIntParams([ userSource, visibilitySelection, bubbleStyle ]);
     };
 
     useEffect(() =>
     {
-        setMessage(trigger.stringData);
+        setMessage(clampShowMessage(trigger.stringData));
         if(trigger.intData.length >= 1) setUserSource(trigger.intData[0]);
         else setUserSource(0);
         if(trigger.intData.length >= 2) setVisibilitySelection(trigger.intData[1]);
@@ -47,7 +59,14 @@ export const WiredActionChatView: FC<{}> = props =>
             footer={ <WiredSourcesSelector showUsers={ true } userSource={ userSource } onChangeUsers={ setUserSource } /> }>
             <div className="flex flex-col gap-1">
                 <Text bold>{ LocalizeText('wiredfurni.params.message') }</Text>
-                <NitroInput maxLength={ GetConfigurationValue<number>('wired.action.chat.max.length', 100) } type="text" value={ message } onChange={ event => setMessage(event.target.value) } />
+                <textarea
+                    className="form-control form-control-sm nitro-wired__resizable-textarea"
+                    maxLength={ maxMessageLength }
+                    rows={ 4 }
+                    value={ message }
+                    onChange={ event => setMessage(clampShowMessage(event.target.value)) } />
+                <WiredTextCounter maxLength={ maxMessageLength } value={ message } />
+                <WiredTextFormattingHelp />
             </div>
             <div className="flex flex-col gap-1">
                 <Text bold>{ LocalizeText('wiredfurni.params.show_message.visibility_selection.title') }</Text>

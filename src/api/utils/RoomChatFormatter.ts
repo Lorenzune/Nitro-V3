@@ -40,11 +40,53 @@ const encodeHTML = (str: string) =>
     });
 };
 
+const formatTag = (content: string, tag: string, replacement: (value: string) => string) =>
+{
+    const pattern = new RegExp(`\\[${ tag }\\]([\\s\\S]*?)\\[\\/${ tag }\\]`, 'gi');
+    let previous = '';
+    let next = content;
+    let guard = 0;
+
+    while((previous !== next) && (guard < 20))
+    {
+        previous = next;
+        next = next.replace(pattern, (match, value) => replacement(value));
+        guard++;
+    }
+
+    return next;
+};
+
+const applyWiredTextMarkup = (content: string) =>
+{
+    const colorStyles: Record<string, string> = {
+        green: '#008000',
+        cyan: '#008b8b',
+        red: '#d60000',
+        blue: '#005dff',
+        purple: '#7d31b8'
+    };
+
+    let result = content;
+
+    result = formatTag(result, 'b', value => `<strong>${ value }</strong>`);
+    result = formatTag(result, 'i', value => `<em>${ value }</em>`);
+    result = formatTag(result, 'u', value => `<u>${ value }</u>`);
+
+    Object.entries(colorStyles).forEach(([ tag, color ]) =>
+    {
+        result = formatTag(result, tag, value => `<span style="color:${ color }">${ value }</span>`);
+    });
+
+    return result;
+};
+
 export const RoomChatFormatter = (content: string) =>
 {
     let result = '';
 
     content = encodeHTML(content);
+    content = applyWiredTextMarkup(content);
     //content = (joypixels.shortnameToUnicode(content) as string)
 
     if(!GetConfigurationValue<boolean>('youtube.publish.disabled', false))
@@ -84,5 +126,5 @@ export const RoomChatFormatter = (content: string) =>
         result = content;
     }
 
-    return result;
+    return result.replace(/\r\n|\r|\n/g, '<br />');
 };
