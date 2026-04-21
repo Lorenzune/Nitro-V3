@@ -16,7 +16,7 @@ export const CatalogAdminOfferEditView: FC<{}> = () =>
     const createOffer = catalogAdmin?.createOffer;
     const loading = catalogAdmin?.loading ?? false;
 
-    const [ itemIds, setItemIds ] = useState('0');
+    const [ itemIds, setItemIds ] = useState('');
     const [ catalogName, setCatalogName ] = useState('');
     const [ costCredits, setCostCredits ] = useState(0);
     const [ costPoints, setCostPoints ] = useState(0);
@@ -37,7 +37,7 @@ export const CatalogAdminOfferEditView: FC<{}> = () =>
         if(editingOffer.offerId === -1)
         {
             setIsNew(true);
-            setItemIds('0');
+            setItemIds('');
             setCatalogName('');
             setCostCredits(0);
             setCostPoints(0);
@@ -53,7 +53,7 @@ export const CatalogAdminOfferEditView: FC<{}> = () =>
         else
         {
             setIsNew(false);
-            setItemIds(String(editingOffer.product?.productClassId || 0));
+            setItemIds(editingOffer.itemIds || '');
             setCatalogName(editingOffer.localizationName || '');
             setCostCredits(editingOffer.priceInCredits);
             setCostPoints(editingOffer.priceInActivityPoints);
@@ -61,7 +61,7 @@ export const CatalogAdminOfferEditView: FC<{}> = () =>
             setAmount(editingOffer.product?.productCount || 1);
             setClubOnly(editingOffer.clubLevel > 0 ? '1' : '0');
             setExtradata(editingOffer.product?.extraParam || '');
-            setHaveOffer('1');
+            setHaveOffer(editingOffer.haveOffer ? '1' : '0');
             setOfferIdGroup(editingOffer.offerId || -1);
             setLimitedStack(0);
             setOrderNumber(0);
@@ -104,7 +104,7 @@ export const CatalogAdminOfferEditView: FC<{}> = () =>
         if(setEditingOffer) setEditingOffer(null);
     };
 
-    const inputClass = 'text-[11px] border-2 border-card-grid-item-border rounded px-2 py-1 bg-white focus:outline-none focus:border-primary transition-colors';
+    const inputClass = 'text-[11px] border-2 border-card-grid-item-border rounded px-2 py-1 bg-white placeholder:text-[#4b5563] focus:outline-none focus:border-primary transition-colors';
 
     return createPortal(
         <div className="fixed inset-0 flex items-center justify-center" style={ { zIndex: 1000 } } onClick={ () => setEditingOffer(null) }>
@@ -140,7 +140,7 @@ export const CatalogAdminOfferEditView: FC<{}> = () =>
                         <div className="grid grid-cols-3 gap-1.5">
                             <div className="flex flex-col gap-0.5">
                                 <label className="text-[9px] text-muted">Item IDs</label>
-                                <input className={ inputClass } placeholder="1234" type="text" value={ itemIds } onChange={ e => setItemIds(e.target.value) } />
+                                <input className={ inputClass } placeholder="1234 or 100;200" type="text" value={ itemIds } onChange={ e => setItemIds(e.target.value) } />
                             </div>
                             <div className="flex flex-col gap-0.5">
                                 <label className="text-[9px] text-muted">{ LocalizeText('catalog.admin.offer.quantity') }</label>
@@ -198,7 +198,7 @@ export const CatalogAdminOfferEditView: FC<{}> = () =>
                         </div>
                         <div className="flex flex-col gap-0.5">
                             <label className="text-[9px] text-muted">{ LocalizeText('catalog.admin.offer.extradata') }</label>
-                            <input className={ inputClass } placeholder="dati extra (opzionale)" type="text" value={ extradata } onChange={ e => setExtradata(e.target.value) } />
+                            <input className={ inputClass } placeholder={ LocalizeText('catalog.admin.offer.extradata') } type="text" value={ extradata } onChange={ e => setExtradata(e.target.value) } />
                         </div>
                         <div className="flex items-center gap-1.5 mt-1.5">
                             <input className="accent-primary" checked={ haveOffer === '1' } id="haveOffer" type="checkbox" onChange={ e => setHaveOffer(e.target.checked ? '1' : '0') } />

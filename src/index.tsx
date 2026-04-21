@@ -14,6 +14,8 @@ import './css/forms/form_select.css';
 
 import './css/hotelview/HotelView.css';
 
+import './css/login/LoginView.css';
+
 import './css/icons/icons.css';
 
 
@@ -31,6 +33,8 @@ import './css/room/NavigatorRoomSettings.css';
 import './css/room/RoomWidgets.css';
 
 import './css/slider.css';
+
+import './css/toolbar/ToolBar.css';
 
 import './css/widgets/FurnitureWidgets.css';
 

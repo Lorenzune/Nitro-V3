@@ -1,7 +1,7 @@
 import { AvatarEditorFigureCategory, AvatarFigureContainer, AvatarFigurePartType, FigureSetIdsMessageEvent, GetAvatarRenderManager, GetSessionDataManager, GetWardrobeMessageComposer, IAvatarFigureContainer, IFigurePartSet, IPalette, IPartColor, SetType, UserWardrobePageEvent } from '@nitrots/nitro-renderer';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useBetween } from 'use-between';
-import { AvatarEditorColorSorter, AvatarEditorPartSorter, AvatarEditorThumbnailsHelper, GetClubMemberLevel, GetConfigurationValue, IAvatarEditorCategory, IAvatarEditorCategoryPartItem, Randomizer, SendMessageComposer } from '../../api';
+import { AvatarEditorColorSorter, AvatarEditorPartSorter, GetClubMemberLevel, GetConfigurationValue, IAvatarEditorCategory, IAvatarEditorCategoryPartItem, Randomizer, SendMessageComposer } from '../../api';
 import { useMessageEvent } from '../events';
 import { useFigureData } from './useFigureData';
 
@@ -71,6 +71,10 @@ const useAvatarEditorState = () =>
         setMaxPaletteCount(partItem.maxPaletteCount || 1);
 
         selectPart(setType, partId);
+
+        // Pet (pt) and Misc (mc) cannot be equipped together — equipping one unequips the other.
+        if(setType === AvatarFigurePartType.PET) selectPart(AvatarFigurePartType.MISC, -1);
+        else if(setType === AvatarFigurePartType.MISC) selectPart(AvatarFigurePartType.PET, -1);
     }, [ activeModel, selectPart ]);
 
     const selectEditorColor = useCallback((setType: string, paletteId: number, colorId: number) =>
@@ -246,11 +250,6 @@ const useAvatarEditorState = () =>
 
     useEffect(() =>
     {
-        AvatarEditorThumbnailsHelper.clearCache();
-    }, [ selectedColorParts ]);
-
-    useEffect(() =>
-    {
         if(!isVisible) return;
 
         const newAvatarModels: { [index: string]: IAvatarEditorCategory[] } = {};
@@ -321,6 +320,7 @@ const useAvatarEditorState = () =>
         newAvatarModels[AvatarEditorFigureCategory.TORSO] = [ AvatarFigurePartType.CHEST, AvatarFigurePartType.CHEST_PRINT, AvatarFigurePartType.COAT_CHEST, AvatarFigurePartType.CHEST_ACCESSORY ].map(setType => buildCategory(setType, buildModeDefault));
         newAvatarModels[AvatarEditorFigureCategory.LEGS] = [ AvatarFigurePartType.LEGS, AvatarFigurePartType.SHOES, AvatarFigurePartType.WAIST_ACCESSORY ].map(setType => buildCategory(setType, buildModeDefault));
         newAvatarModels[AvatarEditorFigureCategory.PETS] = [ AvatarFigurePartType.PET ].map(setType => buildCategory(setType)).filter(Boolean);
+		newAvatarModels[AvatarEditorFigureCategory.MISC] = [ AvatarFigurePartType.MISC ].map(setType => buildCategory(setType)).filter(Boolean);
         newAvatarModels[AvatarEditorFigureCategory.NFT] = [
             AvatarFigurePartType.HEAD,
             AvatarFigurePartType.HAIR,

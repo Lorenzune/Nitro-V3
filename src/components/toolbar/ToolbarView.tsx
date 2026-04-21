@@ -1,11 +1,12 @@
-import { CreateLinkEvent, Dispose, DropBounce, EaseOut, GetSessionDataManager, JumpBy, Motions, NitroToolbarAnimateIconEvent, PerkAllowancesMessageEvent, PerkEnum, Queue, Wait } from '@nitrots/nitro-renderer';
+import { CreateLinkEvent, Dispose, DropBounce, EaseOut, GetSessionDataManager, JumpBy, Motions, NitroToolbarAnimateIconEvent, PerkAllowancesMessageEvent, PerkEnum, Queue, Wait, YouTubeRoomSettingsEvent } from '@nitrots/nitro-renderer';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FC, useState } from 'react';
-import { GetConfigurationValue, MessengerIconState, OpenMessengerChat, VisitDesktop } from '../../api';
+import { FC, useEffect, useState } from 'react';
+import { GetConfigurationValue, MessengerIconState, OpenMessengerChat, setYoutubeRoomEnabled, VisitDesktop } from '../../api';
 import { Flex, LayoutAvatarImageView, LayoutItemCountView } from '../../common';
 import { useAchievements, useFriends, useInventoryUnseenTracker, useMessageEvent, useMessenger, useNitroEvent, useSessionInfo, useWiredTools } from '../../hooks';
 import { ToolbarItemView } from './ToolbarItemView';
 import { ToolbarMeView } from './ToolbarMeView';
+import { YouTubePlayerView } from './YouTubePlayerView';
 
 const containerVariants = {
     hidden: {},
@@ -25,6 +26,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const [ isMeExpanded, setMeExpanded ] = useState(false);
     const [ isToolbarOpen, setIsToolbarOpen ] = useState(false);
     const [ useGuideTool, setUseGuideTool ] = useState(false);
+    const [ youtubeEnabled, setYoutubeEnabled ] = useState(false);
     const { userFigure = null } = useSessionInfo();
     const { getFullCount = 0 } = useInventoryUnseenTracker();
     const { getTotalUnseen = 0 } = useAchievements();
@@ -34,6 +36,25 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const isMod = GetSessionDataManager().isModerator;
     const hasDesktopUnifiedShell = (isInRoom && isToolbarOpen);
     const showDesktopShell = (isToolbarOpen || !isInRoom);
+
+    useMessageEvent<YouTubeRoomSettingsEvent>(YouTubeRoomSettingsEvent, event =>
+    {
+        const enabled = event.getParser().youtubeEnabled;
+        setYoutubeEnabled(enabled);
+        setYoutubeRoomEnabled(enabled);
+    });
+
+    useEffect(() => {
+        if (!isInRoom) {
+            setYoutubeEnabled(false);
+            setYoutubeRoomEnabled(false);
+        }
+    }, [isInRoom]);
+
+    const openYouTubePlayer = () =>
+    {
+        window.dispatchEvent(new CustomEvent('youtube:toggle'));
+    };
 
     useMessageEvent<PerkAllowancesMessageEvent>(PerkAllowancesMessageEvent, event =>
     {
@@ -79,7 +100,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
 
     return (
         <>
-            <style>{ TOOLBAR_STYLES }</style>
+            { youtubeEnabled && <YouTubePlayerView /> }
 
             { isInRoom &&
                 <div className={ `fixed bottom-0 left-0 right-0 z-40 flex h-[52px] items-end px-0 pt-[2px] pb-0 pointer-events-none md:left-1/2 md:right-auto md:h-[52px] md:w-[420px] md:-translate-x-1/2 md:items-center md:px-[6px] md:py-[4px] lg:w-[460px] ${ isToolbarOpen ? (hasDesktopUnifiedShell ? 'md:rounded-none md:border-0 md:bg-transparent md:shadow-none rounded-t-[12px] border border-b-0 border-white/8 bg-[rgba(10,10,12,0.58)] shadow-[0_-6px_18px_rgba(0,0,0,0.18)]' : 'rounded-t-[12px] border border-b-0 border-white/8 bg-[rgba(10,10,12,0.58)] shadow-[0_-6px_18px_rgba(0,0,0,0.18)]') : 'border-0 bg-transparent shadow-none md:border-0 md:bg-transparent md:shadow-none' }` }>
@@ -162,8 +183,8 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                                                 <ToolbarMeView setMeExpanded={ setMeExpanded } unseenAchievementCount={ getTotalUnseen } useGuideTool={ useGuideTool } />
                                             </motion.div> }
                                     </AnimatePresence>
-                                    <motion.div whileHover={ { scale: 1.08 } } whileTap={ { scale: 0.95 } } className="cursor-pointer" onClick={ event => { setMeExpanded(value => !value); event.stopPropagation(); } }>
-                                        <LayoutAvatarImageView headOnly={ true } direction={ 2 } figure={ userFigure } className="tb-icon !h-[44px] !w-[32px] !bg-center !bg-no-repeat" style={ { marginTop: '4px' } } />
+                                    <motion.div whileHover={ { scale: 1.15 } } whileTap={ { scale: 1 } } className="cursor-pointer" onClick={ event => { setMeExpanded(value => !value); event.stopPropagation(); } }>
+                                        <LayoutAvatarImageView headOnly={ true } direction={ 2 } figure={ userFigure } className="tb-icon !h-[63px] !w-[32px] !bg-center !bg-no-repeat" style={ { marginTop: '2px' } } />
                                     </motion.div>
                                     { (getTotalUnseen > 0) &&
                                         <LayoutItemCountView count={ getTotalUnseen } className="pointer-events-none absolute -right-1 -top-1 z-10" /> }
@@ -175,6 +196,10 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                                 { isInRoom &&
                                     <motion.div variants={ itemVariants }>
                                         <ToolbarItemView icon="camera" onClick={ () => CreateLinkEvent('camera/toggle') } className="tb-icon" />
+                                    </motion.div> }
+                                { youtubeEnabled &&
+                                    <motion.div variants={ itemVariants }>
+                                        <ToolbarItemView icon="youtube" onClick={ openYouTubePlayer } className="tb-icon" />
                                     </motion.div> }
                                 { isMod &&
                                     <motion.div variants={ itemVariants }>
@@ -268,6 +293,10 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                                     <motion.div variants={ itemVariants }>
                                         <ToolbarItemView icon="camera" onClick={ () => CreateLinkEvent('camera/toggle') } className="tb-icon" />
                                     </motion.div> }
+                                { youtubeEnabled &&
+                                    <motion.div variants={ itemVariants }>
+                                        <ToolbarItemView icon="youtube" onClick={ openYouTubePlayer } className="tb-icon" />
+                                    </motion.div> }
                                 { isMod &&
                                     <motion.div variants={ itemVariants }>
                                         <ToolbarItemView icon="modtools" onClick={ () => CreateLinkEvent('mod-tools/toggle') } className="tb-icon" />
@@ -289,62 +318,3 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
         </>
     );
 };
-
-const TOOLBAR_STYLES = `
-  .tb-icon {
-    opacity: 1;
-    transition: transform 0.15s ease;
-    cursor: pointer;
-  }
-
-  .tb-icon:hover {
-    transform: translateY(-2px);
-  }
-
-  .tb-icon:active {
-    transform: translateY(0);
-  }
-
-  .tb-toggle {
-    width: 32px;
-    height: 32px;
-    flex-shrink: 0;
-    border-radius: 9px;
-    background: rgba(18, 16, 14, 0.80);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
-    transition: background 0.15s, border-color 0.15s;
-  }
-
-  .tb-toggle:hover {
-    background: rgba(30, 26, 20, 0.88);
-    border-color: rgba(255, 255, 255, 0.13);
-  }
-
-  .tb-bar-scroll {
-    overflow-x: auto;
-    overflow-y: visible;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    flex-wrap: nowrap;
-  }
-
-  .tb-bar-scroll::-webkit-scrollbar {
-    display: none;
-  }
-
-  .tb-open-shell {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .tb-open-shell::-webkit-scrollbar {
-    display: none;
-  }
-`;

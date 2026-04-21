@@ -117,4 +117,14 @@ export class FurnitureOffer implements IPurchasableOffer
     {
         return true;
     }
+
+    public get itemIds(): string
+    {
+        return String(this._furniData?.id ?? '');
+    }
+
+    public get haveOffer(): boolean
+    {
+        return false;
+    }
 }

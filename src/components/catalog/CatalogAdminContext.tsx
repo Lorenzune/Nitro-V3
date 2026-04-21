@@ -207,7 +207,7 @@ export const CatalogAdminProvider: FC<{ children: ReactNode }> = ({ children }) 
         setLastError(null);
         pendingActionRef.current = 'saveOffer';
         SendMessageComposer(new CatalogAdminSaveOfferComposer(
-            data.offerId || 0, data.pageId, parseInt(data.itemIds) || 0,
+            data.offerId || 0, data.pageId, data.itemIds || '',
             data.catalogName, data.costCredits, data.costPoints, data.pointsType,
             data.amount, data.clubOnly === '1' ? 1 : 0, data.extradata,
             data.haveOffer === '1', data.offerId_group, data.limitedStack, data.orderNumber, currentType
@@ -220,7 +220,7 @@ export const CatalogAdminProvider: FC<{ children: ReactNode }> = ({ children }) 
         setLastError(null);
         pendingActionRef.current = 'createOffer';
         SendMessageComposer(new CatalogAdminCreateOfferComposer(
-            data.pageId, parseInt(data.itemIds) || 0,
+            data.pageId, data.itemIds || '',
             data.catalogName, data.costCredits, data.costPoints, data.pointsType,
             data.amount, data.clubOnly === '1' ? 1 : 0, data.extradata,
             data.haveOffer === '1', data.offerId_group, data.limitedStack, data.orderNumber, currentType
