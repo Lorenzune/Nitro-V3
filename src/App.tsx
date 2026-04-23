@@ -35,7 +35,6 @@ export const App: FC<{}> = props =>
         setPrepareTrigger(prev => prev + 1);
     }, []);
 
-    // Listen for socket closed events (code 1000 "Bye" - server rejected SSO)
     useNitroEvent(NitroEventType.SOCKET_CLOSED, showSessionExpired);
 
     useMessageEvent<LoadGameUrlEvent>(LoadGameUrlEvent, event =>
@@ -57,26 +56,77 @@ export const App: FC<{}> = props =>
             {
                 if(!window.NitroConfig) throw new Error('NitroConfig is not defined!');
 
-                const ssoTicket = window.NitroConfig['sso.ticket'];
+                let ssoTicket = window.NitroConfig['sso.ticket'];
+                let configInitError: unknown = null;
 
                 if(!ssoTicket || ssoTicket === '')
                 {
-                    // Configuration is loaded lazily — fetch it up-front so the login
-                    // screen toggle and Turnstile keys are available before we decide.
-                    let configInitError: unknown = null;
                     try { await GetConfiguration().init(); }
                     catch(e) { configInitError = e; }
-
-                    const rawLoginEnabled = GetConfiguration().getValue<unknown>('login.screen.enabled', false);
-                    const loginScreenEnabled = rawLoginEnabled === true || rawLoginEnabled === 'true' || rawLoginEnabled === 1;
 
                     if(configInitError)
                     {
                         NitroLogger.error('[LoginScreen] Failed to load renderer-config.json — cannot resolve login.screen.enabled', configInitError);
                     }
 
+                    if(!configInitError)
+                    {
+                        let storedRemember: string | null = null;
+                        try { storedRemember = window.localStorage.getItem('nitro.remember.token'); }
+                        catch {}
+
+                        if(storedRemember)
+                        {
+                            const rememberUrlTemplate = GetConfiguration().getValue<string>('login.remember.endpoint', '/api/auth/remember');
+                            const rememberUrl = GetConfiguration().interpolate(rememberUrlTemplate);
+                            try
+                            {
+                                const response = await fetch(rememberUrl, {
+                                    method: 'POST',
+                                    credentials: 'include',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json',
+                                        'X-Requested-With': 'NitroRememberMe'
+                                    },
+                                    body: JSON.stringify({ rememberToken: storedRemember })
+                                });
+                                if(response.ok)
+                                {
+                                    const payload = await response.json();
+                                    const ticket = typeof payload.ssoTicket === 'string' ? payload.ssoTicket : '';
+                                    if(ticket)
+                                    {
+                                        window.NitroConfig['sso.ticket'] = ticket;
+                                        ssoTicket = ticket;
+                                        try
+                                        {
+                                            if(typeof payload.rememberToken === 'string' && payload.rememberToken.length)
+                                                window.localStorage.setItem('nitro.remember.token', payload.rememberToken);
+                                        }
+                                        catch {}
+                                    }
+                                }
+                                else if(response.status === 401)
+                                {
+                                    try { window.localStorage.removeItem('nitro.remember.token'); } catch {}
+                                }
+                            }
+                            catch {}
+                        }
+                    }
+                }
+
+                if(!ssoTicket || ssoTicket === '')
+                {
+                    const rawLoginEnabled = GetConfiguration().getValue<unknown>('login.screen.enabled', false);
+                    const loginScreenEnabled = rawLoginEnabled === true || rawLoginEnabled === 'true' || rawLoginEnabled === 1;
+
                     if(loginScreenEnabled)
                     {
+                        try { await GetLocalizationManager().init(); }
+                        catch(localizationErr) { NitroLogger.error('[LoginScreen] Localization init failed', localizationErr); }
+
                         setIsReady(false);
                         setShowLogin(true);
                         return;
@@ -110,7 +160,7 @@ export const App: FC<{}> = props =>
                     eventMode: 'none',
                     failIfMajorPerformanceCaveat: false,
                     roundPixels: true,
-                    useBackBuffer // Keep disabled by default unless explicitly enabled in NitroConfig
+                    useBackBuffer
                 });
 
                 await GetConfiguration().init();
