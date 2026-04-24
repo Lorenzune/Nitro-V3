@@ -27,7 +27,7 @@ const cacheBustUrl = (path: string): string =>
     return url.toString();
 };
 
-(window as any).NitroSecureApiUrl = clientMode.apiBaseUrl || 'https://nitro.example.com:2096/';
+(window as any).NitroSecureApiUrl = clientMode.apiBaseUrl || window.location.origin;
 (window as any).NitroClientMode = clientMode;
 (window as any).NitroConfig = {
     'config.urls': [

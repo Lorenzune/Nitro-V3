@@ -60,12 +60,19 @@ const CHAT_TRANSLATION_SETTINGS_KEY = 'chatTranslationSettings';
 const MAX_ATTEMPTS = 5;
 const LOCK_WINDOW_MS = 60_000;
 const LOCK_DURATION_MS = 2 * 60_000;
-const DEFAULT_LOGIN_IMAGES: Record<string, string> = {
-    background: 'https://hotel.example.com/client/nitro/images/reception/background_gradient_apr25.png',
-    'background.colour': '#6eadc8',
-    drape: 'https://hotel.example.com/client/nitro/images/reception/drape.png',
-    left: 'https://hotel.example.com/client/nitro/images/reception/mute_reception_backdrop_left.png',
-    right: 'https://hotel.example.com/client/nitro/images/reception/background_right.png'
+const getDefaultLoginImages = (): Record<string, string> =>
+{
+    const imagesBase = (GetConfigurationValue<string>('images.url', '') || '').replace(/\/$/, '');
+
+    if(!imagesBase.length) return { 'background.colour': '#6eadc8' };
+
+    return {
+        background: `${ imagesBase }/reception/background_gradient_apr25.png`,
+        'background.colour': '#6eadc8',
+        drape: `${ imagesBase }/reception/drape.png`,
+        left: `${ imagesBase }/reception/mute_reception_backdrop_left.png`,
+        right: `${ imagesBase }/reception/background_right.png`
+    };
 };
 const LOGIN_LOCALES: LoginLocale[] = [
     { code: 'it', file: 'it', label: 'Italiano', flag: flagIt },
@@ -188,7 +195,7 @@ export const LoginView: FC<LoginViewProps> = ({ onAuthenticated, isEntering = fa
     const submitTimeRef = useRef(0);
 
     const configuredLoginImages: Record<string, string> = (loginViewConfig?.['images'] as Record<string, string>) ?? {};
-    const loginImages: Record<string, string> = { ...DEFAULT_LOGIN_IMAGES, ...configuredLoginImages };
+    const loginImages: Record<string, string> = { ...getDefaultLoginImages(), ...configuredLoginImages };
     
     const configuredLoginWidgets: Record<string, unknown> = (loginViewConfig?.['widgets'] as Record<string, unknown>) ?? {};
     const loginWidgetSlots = useMemo(() =>
@@ -487,7 +494,7 @@ export const LoginView: FC<LoginViewProps> = ({ onAuthenticated, isEntering = fa
 
     const checkEmailUrl = GetConfigurationValue<string>('login.check-email.endpoint', '/api/auth/check-email');
     const checkUsernameUrl = GetConfigurationValue<string>('login.check-username.endpoint', '/api/auth/check-username');
-    const imagingUrl = GetConfigurationValue<string>('login.register.imaging.url', 'https://www.habbo.com/habbo-imaging/avatarimage?figure={figure}&gender={gender}&direction=2&head_direction=2&size=l');
+    const imagingUrl = GetConfigurationValue<string>('login.register.imaging.url', '');
     const interpretAvailability = (ok: boolean, status: number, payload: Record<string, unknown>): { available: boolean; error?: string } =>
     {
         const isTrue = (v: unknown) => v === true || v === 'true' || v === 1 || v === '1';

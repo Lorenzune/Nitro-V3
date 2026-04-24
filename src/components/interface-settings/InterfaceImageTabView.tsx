@@ -12,7 +12,7 @@ export const InterfaceImageTabView: FC<{}> = () =>
 
     const baseUrl = useMemo(() =>
     {
-        return GetConfigurationValue<string>('ui.header.images.url', 'https://image.webbo.city/image/headerImage/image{id}.gif');
+        return GetConfigurationValue<string>('ui.header.images.url', '');
     }, []);
 
     const images = useMemo(() =>

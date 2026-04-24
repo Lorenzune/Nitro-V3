@@ -194,7 +194,7 @@ const getApiBase = (): string =>
 
     if(typeof configured === 'string' && configured.length) return configured.replace(/\/$/, '');
 
-    return 'https://nitro.example.com:2096/';
+    return window.location.origin;
 };
 
 const getPlainAssetBase = (kind: 'config' | 'gamedata'): string =>
