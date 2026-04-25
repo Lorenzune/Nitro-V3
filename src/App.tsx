@@ -57,6 +57,7 @@ export const App: FC<{}> = props =>
     const rendererPromiseRef = useRef<Promise<any>>(null);
     const tickersStartedRef = useRef(false);
     const heartbeatIntervalRef = useRef<number>(null);
+    const rememberRotateIntervalRef = useRef<number>(null);
     const showSessionExpired = useCallback(() =>
     {
         const baseUrl = window.location.origin + '/';
@@ -133,6 +134,45 @@ export const App: FC<{}> = props =>
         if(allowSsoFallback && remembered.ssoTicket?.length) return remembered.ssoTicket;
 
         return '';
+    }, []);
+
+    const rotateRememberLogin = useCallback(async (): Promise<void> =>
+    {
+        const remembered = GetRememberLogin();
+
+        if(!remembered?.token?.length) return;
+
+        try
+        {
+            const rawEndpoint = GetConfiguration().getValue<string>('login.refresh.endpoint', '${api.url}/api/auth/refresh');
+            const endpoint = GetConfiguration().interpolate(rawEndpoint);
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'NitroRememberRotate'
+                },
+                body: JSON.stringify({ rememberToken: remembered.token })
+            });
+
+            let payload: Record<string, unknown> = {};
+            try { payload = await response.json(); }
+            catch {}
+
+            if(response.ok)
+            {
+                StoreRememberLoginFromPayload(payload, remembered.username, remembered.ssoTicket);
+                return;
+            }
+
+            if(response.status === 400 || response.status === 401 || response.status === 403) ClearRememberLogin();
+        }
+        catch(error)
+        {
+            NitroLogger.error('[LoginScreen] Remember rotation failed', error);
+        }
     }, []);
 
     // Listen for socket closed events (code 1000 "Bye" - server rejected SSO)
@@ -305,6 +345,11 @@ export const App: FC<{}> = props =>
                 if(heartbeatIntervalRef.current !== null) window.clearInterval(heartbeatIntervalRef.current);
                 heartbeatIntervalRef.current = window.setInterval(() => HabboWebTools.sendHeartBeat(), 10000);
 
+                if(rememberRotateIntervalRef.current !== null) window.clearInterval(rememberRotateIntervalRef.current);
+
+                const rotateMinutes = Math.max(1, Number(GetConfiguration().getValue<unknown>('login.remember.rotate.interval.minutes', 15)) || 15);
+                if(GetRememberLogin()?.token?.length) rememberRotateIntervalRef.current = window.setInterval(() => rotateRememberLogin(), rotateMinutes * 60 * 1000);
+
                 if(!tickersStartedRef.current)
                 {
                     tickersStartedRef.current = true;
@@ -330,8 +375,9 @@ export const App: FC<{}> = props =>
         return () =>
         {
             if(heartbeatIntervalRef.current !== null) window.clearInterval(heartbeatIntervalRef.current);
+            if(rememberRotateIntervalRef.current !== null) window.clearInterval(rememberRotateIntervalRef.current);
         };
-    }, [ prepareTrigger, startWarmup, startRenderer, tryRememberLogin, applySsoTicket ]);
+    }, [ prepareTrigger, startWarmup, startRenderer, tryRememberLogin, applySsoTicket, rotateRememberLogin ]);
 
     return (
         <Base fit overflow="hidden" className={ !(window.devicePixelRatio % 1) && 'image-rendering-pixelated' }>

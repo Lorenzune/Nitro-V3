@@ -7,6 +7,7 @@ export interface RememberLoginData
 }
 
 const REMEMBER_LOGIN_KEY = 'nitro.auth.remember';
+const LEGACY_REMEMBER_LOGIN_KEY = 'nitro.remember.token';
 const DEFAULT_REMEMBER_SECONDS = 30 * 24 * 60 * 60;
 
 export const GetRememberLogin = (): RememberLoginData | null =>
@@ -26,7 +27,25 @@ export const GetRememberLogin = (): RememberLoginData | null =>
     }
     catch
     {
-        return null;
+        try
+        {
+            const legacyToken = window.localStorage.getItem(LEGACY_REMEMBER_LOGIN_KEY) || '';
+
+            if(!legacyToken.length) return null;
+
+            const data: RememberLoginData = {
+                token: legacyToken,
+                expiresAt: Math.floor(Date.now() / 1000) + DEFAULT_REMEMBER_SECONDS
+            };
+
+            SetRememberLogin(data);
+
+            return data;
+        }
+        catch
+        {
+            return null;
+        }
     }
 };
 
@@ -40,14 +59,18 @@ export const SetRememberLogin = (data: RememberLoginData): void =>
 
 export const ClearRememberLogin = (): void =>
 {
-    try { window.localStorage.removeItem(REMEMBER_LOGIN_KEY); }
+    try
+    {
+        window.localStorage.removeItem(REMEMBER_LOGIN_KEY);
+        window.localStorage.removeItem(LEGACY_REMEMBER_LOGIN_KEY);
+    }
     catch {}
 };
 
 export const StoreRememberLoginFromPayload = (payload: Record<string, unknown>, username?: string, ssoTicket?: string): void =>
 {
     const token = typeof payload.rememberToken === 'string' ? payload.rememberToken : '';
-    const rawExpiresAt = payload.rememberExpiresAt;
+    const rawExpiresAt = (payload.rememberExpiresAt ?? payload.expiresAt);
     const parsedExpiresAt = typeof rawExpiresAt === 'number' ? rawExpiresAt : Number(rawExpiresAt || 0);
     const expiresAt = (Number.isFinite(parsedExpiresAt) && parsedExpiresAt > 0)
         ? parsedExpiresAt
