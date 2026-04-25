@@ -31,8 +31,8 @@ const cacheBustUrl = (path: string): string =>
 (window as any).NitroClientMode = clientMode;
 (window as any).NitroConfig = {
     'config.urls': [
-        clientMode.secureAssetsEnabled ? secureUrl('config', 'renderer-config.json', true) : cacheBustUrl('renderer-config.json'),
-        clientMode.secureAssetsEnabled ? secureUrl('config', 'ui-config.json', true) : cacheBustUrl('ui-config.json')
+        clientMode.secureAssetsEnabled ? secureUrl('config', 'renderer-config.json', true) : cacheBustUrl('configuration/renderer-config.json'),
+        clientMode.secureAssetsEnabled ? secureUrl('config', 'ui-config.json', true) : cacheBustUrl('configuration/ui-config.json')
     ],
     'sso.ticket': search.get('sso') || null,
     'forward.type': search.get('room') ? 2 : -1,

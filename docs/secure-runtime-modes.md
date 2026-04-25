@@ -3,11 +3,11 @@
 Questa doc riassume tutti i dati da impostare per:
 
 - offuscamento bundle `dist` (`app.js` / `app.css` → `.dat`)
-- secure assets runtime (`renderer-config.json`, `ui-config.json`, `gamedata`)
+- secure assets runtime (`configuration/renderer-config.json`, `configuration/ui-config.json`, `gamedata`)
 - secure API runtime (`/api/*`)
 - fallback plain quando vuoi spegnere tutto senza togliere il codice
 
-## 1. `Nitro-V3/public/client-mode.json`
+## 1. `Nitro-V3/public/configuration/client-mode.json`
 
 Questo file controlla tutto a runtime.
 
@@ -17,7 +17,7 @@ Questo file controlla tutto a runtime.
     "secureAssetsEnabled": true,
     "secureApiEnabled": true,
     "apiBaseUrl": "https://nitro.example.com:2096",
-    "plainConfigBaseUrl": "https://hotel.example.com/",
+    "plainConfigBaseUrl": "https://hotel.example.com/configuration/",
     "plainGamedataBaseUrl": "https://hotel.example.com/client/nitro/gamedata/"
 }
 ```
@@ -30,7 +30,7 @@ Questo file controlla tutto a runtime.
 
 - `secureAssetsEnabled`
   - `true`: `bootstrap.ts` e `secure-assets.ts` usano `/nitro-sec/file`
-  - `false`: `renderer-config.json`, `ui-config.json` e gamedata vengono letti in plain
+  - `false`: `configuration/renderer-config.json`, `configuration/ui-config.json` e gamedata vengono letti in plain
 
 - `secureApiEnabled`
   - `true`: il wrapper `fetch` cifra le chiamate `/api/*`
@@ -43,7 +43,7 @@ Questo file controlla tutto a runtime.
 
 - `plainConfigBaseUrl`
   - base URL dei file config plain
-  - normalmente: `https://hotel.example.com/`
+  - normalmente: `https://hotel.example.com/configuration/`
 
 - `plainGamedataBaseUrl`
   - base URL del gamedata plain
@@ -74,7 +74,7 @@ Il fallback attuale è:
 (window as any).NitroSecureApiUrl = clientMode.apiBaseUrl || 'https://nitro.example.com:2096/';
 ```
 
-Quindi in produzione conviene sempre valorizzare `apiBaseUrl` dentro `client-mode.json`.
+Quindi in produzione conviene sempre valorizzare `apiBaseUrl` dentro `configuration/client-mode.json`.
 
 ## 3. `Nitro-V3/src/secure-assets.ts`
 
@@ -95,7 +95,7 @@ Qui vive tutta la logica runtime:
 
 Normalmente non serve toccarlo, a meno che tu non voglia cambiare il protocollo secure.
 
-## 4. `Nitro-V3/public/renderer-config.json`
+## 4. `Nitro-V3/public/configuration/renderer-config.json`
 
 Questo file continua a definire i path usati dal renderer.
 
@@ -129,7 +129,7 @@ Conviene usare i path plain classici, per esempio:
 
 oppure lasciare il renderer configurato com’è e demandare il fallback a `secure-assets.ts`.
 
-## 5. `Nitro-V3/public/ui-config.json`
+## 5. `Nitro-V3/public/configuration/ui-config.json`
 
 Qui non c’è logica secure, ma è uno dei file caricati da `config.urls`.
 
@@ -140,12 +140,12 @@ Quindi basta mantenerlo corretto come contenuto, non serve altro.
 
 ## 6. `Nitro-V3/scripts/write-asset-loader.mjs`
 
-Questo script genera `public/asset-loader.js`.
+Questo script genera `public/configuration/asset-loader.js`.
 
 ### Cosa fa ora
 
 - mostra la shell iniziale
-- legge `client-mode.json`
+- legge `configuration/client-mode.json`
 - decide se caricare:
   - `app.css.dat` / `app.js.dat`
   - oppure `assets/app.css` / `assets/app.js`
@@ -194,7 +194,7 @@ nitro.secure.master_key=change-me-to-a-long-random-secret
   - abilita il layer secure per `/api/*`
 
 - `nitro.secure.config.root`
-  - cartella dove leggere `renderer-config.json` e `ui-config.json`
+  - cartella dove leggere `configuration/renderer-config.json` e `configuration/ui-config.json`
 
 - `nitro.secure.gamedata.root`
   - cartella dove leggere il gamedata live
@@ -207,7 +207,7 @@ nitro.secure.master_key=change-me-to-a-long-random-secret
 
 ### Tutto attivo
 
-`client-mode.json`
+`configuration/client-mode.json`
 
 ```json
 {
@@ -215,7 +215,7 @@ nitro.secure.master_key=change-me-to-a-long-random-secret
     "secureAssetsEnabled": true,
     "secureApiEnabled": true,
     "apiBaseUrl": "https://nitro.example.com:2096",
-    "plainConfigBaseUrl": "https://hotel.example.com/",
+    "plainConfigBaseUrl": "https://hotel.example.com/configuration/",
     "plainGamedataBaseUrl": "https://hotel.example.com/client/nitro/gamedata/"
 }
 ```
@@ -232,7 +232,7 @@ nitro.secure.master_key=una-chiave-lunga-random
 
 ### Solo `.dat`, senza secure assets/api
 
-`client-mode.json`
+`configuration/client-mode.json`
 
 ```json
 {
@@ -240,7 +240,7 @@ nitro.secure.master_key=una-chiave-lunga-random
     "secureAssetsEnabled": false,
     "secureApiEnabled": false,
     "apiBaseUrl": "https://nitro.example.com:2096",
-    "plainConfigBaseUrl": "https://hotel.example.com/",
+    "plainConfigBaseUrl": "https://hotel.example.com/configuration/",
     "plainGamedataBaseUrl": "https://hotel.example.com/client/nitro/gamedata/"
 }
 ```
@@ -254,7 +254,7 @@ nitro.secure.api.enabled=false
 
 ### Tutto plain
 
-`client-mode.json`
+`configuration/client-mode.json`
 
 ```json
 {
@@ -262,7 +262,7 @@ nitro.secure.api.enabled=false
     "secureAssetsEnabled": false,
     "secureApiEnabled": false,
     "apiBaseUrl": "https://nitro.example.com:2096",
-    "plainConfigBaseUrl": "https://hotel.example.com/",
+    "plainConfigBaseUrl": "https://hotel.example.com/configuration/",
     "plainGamedataBaseUrl": "https://hotel.example.com/client/nitro/gamedata/"
 }
 ```
@@ -273,9 +273,9 @@ nitro.secure.api.enabled=false
 
 Per cambiare:
 
-- `client-mode.json`
-- `renderer-config.json`
-- `ui-config.json`
+- `configuration/client-mode.json`
+- `configuration/renderer-config.json`
+- `configuration/ui-config.json`
 - gamedata live
 - `config.ini`
 
@@ -298,10 +298,12 @@ Per usare bene i toggle:
 
 ## 12. Checklist veloce
 
-- `client-mode.json` configurato
+- `configuration/client-mode.json` configurato
 - `apiBaseUrl` corretto
 - `nitro.secure.master_key` valorizzata
 - `nitro.secure.config.root` corretto
 - `nitro.secure.gamedata.root` corretto
 - `.dat` e file plain entrambi deployati
 - MIME `.dat` presente sul web server
+
+

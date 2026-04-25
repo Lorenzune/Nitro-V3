@@ -20,12 +20,13 @@
 	-   `yarn install`
 	-   `yarn link "@nitrots/nitro-renderer"` <== This will link the renderer in the project
 -   Rename a few files
-    -   Rename `public/renderer-config.json.example` to `public/renderer-config.json`
-    -   Rename `public/ui-config.json.example` to `public/ui-config.json`
--   Set your links
-    -   Open `public/renderer-config.json`
+    -   Copy `public/configuration/renderer-config.example` to `public/configuration/renderer-config.json`
+    -   Copy `public/configuration/ui-config.example` to `public/configuration/ui-config.json`
+    -   Copy `public/configuration/client-mode.example` to `public/configuration/client-mode.json`
+    -   Set your links
+    -   Open `public/configuration/renderer-config.json`
         -   Update `socket.url, asset.url, image.library.url, & hof.furni.url`
-    -   Open `public/ui-config.json`
+    -   Open `public/configuration/ui-config.json`
         -   Update `camera.url, thumbnails.url, url.prefix, habbopages.url`
 	-   `yarn build` <== the final step to build the DIST folder this is where your browser needs to point / or upload this to your /client if you do the compile on a other machine (preferd)
     -   You can override any variable by passing it to `NitroConfig` in the index.html

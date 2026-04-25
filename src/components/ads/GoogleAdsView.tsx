@@ -1,6 +1,7 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { GetConfigurationValue } from '../../api';
 import { NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../common';
+import { configFileUrl } from '../../secure-assets';
 
 interface AdsenseConfig {
     slot: string;
@@ -70,7 +71,7 @@ export const GoogleAdsView: FC<{}> = () => {
             try {
                 const [ adsTxtRes, configRes ] = await Promise.all([
                     fetch('/ads.txt', { cache: 'no-cache' }),
-                    fetch('/adsense.json', { cache: 'no-cache' })
+                    fetch(configFileUrl('adsense.json', true), { cache: 'no-cache' })
                 ]);
 
                 if (!adsTxtRes.ok) throw new Error(`ads.txt ${ adsTxtRes.status }`);
@@ -156,7 +157,7 @@ export const GoogleAdsView: FC<{}> = () => {
                             data-full-width-responsive={ (config.fullWidthResponsive ?? true) ? 'true' : 'false' }
                         /> }
                     { !loadError && publisherId && config && !config.slot &&
-                        <div className="text-xs text-gray-500 text-center px-2">Ad slot not configured in adsense.json</div> }
+                        <div className="text-xs text-gray-500 text-center px-2">Ad slot not configured in configuration/adsense.json</div> }
                 </div>
             </NitroCardContentView>
         </NitroCardView>

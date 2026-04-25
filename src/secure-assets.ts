@@ -204,7 +204,7 @@ const getPlainAssetBase = (kind: 'config' | 'gamedata'): string =>
 
     if(typeof configured === 'string' && configured.length) return configured.endsWith('/') ? configured : `${ configured }/`;
 
-    if(kind === 'config') return `${ window.location.origin }/`;
+    if(kind === 'config') return `${ window.location.origin }/configuration/`;
 
     return `${ window.location.origin }/nitro/gamedata/`;
 };
@@ -237,6 +237,17 @@ export const secureUrl = (kind: 'config' | 'gamedata', file: string, cacheBust =
     const version = cacheBust ? `&v=${ encodeURIComponent(Date.now().toString(36)) }` : '';
 
     return `${ base }/nitro-sec/file?kind=${ encodeURIComponent(kind) }&file=${ encodeURIComponent(file) }${ version }`;
+};
+
+export const configFileUrl = (file: string, cacheBust = false): string =>
+{
+    if(getClientMode().secureAssetsEnabled) return secureUrl('config', file, cacheBust);
+
+    const plainUrl = new URL(`configuration/${ file.replace(/^\/+/, '') }`, `${ window.location.origin }/`);
+
+    if(cacheBust) plainUrl.searchParams.set('v', Date.now().toString(36));
+
+    return plainUrl.toString();
 };
 
 const createSecureSession = async (): Promise<SecureSession> =>

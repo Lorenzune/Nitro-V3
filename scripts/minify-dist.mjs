@@ -44,12 +44,6 @@ for(const file of walk(dist))
     if(file.endsWith('.json')) minifyJson(file);
 }
 
-for(const file of [ 'renderer-config.json', 'ui-config.json' ])
-{
-    const target = join(dist, file);
-    if(existsSync(target)) rmSync(target);
-}
-
 for(const file of walk(dist))
 {
     if(file.endsWith('.js') && !file.endsWith('asset-loader.js')) encryptFile(file);
@@ -84,4 +78,4 @@ for(const [ source, file ] of publicLoaderAssets)
     }
 }
 
-writeFileSync(join(dist, 'index.html'), `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><div id="root"></div><script src="asset-loader.js?v=${ buildVersion }"></script></body></html>`);
+writeFileSync(join(dist, 'index.html'), `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><div id="root"></div><script src="configuration/bootstrap.js?v=${ buildVersion }"></script></body></html>`);

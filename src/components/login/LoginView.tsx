@@ -1,6 +1,7 @@
 import { GetConfiguration } from '@nitrots/nitro-renderer';
 import { FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ClearRememberLogin, GetConfigurationValue, GetRememberLogin, StoreRememberLoginFromPayload } from '../../api';
+import { configFileUrl } from '../../secure-assets';
 import flagBr from '../../assets/images/flag_icon/flag_icon_br.png';
 import flagDe from '../../assets/images/flag_icon/flag_icon_de.png';
 import flagEn from '../../assets/images/flag_icon/flag_icon_en.png';
@@ -1054,7 +1055,7 @@ const RegisterDialog: FC<RegisterDialogProps> = props =>
     {
         if(step !== 'avatar' || hotLooks.length) return;
         let cancelled = false;
-        fetch('hotlooks.json', { credentials: 'omit' })
+        fetch(configFileUrl('hotlooks.json', true), { credentials: 'omit' })
             .then(r => r.ok ? r.json() : null)
             .then((json: unknown) =>
             {

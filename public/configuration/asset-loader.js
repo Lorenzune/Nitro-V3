@@ -145,6 +145,10 @@
 
   const readClientMode = async () => {
     try {
+      if(window.__nitroClientMode && typeof window.__nitroClientMode === "object") {
+        debug("loader: client-mode preset");
+        return window.__nitroClientMode;
+      }
       const url = withCacheBust(new URL("./client-mode.json", getBase()));
       const response = await fetch(url, { cache: "no-store" });
       if(!response.ok) throw new Error("client-mode " + response.status);
