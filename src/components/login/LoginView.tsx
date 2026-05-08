@@ -197,7 +197,15 @@ export const LoginView: FC<LoginViewProps> = ({ onAuthenticated, isEntering = fa
     const [ loginViewConfig, setLoginViewConfig ] = useState<Record<string, unknown>>(() => GetConfigurationValue<Record<string, unknown>>('loginview', {}));
     const [ , setLocalizationVersion ] = useState(0);
     const submitTimeRef = useRef(0);
+    const preloadedLoginImagesRef = useRef<Set<string>>(new Set());
 
+    const configuredLoginImages = useMemo<Record<string, string>>(() =>
+        (loginViewConfig?.['images'] as Record<string, string>) ?? {}, [ loginViewConfig ]);
+    const loginImages = useMemo<Record<string, string>>(() =>
+        ({ ...getDefaultLoginImages(), ...configuredLoginImages }), [ configuredLoginImages ]);
+
+    const configuredLoginWidgets = useMemo<Record<string, unknown>>(() =>
+        (loginViewConfig?.['widgets'] as Record<string, unknown>) ?? {}, [ loginViewConfig ]);
     useEffect(() =>
     {
         const refreshLocalization = () => setLocalizationVersion(value => (value + 1));
@@ -313,6 +321,44 @@ export const LoginView: FC<LoginViewProps> = ({ onAuthenticated, isEntering = fa
             setLocaleApplying(false);
         }
     }, [ localeApplying, selectedLocale ]);
+
+    useEffect(() =>
+    {
+        if(!loginImageUrls.length) return;
+
+        let cancelled = false;
+        let remaining = 0;
+
+        loginImageUrls
+            .filter(url =>
+            {
+                if(preloadedLoginImagesRef.current.has(url)) return false;
+
+                preloadedLoginImagesRef.current.add(url);
+
+                return true;
+            })
+            .forEach(url =>
+            {
+                remaining++;
+
+                const image = new Image();
+
+                image.onload = image.onerror = () =>
+                {
+                    remaining--;
+
+                    if(!cancelled && remaining <= 0) setLoginImagesVersion(version => version + 1);
+                };
+
+                image.src = url;
+            });
+
+        return () =>
+        {
+            cancelled = true;
+        };
+    }, [ loginImageUrls ]);
 
     useEffect(() =>
     {
