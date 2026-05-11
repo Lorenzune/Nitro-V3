@@ -5,13 +5,11 @@ import { GetClubMemberLevel, GetConfigurationValue, IRoomModel, LocalizeText, Se
 import { Button, Flex, Grid, LayoutCurrencyIcon, LayoutGridItem, Text } from '../../../common';
 import { useNavigator } from '../../../hooks';
 import { NitroInput } from '../../../layout';
-
-let isCreatingRoom = false;
-let createRoomTimeout: ReturnType<typeof setTimeout> = null;
+import { useRoomCreatorStore } from './navigatorRoomCreatorStore';
 
 const MAX_VISITORS_LIST: number[] = Array.from({ length: 10 }, (_, i) => (i + 1) * 10);
 
-export const NavigatorRoomCreatorView: FC<{}> = props =>
+export const NavigatorRoomCreatorView: FC = () =>
 {
     const [ name, setName ] = useState<string>(null);
     const [ description, setDescription ] = useState<string>(null);
@@ -25,7 +23,8 @@ export const NavigatorRoomCreatorView: FC<{}> = props =>
 
         return (models && models.length) ? models[0].name : '';
     });
-    const [ isCreating, setIsCreating ] = useState<boolean>(isCreatingRoom);
+    const isCreating = useRoomCreatorStore(s => s.isCreating);
+    const beginCreate = useRoomCreatorStore(s => s.beginCreate);
     const { categories = null } = useNavigator();
 
     const hcDisabled = GetConfigurationValue<boolean>('hc.disabled', false);
@@ -41,19 +40,11 @@ export const NavigatorRoomCreatorView: FC<{}> = props =>
 
     const createRoom = () =>
     {
-        if(isCreatingRoom) return;
+        if(useRoomCreatorStore.getState().isCreating) return;
 
-        isCreatingRoom = true;
-        setIsCreating(true);
+        beginCreate();
 
         SendMessageComposer(new CreateFlatMessageComposer(name, description, 'model_' + selectedModelName, Number(category), Number(visitorsCount), tradesSetting));
-
-        if(createRoomTimeout) clearTimeout(createRoomTimeout);
-        createRoomTimeout = setTimeout(() =>
-        {
-            isCreatingRoom = false;
-            setIsCreating(false);
-        }, 5000);
     };
 
     useEffect(() =>
