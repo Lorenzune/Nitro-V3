@@ -1125,8 +1125,15 @@ const RegisterDialog: FC<RegisterDialogProps> = props =>
     const [ gender, setGender ] = useState<GenderKey>('F');
     const [ selection, setSelection ] = useState<FigureSelection>(() => ({ ...FALLBACK_DEFAULTS.F }));
     const [ localError, setLocalError ] = useState<string | null>(null);
+    const [ prevStep, setPrevStep ] = useState<RegisterStep>(step);
     const [ turnstileToken, setTurnstileToken ] = useState('');
     const [ resetSignal, setResetSignal ] = useState(0);
+
+    if(prevStep !== step)
+    {
+        setPrevStep(step);
+        setLocalError(null);
+    }
     const [ serverReachable, setServerReachable ] = useState<boolean | null>(null);
     const [ pingingServer, setPingingServer ] = useState(false);
 
@@ -1164,11 +1171,6 @@ const RegisterDialog: FC<RegisterDialogProps> = props =>
         setTurnstileToken('');
         setResetSignal(prev => prev + 1);
     }, []);
-
-    useEffect(() =>
-    {
-        setLocalError(null);
-    }, [ step ]);
 
     const [ figureData, setFigureData ] = useState<FigureData | null>(null);
     const figureDataUrlRaw = GetConfigurationValue<string>('avatar.figuredata.url', '');

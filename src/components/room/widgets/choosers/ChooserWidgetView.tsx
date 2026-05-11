@@ -1,5 +1,5 @@
 import { FurniturePickupAllComposer, GetSessionDataManager } from '@nitrots/nitro-renderer';
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useEffectEvent, useMemo, useState } from 'react';
 import { LocalizeText, RoomObjectItem, SendMessageComposer, chooserSelectionVisualizer } from '../../../../api';
 import { Button, Flex, InfiniteScroll, NitroCardContentView, NitroCardHeaderView, NitroCardView, Text } from '../../../../common';
 import { NitroInput, classNames } from '../../../../layout';
@@ -98,19 +98,24 @@ export const ChooserWidgetView: FC<ChooserWidgetViewProps> = props =>
             .sort((a, b) => a.name.localeCompare(b.name));
     }, [ items, searchValue, selectedFilter, pickallFurni ]);
 
-    useEffect(() =>
+    const notifySelectionChange = useEffectEvent((items: RoomObjectItem[]) =>
     {
-        if(selectedItems.length === 0) return;
-
-        selectItem(selectedItems[selectedItems.length - 1]);
+        selectItem(items[items.length - 1]);
 
         chooserSelectionVisualizer.clearAll();
-        selectedItems.forEach(item =>
+        items.forEach(item =>
         {
             if(item.id && item.category)
                 chooserSelectionVisualizer.show(item.id, item.category);
         });
-    }, [ selectedItems, selectItem ]);
+    });
+
+    useEffect(() =>
+    {
+        if(selectedItems.length === 0) return;
+
+        notifySelectionChange(selectedItems);
+    }, [ selectedItems ]);
 
     const toggleItemSelection = (item: RoomObjectItem) =>
     {
