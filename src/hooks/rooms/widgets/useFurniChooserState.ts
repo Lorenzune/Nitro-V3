@@ -1,4 +1,4 @@
-import { GetRoomEngine, GetSessionDataManager, RoomObjectCategory, RoomObjectVariable } from '@nitrots/nitro-renderer';
+import { GetRoomEngine, GetSessionDataManager, IRoomObject, RoomObjectCategory, RoomObjectVariable } from '@nitrots/nitro-renderer';
 import { useState } from 'react';
 import { GetRoomSession, LocalizeText, RoomObjectItem } from '../../../api';
 import { useFurniAddedEvent, useFurniRemovedEvent } from '../engine';
@@ -11,7 +11,7 @@ const isPetOrBot = (roomObjectType: string): boolean =>
     roomObjectType === 'bot' ||
     roomObjectType.includes('rentableBot');
 
-const buildWallItem = (roomObject: any): RoomObjectItem | null =>
+const buildWallItem = (roomObject: IRoomObject): RoomObjectItem | null =>
 {
     if(roomObject.id < 0 || isPetOrBot(roomObject.type)) return null;
 
@@ -31,14 +31,12 @@ const buildWallItem = (roomObject: any): RoomObjectItem | null =>
     }
 
     const ownerId = roomObject.model.getValue<number>(RoomObjectVariable.FURNITURE_OWNER_ID) || 0;
-    const ownerName = roomObject.model.getValue<string>(RoomObjectVariable.FURNITURE_OWNER_NAME) ||
-        (sessionDataManager.getUserData ? sessionDataManager.getUserData(ownerId)?.name : null) ||
-        `User_${ownerId}`;
+    const ownerName = roomObject.model.getValue<string>(RoomObjectVariable.FURNITURE_OWNER_NAME) || `User_${ ownerId }`;
 
     return new RoomObjectItem(roomObject.id, RoomObjectCategory.WALL, name, ownerId, ownerName, 'furniture');
 };
 
-const buildFloorItem = (roomObject: any): RoomObjectItem | null =>
+const buildFloorItem = (roomObject: IRoomObject): RoomObjectItem | null =>
 {
     if(roomObject.id < 0 || isPetOrBot(roomObject.type)) return null;
 
@@ -51,9 +49,7 @@ const buildFloorItem = (roomObject: any): RoomObjectItem | null =>
     if(furniData && furniData.name.length) name = furniData.name;
 
     const ownerId = roomObject.model.getValue<number>(RoomObjectVariable.FURNITURE_OWNER_ID) || 0;
-    const ownerName = roomObject.model.getValue<string>(RoomObjectVariable.FURNITURE_OWNER_NAME) ||
-        (sessionDataManager.getUserData ? sessionDataManager.getUserData(ownerId)?.name : null) ||
-        `User_${ownerId}`;
+    const ownerName = roomObject.model.getValue<string>(RoomObjectVariable.FURNITURE_OWNER_NAME) || `User_${ ownerId }`;
 
     return new RoomObjectItem(roomObject.id, RoomObjectCategory.FLOOR, name, ownerId, ownerName, 'furniture');
 };
