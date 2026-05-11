@@ -109,8 +109,46 @@ const { data } = useNitroQuery<SomeParser, SomeData>({
 ```
 
 Already wired up; `QueryClientProvider` is mounted in `src/index.tsx`.
-Adopted on `OfferView`, `CatalogLayoutRoomAdsView`, `ModToolsChatlogView`,
-`CfhChatlogView`.
+
+Companion `useNitroEventInvalidator(eventType, queryKey, accept?)` —
+import from `src/api/nitro-query`. Subscribes to the renderer event
+and invalidates the query slot on every push, so server-driven
+refresh paths work the same as the initial request/response (e.g.
+ClubGiftInfoEvent firing again after the user claims a gift).
+
+### Singleton-filter split for `useBetween`-based hooks
+
+When a hook backs many consumers but most only need either state OR
+actions (not both), split it without breaking the shared-singleton
+guarantee:
+
+```ts
+// internal: state + actions in one closure
+const useFooStore = () => {
+    const [ data, setData ] = useState(...);
+    // listeners, effects, actions ...
+    return { data, doThing };
+};
+
+// public: read-only filter
+export const useFooState = () => {
+    const { data } = useBetween(useFooStore);
+    return { data };
+};
+
+// public: imperative filter
+export const useFooActions = () => {
+    const { doThing } = useBetween(useFooStore);
+    return { doThing };
+};
+
+// deprecated shim — keeps the historical return shape
+export const useFoo = () => useBetween(useFooStore);
+```
+
+`useBetween` ensures all three entry points hit the same store
+instance, so listeners/effects register once. Used by `useWiredTools`,
+`useTranslation`, `useNotification`, `useFriends`.
 
 ### Zustand stores
 
@@ -159,9 +197,9 @@ Login / Register / Forgot in `src/components/login/LoginView.tsx` use
 | `useNitroQuery` + `useNitroEventInvalidator` | `OfferView`, `CatalogLayoutRoomAdsView`, `ModToolsChatlogView`, `CfhChatlogView`, `useGiftConfiguration`, `useUserGroups`, `useClubOffers(windowId)`, `useSellablePetPalette(breed)`, `useMarketplaceConfiguration`, `useClubGifts` (with invalidator) |
 | Zustand | `NavigatorRoomCreatorView` (`useRoomCreatorStore`) |
 | God-hook split (state + actions + shim) | `doorbell`, `poll`, `furni-chooser`, `user-chooser`, `friend-request`, `chat-input` |
-| God-hook split (`useBetween` singleton + state filter + actions filter + shim) | `wired-tools`, `translation` |
+| God-hook split (`useBetween` singleton + state filter + actions filter + shim) | `wired-tools`, `translation`, `notification`, `friends` |
 | `WidgetErrorBoundary` | `RoomWidgetsView` umbrella |
-| Vitest | 99/99 cases on pure helpers + the Zustand store |
+| Vitest | 113/113 cases on pure helpers + the Zustand store |
 
 | Not yet | Notes |
 |---|---|
@@ -197,7 +235,7 @@ Fix shapes documented; both are reasonable PRs on their own.
 - **Skip-motivated god-hook splits are fine** — when a hook's actions
   mutate internal state, document the reason in the commit message and
   move on rather than forcing a bad split.
-- **`yarn test` must stay green** on every commit. Currently 99/99.
+- **`yarn test` must stay green** on every commit. Currently 113/113.
 - **Lint baseline**: don't regress. Some pre-existing errors (`FC<{}>`,
   `IMessageEvent | undefined` redundant union in the local sandbox where
   the renderer SDK isn't installed) are out of scope here.

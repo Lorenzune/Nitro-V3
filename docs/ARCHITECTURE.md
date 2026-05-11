@@ -427,6 +427,18 @@ The current branch (**`feat/react19-modernization`**, PR #2) has applied:
       Wired tools — six consumers split across read-only views
       (settings panel, bootstrap) and dispatch sites (messenger, chat
       input).
+    - **notification**: `useNotificationStore` (internal singleton) +
+      `useNotificationState` (queue arrays for the renderer view) +
+      `useNotificationActions` (8 entry points: simpleAlert,
+      showNitroAlert, showTradeAlert, showConfirm, showSingleBubble,
+      closeAlert, closeBubbleAlert, closeConfirm) + shim. The ~30
+      message-event listeners and 5 state slices stay in the singleton.
+      Used by ~44 consumers, most of which only need one action.
+    - **friends**: `useFriendsStore` (internal singleton) +
+      `useFriendsState` (friends arrays, settings, derived
+      online/offline split, lookup helpers) + `useFriendsActions`
+      (requestFriend, requestResponse, followFriend, updateRelationship)
+      + shim. 16 consumers.
 - **Zustand** (proposal #5) — **enabled**. `zustand` installed; factory at
   `src/state/createNitroStore.ts`. First adoption: the `let isCreatingRoom`
   / `createRoomTimeout` module-level pair in `NavigatorRoomCreatorView`
@@ -472,7 +484,7 @@ Status after this round of work:
 - Vitest 3 + jsdom + `@testing-library/react` + `@testing-library/jest-dom`
   configured. Separate `vitest.config.mts` so the runner doesn't drag in
   the renderer SDK aliases from `vite.config.mjs`.
-- **99 cases passing** across 7 test files:
+- **113 cases passing** across 8 test files:
     - `WiredCreatorTools.helpers.test.ts` (18) — formatters + snapshot
       factory.
     - `navigatorRoomCreatorStore.test.ts` (4) — Zustand store invariants
@@ -488,10 +500,16 @@ Status after this round of work:
       (covers the helper used by the InfoStand pilot).
     - `catalog-favorites.helpers.test.ts` (16) — localStorage parse +
       v2→v3 migration + per-catalog-type storage-key routing.
+    - `avatar-info-reducers.test.ts` (14) — InfoStand reducer pilot:
+      bail-out branches (state-not-AvatarInfoUser, mismatched
+      user/roomIndex, equal-after-dedup) + the figure / favorite-group
+      apply paths.
 - **Pure-module convention**: tests live in `tests/` and import from
   concrete file paths (e.g. `../src/api/catalog/CatalogType`) rather
   than the api barrel, so jsdom doesn't transitively load the renderer
-  SDK's Pixi-bound modules.
+  SDK's Pixi-bound modules. Renderer event type imports use
+  `import type { … }` so they're erased at compile time and don't
+  trigger the runtime module load either.
 - `yarn test` + `yarn test:watch` scripts added.
 
 ### Logic bug fixes
