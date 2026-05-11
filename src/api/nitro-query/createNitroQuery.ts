@@ -24,6 +24,14 @@ export interface NitroQueryConfig<TParser extends IMessageEvent, TData>
      */
     select?: (event: TParser) => TData;
     /**
+     * Optional predicate to ignore parser events that don't match this
+     * query (typically used as a correlation-key filter on a globally
+     * shared event stream — e.g. `e => e.getParser()?.roomId === roomId`).
+     * When the predicate returns false, the listener stays registered
+     * and keeps waiting; the timeout still applies.
+     */
+    accept?: (event: TParser) => boolean;
+    /**
      * Max time to wait for the response before rejecting (default 15s).
      */
     timeoutMs?: number;
@@ -52,11 +60,11 @@ export const useNitroQuery = <TParser extends IMessageEvent, TData = TParser>(
     config: NitroQueryConfig<TParser, TData>
 ): UseQueryResult<TData> =>
 {
-    const { key, request, parser, select, timeoutMs = 15_000, enabled, staleTime, refetchOnMount } = config;
+    const { key, request, parser, select, accept, timeoutMs = 15_000, enabled, staleTime, refetchOnMount } = config;
 
     const options: UseQueryOptions<TData, Error, TData> = {
         queryKey: key,
-        queryFn: () => awaitNitroResponse<TParser, TData>({ key, request, parser, select, timeoutMs }),
+        queryFn: () => awaitNitroResponse<TParser, TData>({ key, request, parser, select, accept, timeoutMs }),
         enabled,
         staleTime,
         refetchOnMount
@@ -71,11 +79,11 @@ export const useNitroQuery = <TParser extends IMessageEvent, TData = TParser>(
  * can use the same plumbing imperatively.
  */
 export const awaitNitroResponse = <TParser extends IMessageEvent, TData>(
-    config: Pick<NitroQueryConfig<TParser, TData>, 'request' | 'parser' | 'select' | 'timeoutMs'>
+    config: Pick<NitroQueryConfig<TParser, TData>, 'request' | 'parser' | 'select' | 'accept' | 'timeoutMs'>
 ): Promise<TData> =>
         new Promise<TData>((resolve, reject) =>
         {
-            const { request, parser: ParserCtor, select, timeoutMs = 15_000 } = config;
+            const { request, parser: ParserCtor, select, accept, timeoutMs = 15_000 } = config;
 
             let settled = false;
             let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
@@ -90,6 +98,7 @@ export const awaitNitroResponse = <TParser extends IMessageEvent, TData>(
             listener = new (ParserCtor as any)((event: TParser) =>
             {
                 if(settled) return;
+                if(accept && !accept(event)) return;
                 settled = true;
 
                 cleanup();
