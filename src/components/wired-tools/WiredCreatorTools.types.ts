@@ -1,4 +1,4 @@
-import { AvatarInfoFurni } from '../../api';
+import type { AvatarInfoFurni } from '../../api';
 
 export type WiredToolsTab = 'monitor' | 'variables' | 'inspection' | 'chests' | 'settings';
 export type InspectionElementType = 'furni' | 'user' | 'global';

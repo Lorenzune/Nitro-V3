@@ -1,4 +1,4 @@
-import { HotelDateTimeParts, MonitorSnapshot } from './WiredCreatorTools.types';
+import type { HotelDateTimeParts, MonitorSnapshot } from './WiredCreatorTools.types';
 
 const HOTEL_TIME_FORMATTERS: Map<string, Intl.DateTimeFormat> = new Map();
 
