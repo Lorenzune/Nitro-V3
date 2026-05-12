@@ -84,9 +84,15 @@ export default defineConfig({
                 assetFileNames: 'src/assets/[name]-[hash].[ext]',
                 manualChunks: id =>
                 {
+                    // Renderer source is consumed via filesystem alias
+                    // (../Nitro_Render_V3/packages/*/src) so it is NOT
+                    // under node_modules — needs its own branch before
+                    // the node_modules check.
+                    if(id.includes('Nitro_Render_V3') || id.includes(`${ rendererRoot }`)) return 'nitro-renderer';
+
                     if(id.includes('node_modules'))
                     {
-                        if(id.includes('@nitrots/nitro-renderer') || id.includes('renderer3') || id.includes('Nitro_Render_V3')) return 'nitro-renderer';
+                        if(id.includes('@nitrots/nitro-renderer') || id.includes('renderer3')) return 'nitro-renderer';
 
                         return 'vendor';
                     }
