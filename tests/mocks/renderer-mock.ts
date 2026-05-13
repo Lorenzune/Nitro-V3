@@ -98,11 +98,9 @@ const makeEnumProxy = (label: string) => new Proxy({}, {
 export const NitroEventType = makeEnumProxy('NitroEventType');
 export const MouseEventType = makeEnumProxy('MouseEventType');
 export const TouchEventType = makeEnumProxy('TouchEventType');
-export const RoomObjectCategory = makeEnumProxy('RoomObjectCategory');
 export const RoomObjectPlacementSource = makeEnumProxy('RoomObjectPlacementSource');
 export const RoomObjectType = makeEnumProxy('RoomObjectType');
 export const RoomObjectVariable = makeEnumProxy('RoomObjectVariable');
-export const RoomControllerLevel = makeEnumProxy('RoomControllerLevel');
 export const RoomTradingLevelEnum = makeEnumProxy('RoomTradingLevelEnum');
 export const HabboClubLevelEnum = makeEnumProxy('HabboClubLevelEnum');
 export const FurnitureType = makeEnumProxy('FurnitureType');
@@ -112,6 +110,29 @@ export const AvatarScaleType = makeEnumProxy('AvatarScaleType');
 export const AvatarSetType = makeEnumProxy('AvatarSetType');
 export const AvatarAction = makeEnumProxy('AvatarAction');
 export const RoomWidgetEnumItemExtradataParameter = makeEnumProxy('RoomWidgetEnumItemExtradataParameter');
+
+// Numeric enums — values mirror the real renderer SDK so comparisons
+// (`controllerLevel >= GUILD_ADMIN`, category branching) keep working.
+
+export class RoomControllerLevel
+{
+    static readonly NONE = 0;
+    static readonly GUEST = 1;
+    static readonly GUILD_MEMBER = 2;
+    static readonly GUILD_ADMIN = 3;
+    static readonly ROOM_OWNER = 4;
+    static readonly MODERATOR = 5;
+}
+
+export class RoomObjectCategory
+{
+    static readonly MINIMUM = 0;
+    static readonly ROOM = 10;
+    static readonly UNIT = 20;
+    static readonly FLOOR = 30;
+    static readonly WALL = 40;
+    static readonly MAXIMUM = 50;
+}
 
 // ---------------------------------------------------------------------------
 // Doorbell event class

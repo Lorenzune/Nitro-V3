@@ -480,11 +480,39 @@ Status after this round of work:
 | CatalogPagesList / CatalogPage | **deferred** — core state slice (rootNode / offersToNodes / currentPage), needs its own split-out store |
 | BuildersClubFurniCount / SubscriptionStatus | **deferred** — read by the internal `getBuilderFurniPlaceableStatus` logic, moves with the data/actions split |
 
+Pure-helper extraction landed before the singleton split:
+`src/hooks/catalog/useCatalog.helpers.ts` hosts the dependency-free
+pieces previously inlined in the hook —
+
+- `normalizeCatalogType(type?)` — coerce the optional catalog type
+  back to `NORMAL` / `BUILDER`.
+- `getOfferProductKeys(offer)` — canonical lookup keys for the
+  resolved-offer cache.
+- `findNodeById` / `findNodeByName` — DFS over the catalog tree,
+  root excluded.
+- `getNodesByOfferIdFromMap(offerId, map, onlyVisible)` — used to be
+  the closed-over `getNodesByOfferId`; the `onlyVisible` fallback to
+  the full bucket is preserved.
+- `buildCatalogNodeTree(NodeData)` — pulled out of the
+  `CatalogPagesListEvent` reducer; returns the tree + the offerId
+  index map in one pass.
+- `resolveBuilderFurniPlaceableStatus(input)` — the placement
+  decision tree as a pure function; the hook keeps the `GetRoomEngine`
+  / `GetSessionDataManager` reads (to count non-self, non-moderator
+  visitors) and passes the resulting `visitorCount` into the helper.
+
+`useCatalog.ts` now imports these instead of defining them inline
+(net **−75 LOC**). Test file `tests/useCatalog.helpers.test.ts` covers
+all six helpers with 34 cases (tree depth + offerId mapping,
+node lookups including root exclusion, the limit-reached / guild-admin
+fallback / visitors-in-room paths of the placement helper, and the
+empty-map / partial-bucket branches of the offer lookup).
+
 ### Tests
 - Vitest 3 + jsdom + `@testing-library/react` + `@testing-library/jest-dom`
   configured. Separate `vitest.config.mts` so the runner doesn't drag in
   the renderer SDK aliases from `vite.config.mjs`.
-- **124 cases passing** across 10 test files. Pure-module suites:
+- **158 cases passing** across 11 test files. Pure-module suites:
     - `WiredCreatorTools.helpers.test.ts` (18) — formatters + snapshot
       factory.
     - `navigatorRoomCreatorStore.test.ts` (4) — Zustand store invariants
@@ -504,6 +532,13 @@ Status after this round of work:
       bail-out branches (state-not-AvatarInfoUser, mismatched
       user/roomIndex, equal-after-dedup) + the figure / favorite-group
       apply paths.
+    - `useCatalog.helpers.test.ts` (34) — catalog pure helpers
+      extracted out of the god-hook: `normalizeCatalogType`,
+      `getOfferProductKeys`, `findNodeById` / `findNodeByName` (with
+      the root-exclusion guard), `getNodesByOfferIdFromMap` (with
+      the partial-visible fallback), `buildCatalogNodeTree` (tree
+      depth + offerId index), and the full decision tree of
+      `resolveBuilderFurniPlaceableStatus`.
 
   Component-/hook-level suites (on the new renderer-SDK mock):
     - `WidgetErrorBoundary.test.tsx` (4) — happy path + caught render

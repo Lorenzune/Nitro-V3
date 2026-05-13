@@ -1,10 +1,11 @@
-import { BuildersClubFurniCountMessageEvent, BuildersClubPlaceRoomItemMessageComposer, BuildersClubPlaceWallItemMessageComposer, BuildersClubQueryFurniCountMessageComposer, BuildersClubSubscriptionStatusMessageEvent, CatalogPageMessageEvent, CatalogPagesListEvent, CatalogPublishedMessageEvent, CreateLinkEvent, FrontPageItem, FurniturePlaceComposer, FurniturePlacePaintComposer, GetCatalogIndexComposer, GetCatalogPageComposer, GetRoomEngine, GetSessionDataManager, GetTickerTime, LegacyDataType, LimitedEditionSoldOutEvent, MarketplaceMakeOfferResult, NodeData, ProductOfferEvent, PurchaseErrorMessageEvent, PurchaseFromCatalogComposer, PurchaseNotAllowedMessageEvent, PurchaseOKMessageEvent, RoomControllerLevel, RoomEngineObjectPlacedEvent, RoomObjectCategory, RoomObjectPlacementSource, RoomObjectType, RoomObjectVariable, RoomPreviewer, Vector3d } from '@nitrots/nitro-renderer';
+import { BuildersClubFurniCountMessageEvent, BuildersClubPlaceRoomItemMessageComposer, BuildersClubPlaceWallItemMessageComposer, BuildersClubQueryFurniCountMessageComposer, BuildersClubSubscriptionStatusMessageEvent, CatalogPageMessageEvent, CatalogPagesListEvent, CatalogPublishedMessageEvent, CreateLinkEvent, FrontPageItem, FurniturePlaceComposer, FurniturePlacePaintComposer, GetCatalogIndexComposer, GetCatalogPageComposer, GetRoomEngine, GetSessionDataManager, GetTickerTime, LegacyDataType, LimitedEditionSoldOutEvent, MarketplaceMakeOfferResult, ProductOfferEvent, PurchaseErrorMessageEvent, PurchaseFromCatalogComposer, PurchaseNotAllowedMessageEvent, PurchaseOKMessageEvent, RoomEngineObjectPlacedEvent, RoomObjectPlacementSource, RoomObjectVariable, RoomPreviewer, Vector3d } from '@nitrots/nitro-renderer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useBetween } from 'use-between';
-import { BuilderFurniPlaceableStatus, CatalogNode, CatalogPage, CatalogType, DispatchUiEvent, FurniCategory, GetFurnitureData, GetProductDataForLocalization, GetRoomSession, ICatalogNode, ICatalogPage, IPageLocalization, IProduct, IPurchasableOffer, IPurchaseOptions, LocalizeText, NotificationAlertType, Offer, PageLocalization, PlacedObjectPurchaseData, PlaySound, Product, ProductTypeEnum, RequestedPage, SearchResult, SendMessageComposer, SoundNames } from '../../api';
+import { BuilderFurniPlaceableStatus, CatalogPage, CatalogType, DispatchUiEvent, FurniCategory, GetFurnitureData, GetProductDataForLocalization, GetRoomSession, ICatalogNode, ICatalogPage, IPageLocalization, IProduct, IPurchasableOffer, IPurchaseOptions, LocalizeText, NotificationAlertType, Offer, PageLocalization, PlacedObjectPurchaseData, PlaySound, Product, ProductTypeEnum, RequestedPage, SearchResult, SendMessageComposer, SoundNames } from '../../api';
 import { CatalogPurchaseFailureEvent, CatalogPurchaseNotAllowedEvent, CatalogPurchaseSoldOutEvent, CatalogPurchasedEvent, InventoryFurniAddedEvent } from '../../events';
 import { useMessageEvent, useNitroEvent, useUiEvent } from '../events';
 import { useNotification } from '../notification';
+import { buildCatalogNodeTree, findNodeById, findNodeByName, getNodesByOfferIdFromMap, getOfferProductKeys, normalizeCatalogType, resolveBuilderFurniPlaceableStatus, RoomControllerLevel, RoomObjectCategory, RoomObjectType } from './useCatalog.helpers';
 import { useCatalogPlaceMultipleItems } from './useCatalogPlaceMultipleItems';
 import { useCatalogSkipPurchaseConfirmation } from './useCatalogSkipPurchaseConfirmation';
 
@@ -62,13 +63,6 @@ const useCatalogState = () =>
         setIsVisible(false);
     }, []);
 
-    const normalizeCatalogType = useCallback((type?: string) =>
-    {
-        if(type === CatalogType.BUILDER) return CatalogType.BUILDER;
-
-        return CatalogType.NORMAL;
-    }, []);
-
     const resetVisibleCatalogState = useCallback((type?: string) =>
     {
         requestedPage.current.resetRequest();
@@ -85,7 +79,7 @@ const useCatalogState = () =>
         setFrontPageItems([]);
         setNavigationHidden(false);
         setCurrentType(normalizeCatalogType(type));
-    }, [ normalizeCatalogType ]);
+    }, []);
 
     const openCatalogByType = useCallback((type?: string) =>
     {
@@ -97,7 +91,7 @@ const useCatalogState = () =>
         }
 
         setIsVisible(true);
-    }, [ currentType, normalizeCatalogType, resetVisibleCatalogState ]);
+    }, [ currentType, resetVisibleCatalogState ]);
 
     const toggleCatalogByType = useCallback((type?: string) =>
     {
@@ -116,54 +110,60 @@ const useCatalogState = () =>
         }
 
         setIsVisible(true);
-    }, [ isVisible, currentType, normalizeCatalogType, resetVisibleCatalogState ]);
+    }, [ isVisible, currentType, resetVisibleCatalogState ]);
 
     const getBuilderFurniPlaceableStatus = useCallback((offer: IPurchasableOffer) =>
     {
-        if(!offer) return BuilderFurniPlaceableStatus.MISSING_OFFER;
-
         const roomSession = GetRoomSession();
-        const canUseGuildAdminFallback = (!!roomSession
-            && roomSession.isGuildRoom
-            && (roomSession.controllerLevel >= RoomControllerLevel.GUILD_ADMIN)
-            && (secondsLeft > 0));
-        const usesSharedPlacementPool = (!!roomSession && !roomSession.isRoomOwner && (builderPlacementAllowedInCurrentRoom || canUseGuildAdminFallback));
 
-        if(!roomSession) return BuilderFurniPlaceableStatus.NOT_IN_ROOM;
+        // Count non-self, non-moderator users sharing the room. Only
+        // matters when the subscription has expired — the pure helper
+        // short-circuits on the limit-reached / not-in-room paths
+        // first, so we skip the room scan when there's still time on
+        // the clock.
+        let visitorCount = 0;
 
-        if(!roomSession.isRoomOwner && !builderPlacementAllowedInCurrentRoom && !canUseGuildAdminFallback) return BuilderFurniPlaceableStatus.NOT_GROUP_ADMIN;
-
-        if(!usesSharedPlacementPool && ((furniCount < 0) || (furniCount >= furniLimit))) return BuilderFurniPlaceableStatus.FURNI_LIMIT_REACHED;
-
-        if((secondsLeft <= 0) && builderPlacementBlockedByVisitors) return BuilderFurniPlaceableStatus.VISITORS_IN_ROOM;
-
-        if(secondsLeft <= 0)
+        if(roomSession && (secondsLeft <= 0) && !builderPlacementBlockedByVisitors)
         {
             const roomEngine = GetRoomEngine();
             const userDataManager = roomSession.userDataManager;
             const sessionDataManager = GetSessionDataManager();
 
-            if(!roomEngine || !userDataManager || !sessionDataManager) return BuilderFurniPlaceableStatus.OKAY;
-
-            const roomObjects = roomEngine.getRoomObjects(roomSession.roomId, RoomObjectCategory.UNIT);
-
-            if(!roomObjects || !roomObjects.length) return BuilderFurniPlaceableStatus.OKAY;
-
-            for(const roomObject of roomObjects)
+            if(roomEngine && userDataManager && sessionDataManager)
             {
-                if(!roomObject) continue;
+                const roomObjects = roomEngine.getRoomObjects(roomSession.roomId, RoomObjectCategory.UNIT);
 
-                const userData = userDataManager.getUserDataByIndex(roomObject.id);
+                if(roomObjects && roomObjects.length)
+                {
+                    for(const roomObject of roomObjects)
+                    {
+                        if(!roomObject) continue;
 
-                if(!userData || (userData.type !== RoomObjectType.USER)) continue;
-                if(userData.webID === sessionDataManager.userId) continue;
-                if(userData.isModerator) continue;
+                        const userData = userDataManager.getUserDataByIndex(roomObject.id);
 
-                return BuilderFurniPlaceableStatus.VISITORS_IN_ROOM;
+                        if(!userData || (userData.type !== RoomObjectType.USER)) continue;
+                        if(userData.webID === sessionDataManager.userId) continue;
+                        if(userData.isModerator) continue;
+
+                        visitorCount++;
+                        break;
+                    }
+                }
             }
         }
 
-        return BuilderFurniPlaceableStatus.OKAY;
+        return resolveBuilderFurniPlaceableStatus({
+            offer,
+            roomSession: roomSession
+                ? { isGuildRoom: roomSession.isGuildRoom, isRoomOwner: roomSession.isRoomOwner, controllerLevel: roomSession.controllerLevel }
+                : null,
+            secondsLeft,
+            furniCount,
+            furniLimit,
+            builderPlacementAllowedInCurrentRoom,
+            builderPlacementBlockedByVisitors,
+            visitorCount
+        });
     }, [ builderPlacementAllowedInCurrentRoom, builderPlacementBlockedByVisitors, furniCount, furniLimit, secondsLeft ]);
 
     const isDraggable = useCallback((offer: IPurchasableOffer) =>
@@ -294,70 +294,12 @@ const useCatalogState = () =>
         });
     }, [ resetObjectMover, resetRoomPaint ]);
 
-    const getNodeById = useCallback((id: number, node: ICatalogNode) =>
-    {
-        if((node.pageId === id) && (node !== rootNode)) return node;
+    const getNodeById = useCallback((id: number, node: ICatalogNode) => findNodeById(id, node, rootNode), [ rootNode ]);
 
-        for(const child of node.children)
-        {
-            const found = (getNodeById(id, child));
-
-            if(found) return found;
-        }
-
-        return null;
-    }, [ rootNode ]);
-
-    const getNodeByName = useCallback((name: string, node: ICatalogNode) =>
-    {
-        if((node.pageName === name) && (node !== rootNode)) return node;
-
-        for(const child of node.children)
-        {
-            const found = (getNodeByName(name, child));
-
-            if(found) return found;
-        }
-
-        return null;
-    }, [ rootNode ]);
+    const getNodeByName = useCallback((name: string, node: ICatalogNode) => findNodeByName(name, node, rootNode), [ rootNode ]);
 
     const getNodesByOfferId = useCallback((offerId: number, flag: boolean = false) =>
-    {
-        if(!offersToNodes || !offersToNodes.size) return null;
-
-        if(flag)
-        {
-            const nodes: ICatalogNode[] = [];
-            const offers = offersToNodes.get(offerId);
-
-            if(offers && offers.length) for(const offer of offers) (offer.isVisible && nodes.push(offer));
-
-            if(nodes.length) return nodes;
-        }
-
-        return offersToNodes.get(offerId);
-    }, [ offersToNodes ]);
-
-    const getOfferProductKeys = useCallback((offer: IPurchasableOffer) =>
-    {
-        const product = offer?.product;
-        const keys: string[] = [];
-
-        if(!product) return keys;
-
-        if(product.productType && (product.productClassId >= 0))
-        {
-            keys.push(`${ product.productType }:id:${ product.productClassId }`);
-        }
-
-        if(product.productType && product.furnitureData?.className?.length)
-        {
-            keys.push(`${ product.productType }:class:${ product.furnitureData.className }`);
-        }
-
-        return keys;
-    }, []);
+        getNodesByOfferIdFromMap(offerId, offersToNodes, flag), [ offersToNodes ]);
 
     const cacheResolvedOffer = useCallback((offer: IPurchasableOffer) =>
     {
@@ -365,7 +307,7 @@ const useCatalogState = () =>
         {
             resolvedOffersByProductKey.current.set(key, offer);
         }
-    }, [ getOfferProductKeys ]);
+    }, []);
 
     const applySelectedOffer = useCallback((offer: IPurchasableOffer) =>
     {
@@ -563,27 +505,10 @@ const useCatalogState = () =>
 
         if(parserCatalogType !== currentType) return;
 
-        const offers: Map<number, ICatalogNode[]> = new Map();
+        const { rootNode: builtRoot, offersToNodes: builtOffers } = buildCatalogNodeTree(parser.root);
 
-        const getCatalogNode = (node: NodeData, depth: number, parent: ICatalogNode) =>
-        {
-            const catalogNode = (new CatalogNode(node, depth, parent) as ICatalogNode);
-
-            for(const offerId of catalogNode.offerIds)
-            {
-                if(offers.has(offerId)) offers.get(offerId).push(catalogNode);
-                else offers.set(offerId, [ catalogNode ]);
-            }
-
-            depth++;
-
-            for(const child of node.children) catalogNode.addChild(getCatalogNode(child, depth, catalogNode));
-
-            return catalogNode;
-        };
-
-        setRootNode(getCatalogNode(parser.root, 0, null));
-        setOffersToNodes(offers);
+        setRootNode(builtRoot);
+        setOffersToNodes(builtOffers);
     });
 
     useMessageEvent<CatalogPageMessageEvent>(CatalogPageMessageEvent, event =>

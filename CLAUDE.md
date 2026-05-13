@@ -261,13 +261,13 @@ into `configurePreviewServer` so `yarn preview` keeps working.
 | God-hook split (state + actions + shim) | `doorbell`, `poll`, `furni-chooser`, `user-chooser`, `friend-request`, `chat-input` |
 | God-hook split (`useBetween` singleton + state filter + actions filter + shim) | `wired-tools`, `translation`, `notification`, `friends` |
 | `WidgetErrorBoundary` | `RoomWidgetsView` umbrella |
-| Vitest | 124/124 cases — 113 on pure helpers + Zustand store, plus the first 2 component-/hook-level pilots (WidgetErrorBoundary, useDoorbellState) on top of the new renderer-SDK mock at `tests/mocks/renderer-mock.ts` |
+| Vitest | 158/158 cases — pure helpers + Zustand store + 2 component-/hook-level pilots (WidgetErrorBoundary, useDoorbellState) on top of the renderer-SDK mock at `tests/mocks/renderer-mock.ts`, plus 34 cases on the freshly extracted catalog helpers |
 | Form Actions | Login / Register / Forgot (LoginView.tsx) |
 | Cherry-picked from `duckietm` PR #126 | `UserAccountSettingsView` (reset password / email / username under user settings), plus the wear-badge popup `canShowWearButton` gating |
 
 | Not yet | Notes |
 |---|---|
-| Core `useCatalog` split | Session-stable secondary fetches all migrated to TanStack queries (see ARCHITECTURE.md). What's left: core `rootNode`/`offersToNodes`/`currentPage` slice + Builders Club status. Needs a dedicated `useCatalogData`/`useCatalogUiState`/`useCatalogActions` split. |
+| Singleton-filter split of `useCatalog` | Pure helpers extracted to `useCatalog.helpers.ts` and consumed in the hook (`buildCatalogNodeTree`, `findNodeById`, `findNodeByName`, `getNodesByOfferIdFromMap`, `getOfferProductKeys`, `normalizeCatalogType`, `resolveBuilderFurniPlaceableStatus`). What still remains: split the singleton state into `useCatalogData` / `useCatalogUiState` / `useCatalogActions` filters via `useBetween`, mirroring the wired-tools / translation / notification / friends pattern. The 48 consumers can stay on the shim during the transition. |
 | Split `useChatWidget` / `useAvatarInfoWidget` | Both state-driven via events with no clean imperative actions to extract — skip-motivated. Already touched today for the InfoStand listener move. |
 | Split `usePetPackageWidget` / `useWordQuizWidget` / `useChatCommandSelector` | Their "actions" mutate internal state or are tightly interdependent — skip-motivated. |
 | Hoist Wired Creator Tools shared state to a Zustand slice | Would remove ~25 props passed to the 3 tab sub-components. (Wired-tools split done as singleton-filter; Zustand slice is the next step.) |
@@ -323,6 +323,10 @@ Fix shapes documented; both are reasonable PRs on their own.
 - Asset middleware: `nitroAssetsServer()` in `vite.config.mjs`
 - Configuration pre-init: `src/bootstrap.ts` (`await GetConfiguration().init()`
   before `import('./index')`)
+- Catalog pure helpers: `src/hooks/catalog/useCatalog.helpers.ts`
+  (`buildCatalogNodeTree`, `findNodeById` / `findNodeByName`,
+  `getNodesByOfferIdFromMap`, `getOfferProductKeys`,
+  `normalizeCatalogType`, `resolveBuilderFurniPlaceableStatus`)
 - Renderer-SDK mock for Vitest: `tests/mocks/renderer-mock.ts`
   (aliased over `@nitrots/nitro-renderer` via `vitest.config.mts`).
   Hosts the explicit `NitroLogger` mock, the `mockEventDispatcher` /
