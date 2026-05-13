@@ -1,4 +1,4 @@
-import { GetConfiguration } from '@nitrots/configuration';
+import { GetConfiguration } from '@nitrots/nitro-renderer';
 import { configFileUrl, getClientMode, installSecureFetch } from './secure-assets';
 
 const ensureMobileViewport = () =>

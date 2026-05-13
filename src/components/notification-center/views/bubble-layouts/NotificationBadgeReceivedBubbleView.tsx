@@ -14,6 +14,8 @@ export const NotificationBadgeReceivedBubbleView: FC<NotificationBadgeReceivedBu
     const { item = null, onClose = null, ...rest } = props;
     const { activeBadgeCodes = [], toggleBadge = null, isWearingBadge = null, canWearBadges = null } = useInventoryBadges();
 
+    const requestBadgesIfEmpty = useEffectEvent(() =>
+    {
         if(activeBadgeCodes.length === 0) SendMessageComposer(new RequestBadgesComposer());
     });
 
