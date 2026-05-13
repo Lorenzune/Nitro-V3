@@ -7,6 +7,14 @@ on:
       - 'feat/**'
   pull_request:
 
+# Opt into the Node.js 24 runtime for the JavaScript actions
+# (actions/checkout, actions/setup-node, …). Node 20 will be removed
+# from GitHub-hosted runners in September 2026; this env var asks the
+# runner to use Node 24 today so the workflow logs stop warning about
+# it on every run.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
   check:
     name: Type check + tests
