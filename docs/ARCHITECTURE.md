@@ -776,44 +776,6 @@ this repo.
 
 ### Open
 
-#### `MainView` — race between `RoomSessionEvent.CREATED` and `ENDED`
-
-`src/components/MainView.tsx:47-48` writes the same `landingViewVisible`
-state from two independent listeners with no session-token guard:
-
-```ts
-useNitroEvent(RoomSessionEvent.CREATED, () => setLandingViewVisible(false));
-useNitroEvent(RoomSessionEvent.ENDED, e => setLandingViewVisible(e.openLandingView));
-```
-
-If the events arrive out of order (fast reconnect, network reordering),
-the final state contradicts the actual session state — landing view stuck
-open inside a room, or stuck closed at the hotel view. Resolves on next
-room change.
-
-**Fix shape** (deferred until `useNitroEventReducer` companion lands —
-see proposal #1):
-
-```ts
-// One reducer owns both events + the active session token
-const { sessionId, landingViewVisible } = useNitroEventReducer<...>(
-    [RoomSessionEvent.CREATED, RoomSessionEvent.ENDED],
-    (state, e) => {
-        if (e.type === RoomSessionEvent.CREATED) {
-            return { sessionId: e.session.roomId, landingViewVisible: false };
-        }
-        if (state.sessionId !== null && e.session.roomId !== state.sessionId) {
-            return state; // stale ENDED for old session, ignore
-        }
-        return { sessionId: null, landingViewVisible: e.openLandingView };
-    },
-    { sessionId: null, landingViewVisible: true }
-);
-```
-
-**Severity**: edge case, observed only after unstable websocket
-reconnects. UX-degrading, not data-corrupting.
-
 #### `LayoutFurniImageView` / `LayoutAvatarImageView` — async fetch race
 
 In both files an effect kicks off an async `processAsImageUrl` /
@@ -832,6 +794,16 @@ data-corrupting.
 
 ### Recently fixed (in this branch)
 
+- **`MainView` CREATED/ENDED race fixed.** Two independent
+  `useNitroEvent` listeners on `RoomSessionEvent.CREATED` /
+  `RoomSessionEvent.ENDED` could land out of order under flaky
+  reconnects, leaving `landingViewVisible` contradicting the actual
+  session state. Replaced with a single `useNitroEventReducer` that
+  carries the active session's `roomId`: a CREATED bumps the tracked
+  id and closes the landing view; an ENDED is honored only if its
+  `event.session.roomId` matches the tracked id (or no session is
+  active), otherwise it's a stale ENDED for a previous session and
+  gets ignored.
 - **Doorbell close button didn't close** while users were pending
   (`useEffect(() => setIsVisible(!!users.length))` overrode the close).
   Fixed by `src/components/room/widgets/doorbell/DoorbellWidgetView.tsx`
