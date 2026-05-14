@@ -260,7 +260,7 @@ into `configurePreviewServer` so `yarn preview` keeps working.
 | Zustand | `NavigatorRoomCreatorView` (`useRoomCreatorStore`) |
 | God-hook split (state + actions + shim) | `doorbell`, `poll`, `furni-chooser`, `user-chooser`, `friend-request`, `chat-input` |
 | God-hook split (`useBetween` singleton + state filter + actions filter + shim) | `wired-tools`, `translation`, `notification`, `friends`, `catalog` (three-way: `useCatalogData` / `useCatalogUiState` / `useCatalogActions` — all 48 consumers migrated, deprecated `useCatalog` shim removed) |
-| `WidgetErrorBoundary` | `RoomWidgetsView` umbrella |
+| `WidgetErrorBoundary` | `RoomWidgetsView` umbrella + per-widget wrap on all 13 room widgets and all 20 furniture widgets (so a crash in one widget no longer takes down its siblings) |
 | Vitest | 162/162 cases — pure helpers + Zustand store + 2 component-/hook-level pilots (WidgetErrorBoundary, useDoorbellState) on top of the renderer-SDK mock at `tests/mocks/renderer-mock.ts`, 34 cases on the catalog pure helpers, 4 contract cases on the catalog filters |
 | Form Actions | Login / Register / Forgot (LoginView.tsx) |
 | Cherry-picked from `duckietm` PR #126 | `UserAccountSettingsView` (reset password / email / username under user settings), plus the wear-badge popup `canShowWearButton` gating |

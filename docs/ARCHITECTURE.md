@@ -302,12 +302,12 @@ takes down the whole UI.
 Implementation lives at `src/common/error-boundary/WidgetErrorBoundary.tsx`.
 
 **Status.** Implemented + applied to `RoomWidgetsView` as the umbrella for
-all in-room widgets. A widget crash now degrades gracefully (the offending
-widget disappears) instead of unmounting the room.
-
-A more granular pass could wrap each individual widget for finer-grained
-fallbacks, but the umbrella alone already prevents the worst class of
-failures.
+all in-room widgets, **plus** a per-widget pass that wraps each of the 13
+direct children of `RoomWidgetsView` and each of the 20 sub-widgets in
+`FurnitureWidgetsView`. A crash in any single widget now silently logs
+through `NitroLogger` and renders `null` for that widget only — its
+siblings keep rendering. Each boundary carries a `name` prop matching
+the widget so the log line identifies the culprit.
 
 ---
 
@@ -729,20 +729,11 @@ Remaining order of value/risk for the next contributor:
    siblings under `src/hooks/catalog/`). Only after step 1 — React
    Query removes ~60% of the file's responsibility, Zustand can absorb
    the UI state slice.
-3. **Per-widget `WidgetErrorBoundary` wrapping** inside `RoomWidgetsView`.
-   The umbrella is in place; granular wrapping means a crash in one
-   widget (e.g. `ChatWidgetView`) doesn't take down the rest of the
-   room overlay. Mechanical and safe.
-4. **Hoist `WiredCreatorToolsView`'s shared state to a Zustand slice.**
+3. **Hoist `WiredCreatorToolsView`'s shared state to a Zustand slice.**
    The 4-tab split is done but the parent still passes ~25 props to
    each tab. A slice at `src/components/wired-tools/wiredToolsStore.ts`
    would make each tab subscribe to the keys it needs.
-5. **Address the two open logic bugs** (see the "Known logic bugs"
-   section above): the `MainView` CREATED/ENDED race needs a session
-   token; the `LayoutFurniImageView` / `LayoutAvatarImageView` async
-   fetch race needs a request-id ref (or is solved by migrating the
-   image fetch to `useNitroQuery` keyed on props).
-6. **Widen the component/hook Vitest coverage.** The renderer-SDK
+4. **Widen the component/hook Vitest coverage.** The renderer-SDK
    mock layer is in place (`tests/mocks/renderer-mock.ts`) and the
    first two pilots — `WidgetErrorBoundary` and `useDoorbellState` —
    pass. Good follow-up targets: other `*State` hooks built on event

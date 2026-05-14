@@ -161,20 +161,20 @@ export const RoomWidgetsView: FC<{}> = props =>
     return (
         <WidgetErrorBoundary name="RoomWidgets">
             <div className="absolute top-0 left-0 pointer-events-none size-full">
-                <FurnitureWidgetsView />
+                <WidgetErrorBoundary name="FurnitureWidgets"><FurnitureWidgetsView /></WidgetErrorBoundary>
             </div>
-            <AvatarInfoWidgetView />
-            <ChatWidgetView />
-            <ChatInputView />
-            <DoorbellWidgetView />
-            <RoomToolsWidgetView />
-            <RoomFilterWordsWidgetView />
-            <RoomThumbnailWidgetView />
-            <FurniChooserWidgetView />
-            <PetPackageWidgetView />
-            <UserChooserWidgetView />
-            <WordQuizWidgetView />
-            <FriendRequestWidgetView />
+            <WidgetErrorBoundary name="AvatarInfoWidget"><AvatarInfoWidgetView /></WidgetErrorBoundary>
+            <WidgetErrorBoundary name="ChatWidget"><ChatWidgetView /></WidgetErrorBoundary>
+            <WidgetErrorBoundary name="ChatInput"><ChatInputView /></WidgetErrorBoundary>
+            <WidgetErrorBoundary name="DoorbellWidget"><DoorbellWidgetView /></WidgetErrorBoundary>
+            <WidgetErrorBoundary name="RoomToolsWidget"><RoomToolsWidgetView /></WidgetErrorBoundary>
+            <WidgetErrorBoundary name="RoomFilterWordsWidget"><RoomFilterWordsWidgetView /></WidgetErrorBoundary>
+            <WidgetErrorBoundary name="RoomThumbnailWidget"><RoomThumbnailWidgetView /></WidgetErrorBoundary>
+            <WidgetErrorBoundary name="FurniChooserWidget"><FurniChooserWidgetView /></WidgetErrorBoundary>
+            <WidgetErrorBoundary name="PetPackageWidget"><PetPackageWidgetView /></WidgetErrorBoundary>
+            <WidgetErrorBoundary name="UserChooserWidget"><UserChooserWidgetView /></WidgetErrorBoundary>
+            <WidgetErrorBoundary name="WordQuizWidget"><WordQuizWidgetView /></WidgetErrorBoundary>
+            <WidgetErrorBoundary name="FriendRequestWidget"><FriendRequestWidgetView /></WidgetErrorBoundary>
         </WidgetErrorBoundary>
     );
 };
