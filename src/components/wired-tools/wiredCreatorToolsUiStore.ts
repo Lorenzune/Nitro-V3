@@ -1,6 +1,6 @@
 import { createNitroStore } from '../../state/createNitroStore';
 import { createEmptyMonitorSnapshot } from './WiredCreatorTools.helpers';
-import { InspectionElementType, InspectionFurniLiveState, InspectionFurniSelection, InspectionUserLiveState, InspectionUserSelection, MonitorSnapshot, VariablesElementType, WiredToolsTab } from './WiredCreatorTools.types';
+import { InspectionElementType, InspectionFurniLiveState, InspectionFurniSelection, InspectionUserLiveState, InspectionUserSelection, MonitorSnapshot, VariableHighlightOverlay, VariablesElementType, WiredToolsTab } from './WiredCreatorTools.types';
 
 type MonitorSeverityFilter = 'ALL' | 'ERROR' | 'WARNING';
 type Updater<T> = T | ((prev: T) => T);
@@ -55,6 +55,16 @@ interface WiredCreatorToolsUiState
     selectedUserLiveState: InspectionUserLiveState | null;
     selectedUserActionVersion: number;
 
+    /**
+     * Variable highlight feature: the toggle UI flag (`isActive`) plus
+     * the computed screen-space overlays the parent's effect populates
+     * from `WiredSelectionVisualizer` + `GetRoomObjectScreenLocation`.
+     * Stored together so a panel close/reopen cycle keeps the active
+     * highlight visible instead of re-toggling from scratch.
+     */
+    isVariableHighlightActive: boolean;
+    variableHighlightOverlays: VariableHighlightOverlay[];
+
     setIsVisible: (next: Updater<boolean>) => void;
     setActiveTab: (next: WiredToolsTab) => void;
     setInspectionType: (next: InspectionElementType) => void;
@@ -81,6 +91,9 @@ interface WiredCreatorToolsUiState
     setSelectedUser: (next: InspectionUserSelection | null) => void;
     setSelectedUserLiveState: (next: Updater<InspectionUserLiveState | null>) => void;
     setSelectedUserActionVersion: (next: Updater<number>) => void;
+
+    setIsVariableHighlightActive: (next: Updater<boolean>) => void;
+    setVariableHighlightOverlays: (next: VariableHighlightOverlay[]) => void;
 }
 
 export const useWiredCreatorToolsUiStore = createNitroStore<WiredCreatorToolsUiState>()((set) => ({
@@ -110,6 +123,9 @@ export const useWiredCreatorToolsUiStore = createNitroStore<WiredCreatorToolsUiS
     selectedUserLiveState: null,
     selectedUserActionVersion: 0,
 
+    isVariableHighlightActive: false,
+    variableHighlightOverlays: [],
+
     setIsVisible: (next) => set(state => ({ isVisible: apply(state.isVisible, next) })),
     setActiveTab: (next) => set({ activeTab: next }),
     setInspectionType: (next) => set({ inspectionType: next }),
@@ -135,5 +151,8 @@ export const useWiredCreatorToolsUiStore = createNitroStore<WiredCreatorToolsUiS
     setSelectedFurniLiveState: (next) => set(state => ({ selectedFurniLiveState: apply(state.selectedFurniLiveState, next) })),
     setSelectedUser: (next) => set({ selectedUser: next }),
     setSelectedUserLiveState: (next) => set(state => ({ selectedUserLiveState: apply(state.selectedUserLiveState, next) })),
-    setSelectedUserActionVersion: (next) => set(state => ({ selectedUserActionVersion: apply(state.selectedUserActionVersion, next) }))
+    setSelectedUserActionVersion: (next) => set(state => ({ selectedUserActionVersion: apply(state.selectedUserActionVersion, next) })),
+
+    setIsVariableHighlightActive: (next) => set(state => ({ isVariableHighlightActive: apply(state.isVariableHighlightActive, next) })),
+    setVariableHighlightOverlays: (next) => set({ variableHighlightOverlays: next })
 }));

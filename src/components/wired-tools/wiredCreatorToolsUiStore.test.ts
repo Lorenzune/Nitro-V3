@@ -22,7 +22,9 @@ const INITIAL = {
     selectedFurniLiveState: null,
     selectedUser: null,
     selectedUserLiveState: null,
-    selectedUserActionVersion: 0
+    selectedUserActionVersion: 0,
+    isVariableHighlightActive: false,
+    variableHighlightOverlays: []
 };
 
 describe('useWiredCreatorToolsUiStore', () =>
@@ -56,6 +58,8 @@ describe('useWiredCreatorToolsUiStore', () =>
         expect(state.selectedUser).toBeNull();
         expect(state.selectedUserLiveState).toBeNull();
         expect(state.selectedUserActionVersion).toBe(0);
+        expect(state.isVariableHighlightActive).toBe(false);
+        expect(state.variableHighlightOverlays).toEqual([]);
     });
 
     describe('setIsVisible', () =>
@@ -312,6 +316,44 @@ describe('useWiredCreatorToolsUiStore', () =>
             useWiredCreatorToolsUiStore.getState().setIsVisible(true);
 
             expect(useWiredCreatorToolsUiStore.getState().selectedFurni).toEqual(furniSelection);
+        });
+    });
+
+    describe('variable highlight', () =>
+    {
+        const overlay = { itemId: 1, key: 'foo', x: 100, y: 200, screenX: 100, screenY: 200, value: '42', objectId: 7, category: 10 } as never;
+
+        it('setIsVariableHighlightActive accepts a direct boolean and a toggle updater', () =>
+        {
+            useWiredCreatorToolsUiStore.getState().setIsVariableHighlightActive(true);
+            expect(useWiredCreatorToolsUiStore.getState().isVariableHighlightActive).toBe(true);
+
+            useWiredCreatorToolsUiStore.getState().setIsVariableHighlightActive(prev => !prev);
+            expect(useWiredCreatorToolsUiStore.getState().isVariableHighlightActive).toBe(false);
+
+            useWiredCreatorToolsUiStore.getState().setIsVariableHighlightActive(prev => !prev);
+            expect(useWiredCreatorToolsUiStore.getState().isVariableHighlightActive).toBe(true);
+        });
+
+        it('setVariableHighlightOverlays replaces the overlay array', () =>
+        {
+            useWiredCreatorToolsUiStore.getState().setVariableHighlightOverlays([ overlay ]);
+            expect(useWiredCreatorToolsUiStore.getState().variableHighlightOverlays).toEqual([ overlay ]);
+
+            useWiredCreatorToolsUiStore.getState().setVariableHighlightOverlays([]);
+            expect(useWiredCreatorToolsUiStore.getState().variableHighlightOverlays).toEqual([]);
+        });
+
+        it('the highlight survives a panel close/reopen lifecycle', () =>
+        {
+            useWiredCreatorToolsUiStore.getState().setIsVariableHighlightActive(true);
+            useWiredCreatorToolsUiStore.getState().setVariableHighlightOverlays([ overlay ]);
+
+            useWiredCreatorToolsUiStore.getState().setIsVisible(false);
+            useWiredCreatorToolsUiStore.getState().setIsVisible(true);
+
+            expect(useWiredCreatorToolsUiStore.getState().isVariableHighlightActive).toBe(true);
+            expect(useWiredCreatorToolsUiStore.getState().variableHighlightOverlays).toEqual([ overlay ]);
         });
     });
 });

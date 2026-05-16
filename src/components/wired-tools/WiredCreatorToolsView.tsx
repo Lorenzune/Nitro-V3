@@ -77,8 +77,10 @@ export const WiredCreatorToolsView: FC<{}> = () =>
     const setIsManagedGiveOpen = useWiredCreatorToolsUiStore(s => s.setIsManagedGiveOpen);
     const [ managedGiveVariableItemId, setManagedGiveVariableItemId ] = useState(0);
     const [ managedGiveValue, setManagedGiveValue ] = useState('0');
-    const [ isVariableHighlightActive, setIsVariableHighlightActive ] = useState(false);
-    const [ variableHighlightOverlays, setVariableHighlightOverlays ] = useState<VariableHighlightOverlay[]>([]);
+    const isVariableHighlightActive = useWiredCreatorToolsUiStore(s => s.isVariableHighlightActive);
+    const setIsVariableHighlightActive = useWiredCreatorToolsUiStore(s => s.setIsVariableHighlightActive);
+    const variableHighlightOverlays = useWiredCreatorToolsUiStore(s => s.variableHighlightOverlays);
+    const setVariableHighlightOverlays = useWiredCreatorToolsUiStore(s => s.setVariableHighlightOverlays);
     const variableHighlightObjectsRef = useRef<Array<{ category: number; objectId: number; }>>([]);
     const shouldPauseVariableSnapshotRefresh = (!!editingVariable || !!editingManagedHolderVariableId || isInspectionGiveOpen || isManagedGiveOpen);
     const [ selectedVariableKeys, setSelectedVariableKeys ] = useState<Record<VariablesElementType, string>>({
@@ -3145,8 +3147,6 @@ export const WiredCreatorToolsView: FC<{}> = () =>
                             selectedVariableDefinition={ selectedVariableDefinition }
                             onPickVariable={ key => setSelectedVariableKeys(prev => ({ ...prev, [variablesType]: key })) }
                             canVariableHighlight={ canVariableHighlight }
-                            isVariableHighlightActive={ isVariableHighlightActive }
-                            onToggleVariableHighlight={ () => setIsVariableHighlightActive(value => !value) }
                             variableManageCanOpen={ variableManageCanOpen }
                             onOpenManagePanel={ () =>
                             {

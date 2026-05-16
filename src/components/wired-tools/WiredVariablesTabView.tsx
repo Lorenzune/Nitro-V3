@@ -10,8 +10,6 @@ export interface WiredVariablesTabViewProps
     selectedVariableDefinition: VariableDefinition | null;
     onPickVariable: (key: string) => void;
     canVariableHighlight: boolean;
-    isVariableHighlightActive: boolean;
-    onToggleVariableHighlight: () => void;
     variableManageCanOpen: boolean;
     onOpenManagePanel: () => void;
     selectedVariableProperties: { key: string; value: string; }[];
@@ -30,8 +28,6 @@ export const WiredVariablesTabView: FC<WiredVariablesTabViewProps> = ({
     selectedVariableDefinition,
     onPickVariable,
     canVariableHighlight,
-    isVariableHighlightActive,
-    onToggleVariableHighlight,
     variableManageCanOpen,
     onOpenManagePanel,
     selectedVariableProperties,
@@ -40,6 +36,8 @@ export const WiredVariablesTabView: FC<WiredVariablesTabViewProps> = ({
 {
     const variablesType = useWiredCreatorToolsUiStore(s => s.variablesType);
     const setVariablesType = useWiredCreatorToolsUiStore(s => s.setVariablesType);
+    const isVariableHighlightActive = useWiredCreatorToolsUiStore(s => s.isVariableHighlightActive);
+    const setIsVariableHighlightActive = useWiredCreatorToolsUiStore(s => s.setIsVariableHighlightActive);
 
     return (
         <div className="p-3 min-h-[360px] flex gap-4">
@@ -83,7 +81,7 @@ export const WiredVariablesTabView: FC<WiredVariablesTabViewProps> = ({
                     <Button
                         disabled={ !canVariableHighlight }
                         variant="secondary"
-                        onClick={ onToggleVariableHighlight }>
+                        onClick={ () => setIsVariableHighlightActive(value => !value) }>
                         { isVariableHighlightActive ? 'Undo' : 'Highlight' }
                     </Button>
                     <Button
