@@ -2,7 +2,7 @@
 
 End-to-end documentation of every modification made since the two modernization branches were opened:
 
-- **Nitro-V3** (React client) — branch `feat/react19-modernization`, **109 commits** since baseline `ae17619`
+- **Nitro-V3** (React client) — branch `feat/react19-modernization`, **114 commits** since baseline `ae17619`
 - **Nitro_Render_V3** (renderer library) — branch `feat/react19-event-bus`, **22 commits** since baseline `98b03aa`
 
 Plus the in-session upstream sync of the third codebase touched on 2026-05-18:
@@ -57,7 +57,7 @@ Working directory: `E:\Users\simol\Desktop\DEV`. *(NitroV3-Housekeeping was not 
 
 | Branch | HEAD | Commits since baseline | Typecheck | Vitest |
 |---|---|---|---|---|
-| Nitro-V3 / `feat/react19-modernization` | `1c2d8da` | 109 (baseline `ae17619`) | clean | **203/203** |
+| Nitro-V3 / `feat/react19-modernization` | `02a396d` | 114 (baseline `ae17619`) | clean | **203/203** |
 | Nitro_Render_V3 / `feat/react19-event-bus` | `28c552f` | 22 (baseline `98b03aa`) | clean | **127/127** |
 | Arcturus / `main` | `efb4997` (v4.1.16) | tracks `origin/main` with no local divergence | n/a | n/a |
 
@@ -354,6 +354,49 @@ After Phase 10, the local branch was 98 commits ahead of `origin/Dev`. Upstream 
 Verification: typecheck clean, Vitest 193/193 (preserved baseline), `yarn build` green.
 
 Commit `779a98c` — merge commit. Followed by `3b35fa9` — CLAUDE.md refresh (TL;DR + wired-up table updated to reflect post-merge state with note about expected future conflict surface).
+
+### Phase 12: Snapshot pattern consumer-side wiring + first migrations
+
+After Phase 11 closed the WiredCreatorTools roadmap, the renderer side had six snapshot getters (Session, RoomSession, IgnoredUsers, GroupBadges, RoomUserList, SoundVolumes) but nothing on the client consumed them — `useExternalSnapshot` existed as a `useSyncExternalStore` wrapper, no widget was wired up to a snapshot.
+
+#### `b2a86da` — React-side consumer hooks for the renderer snapshot pattern
+
+New file [`src/hooks/session/useSessionSnapshots.ts`](../src/hooks/session/useSessionSnapshots.ts) exposes eight thin hooks, each a `useExternalSnapshot` wrapper around the matching subscribe + getter pair:
+
+| Hook | Returns |
+|---|---|
+| `useUserDataSnapshot()` | `Readonly<IUserDataSnapshot>` |
+| `useActiveRoomSessionSnapshot()` | `Readonly<IRoomSessionSnapshot> \| null` |
+| `useIgnoredUsersSnapshot()` | `ReadonlyArray<string>` |
+| `useIsUserIgnored(name)` | `boolean` (memoized) |
+| `useGroupBadgesSnapshot()` | `ReadonlyMap<number, string>` |
+| `useGroupBadge(groupId)` | `string` (memoized) |
+| `useVolumesSnapshot()` | `Readonly<ISoundVolumesSnapshot>` |
+| `useRoomUserListSnapshot()` | `ReadonlyArray<IRoomUserData>` |
+
+Two design subtleties documented inline:
+- `useRoomUserListSnapshot` subscribes to BOTH `ROOM_USER_LIST_UPDATED` (for join/leave/update inside the active session) AND `ROOM_SESSION_UPDATED` (because the underlying `userDataManager` reference flips when the active room changes). A module-level frozen `EMPTY_USER_LIST` is the fallback when no session is active, keeping reference stability across reads in the no-room state.
+- `useIsUserIgnored` / `useGroupBadge` memoize the scalar derivation so a re-render only fires when the underlying snapshot reference flips, not on unrelated `useExternalSnapshot` wake-ups.
+
+#### `71a0eee` — Migrate useSessionInfo to useUserDataSnapshot
+
+First consumer migration. The old `useSessionInfo` carried three `useState` mirrors of session data (`userFigure` / `userRespectRemaining` / `petRespectRemaining`) driven by `useMessageEvent<UserInfoEvent>` + `useMessageEvent<FigureUpdateEvent>` + manual `setUser…` after `giveRespect`. Replaced with a single `useUserDataSnapshot()` read. `SessionDataManager` already invalidates its snapshot on every state change that mattered to the old hook (UserInfoEvent handler, FigureUpdateEvent listener, `giveRespect` / `givePetRespect`) — so the snapshot is a strict superset of the manual mirror.
+
+Net result: 3 useState declarations + 2 useMessageEvent subscriptions removed; `respectUser` / `respectPet` become trivial pass-throughs because the manager's invalidate dispatches the event for us. `chatStyleId` stays on `useState` (driven by `UserSettingsEvent`, not in the snapshot). The deprecated `userInfo: UserInfoDataParser` field is dropped from the return shape — no in-tree consumer reads it.
+
+#### `36addbe` — Reactive Ignore/Unignore menu entry via useIsUserIgnored
+
+The Ignore ↔ Unignore context-menu entry in `AvatarInfoWidgetAvatarView` was driven by `avatarInfo.isIgnored` — a boolean captured by `AvatarInfoUtilities` once, at the time the avatar was clicked. If the user got ignored / unignored *while the popup was already open* (e.g. via the friends panel, or because a server push flipped the state), the menu kept showing the stale option and clicking it would no-op (or worse, double-ignore).
+
+Switched the menu items to `useIsUserIgnored(avatarInfo.name)` — the reactive hook backed by `IgnoredUsersManager.getIgnoredUsersSnapshot()` + `NitroEventType.IGNORED_USERS_UPDATED`. The menu now flips automatically the moment the ignore list changes, without re-opening.
+
+#### `02a396d` — docs(CLAUDE.md): refresh stale sections
+
+Aligning `Nitro-V3/CLAUDE.md` with the current branch state:
+- Adopted table: new row for the snapshot consumer hooks (pilots on `useSessionInfo` + `AvatarInfoWidgetAvatarView`); Vitest count bumped 193 → 203; Zustand row expanded to note the WiredCreatorTools panel-lifecycle hoist roadmap is fully closed.
+- Not yet table: dropped the obsolete "hoist Wired Creator Tools derived state" row; added a new row for migrating remaining session-data mirrors.
+- New "Patterns to use" entry at the top documenting the 8-hook `useSessionSnapshots` menu.
+- "Known open logic bugs" replaced with a "no open bugs" entry (both previously-open races are closed in `9d10e52` and `97c9717`).
 
 ---
 
@@ -730,6 +773,16 @@ Both branches maintained substantial in-tree documentation throughout their life
 | `8894fcc` | wired-tools(store): hoist inspection give pickers (inspectionGiveVariableItemId, inspectionGiveValue) |
 | `1c2d8da` | wired-tools(store): hoist managed-holder give picker chain |
 
+#### Phase 12: Snapshot consumer-side wiring + first migrations
+
+| SHA | Subject |
+|---|---|
+| `e7e8bcc` | docs: full changelog for feat/react19-modernization + feat/react19-event-bus |
+| `b2a86da` | feat(hooks/session): React-side consumer hooks for the renderer snapshot pattern |
+| `71a0eee` | refactor(hooks/session): migrate useSessionInfo to useUserDataSnapshot |
+| `36addbe` | fix(avatar-info): reactive Ignore/Unignore menu entry via useIsUserIgnored |
+| `02a396d` | docs(CLAUDE.md): refresh stale sections — snapshot consumer hooks + closed bugs |
+
 ### Nitro_Render_V3 — `feat/react19-event-bus` (22 commits, baseline `98b03aa`)
 
 | SHA | Subject |
@@ -767,7 +820,7 @@ Both branches maintained substantial in-tree documentation throughout their life
 
 | Repo | Branch | HEAD | Tracking | Push status |
 |---|---|---|---|---|
-| Nitro-V3 | `feat/react19-modernization` | `1c2d8da` | `simoleo/feat/react19-modernization` | up-to-date |
+| Nitro-V3 | `feat/react19-modernization` | `02a396d` | `simoleo/feat/react19-modernization` | up-to-date |
 | Nitro_Render_V3 | `feat/react19-event-bus` | `28c552f` | `fork/feat/react19-event-bus` | up-to-date |
 | Arcturus-Morningstar-Extended | `main` | `efb4997` (v4.1.16) | `origin/main` | up-to-date (no fork divergence) |
 | NitroV3-Housekeeping | *(not touched)* | — | — | — |
