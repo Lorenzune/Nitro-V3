@@ -104,6 +104,16 @@ export default defineConfig({
         alias: {
             '@': resolve(__dirname, 'src'),
             '~': resolve(__dirname, 'node_modules'),
+            // Force the umbrella to the source index.ts. Without this,
+            // node-module resolution (via the symlink at
+            // node_modules/@nitrots/nitro-renderer -> ../Nitro_Render_V3)
+            // can land on the stale `dist/index.js` when one exists in
+            // the renderer working tree — leaving the bundle with
+            // pre-snapshot-pattern stubs and producing runtime errors
+            // like "TypeError: (intermediate value)() is undefined"
+            // when newer code calls getUserDataSnapshot() / .subscribe()
+            // / NitroEventType.SESSION_DATA_UPDATED etc.
+            '@nitrots/nitro-renderer': resolve(rendererRoot, 'index.ts'),
             '@nitrots/api': resolve(rendererRoot, 'packages/api/src/index.ts'),
             '@nitrots/assets': resolve(rendererRoot, 'packages/assets/src/index.ts'),
             '@nitrots/avatar': resolve(rendererRoot, 'packages/avatar/src/index.ts'),
