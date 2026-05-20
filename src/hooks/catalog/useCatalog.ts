@@ -956,7 +956,7 @@ const useCatalogStore = () =>
         };
     }, []);
 
-    return { isVisible, setIsVisible, isBusy, pageId, previousPageId, currentType, rootNode, offersToNodes, currentPage, setCurrentPage, currentOffer, setCurrentOffer, activeNodes, searchResult, setSearchResult, frontPageItems, roomPreviewer, navigationHidden, setNavigationHidden, purchaseOptions, setPurchaseOptions, catalogLocalizationVersion, getNodeById, getNodeByName, activateNode, openPageById, openPageByName, openPageByOfferId, requestOfferToMover, openCatalogByType, toggleCatalogByType, furniCount, furniLimit, maxFurniLimit, secondsLeft, secondsLeftWithGrace, updateTime, catalogPlaceMultipleObjects, setCatalogPlaceMultipleObjects, getBuilderFurniPlaceableStatus, selectCatalogOffer };
+    return { isVisible, setIsVisible, isBusy, pageId, previousPageId, currentType, rootNode, offersToNodes, currentPage, setCurrentPage, currentOffer, setCurrentOffer, activeNodes, searchResult, setSearchResult, frontPageItems, roomPreviewer, navigationHidden, setNavigationHidden, purchaseOptions, setPurchaseOptions, catalogLocalizationVersion, getNodeById, getNodeByName, getNodesByOfferId, activateNode, openPageById, openPageByName, openPageByOfferId, requestOfferToMover, openCatalogByType, toggleCatalogByType, furniCount, furniLimit, maxFurniLimit, secondsLeft, secondsLeftWithGrace, updateTime, catalogPlaceMultipleObjects, setCatalogPlaceMultipleObjects, getBuilderFurniPlaceableStatus, selectCatalogOffer };
 };
 
 /**
@@ -1039,7 +1039,7 @@ export const useCatalogActions = () =>
         activateNode,
         openPageById, openPageByName, openPageByOfferId,
         requestOfferToMover, selectCatalogOffer,
-        getNodeById, getNodeByName,
+        getNodeById, getNodeByName, getNodesByOfferId,
         getBuilderFurniPlaceableStatus
     } = useBetween(useCatalogStore);
 
@@ -1048,7 +1048,7 @@ export const useCatalogActions = () =>
         activateNode,
         openPageById, openPageByName, openPageByOfferId,
         requestOfferToMover, selectCatalogOffer,
-        getNodeById, getNodeByName,
+        getNodeById, getNodeByName, getNodesByOfferId,
         getBuilderFurniPlaceableStatus
     };
 };

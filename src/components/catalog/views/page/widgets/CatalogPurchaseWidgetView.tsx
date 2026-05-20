@@ -22,7 +22,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
     const [ catalogSkipPurchaseConfirmation, setCatalogSkipPurchaseConfirmation ] = useLocalStorage(LocalStorageKeys.CATALOG_SKIP_PURCHASE_CONFIRMATION, false);
     const { currentOffer = null, currentPage = null } = useCatalogData();
     const { currentType = CatalogType.NORMAL, purchaseOptions = null, setPurchaseOptions = null, setCatalogPlaceMultipleObjects = null } = useCatalogUiState();
-    const { requestOfferToMover = null, getBuilderFurniPlaceableStatus = null } = useCatalogActions();
+    const { requestOfferToMover = null, getBuilderFurniPlaceableStatus = null, getNodesByOfferId = null } = useCatalogActions();
     const { getCurrencyAmount = null } = usePurse();
     const { showSingleBubble = null } = useNotification();
 
@@ -105,12 +105,11 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
 
         let pageId = currentOffer.page.pageId;
 
-        // if(pageId === -1)
-        // {
-        //     const nodes = getNodesByOfferId(currentOffer.offerId);
-
-        //     if(nodes) pageId = nodes[0].pageId;
-        // }
+        if(pageId === -1 && getNodesByOfferId)
+        {
+            const nodes = getNodesByOfferId(currentOffer.offerId);
+            if(nodes && nodes.length) pageId = nodes[0].pageId;
+        }
 
         SendMessageComposer(new PurchaseFromCatalogComposer(pageId, currentOffer.offerId, purchaseOptions.extraData, purchaseOptions.quantity));
     };

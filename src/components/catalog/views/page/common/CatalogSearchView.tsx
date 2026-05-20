@@ -49,6 +49,7 @@ export const CatalogSearchView: FC<{}> = () =>
 
                 const name = normalizeSearchText(furniture.name || '');
                 const matchesSearch = name.includes(search);
+                const isBuyable = (furniture.purchaseOfferId > -1) || (furniture.rentOfferId > -1);
 
                 if((currentType === CatalogType.BUILDER) && (furniture.purchaseOfferId === -1) && (furniture.rentOfferId === -1))
                 {
@@ -57,7 +58,7 @@ export const CatalogSearchView: FC<{}> = () =>
                         if(matchesSearch) foundFurniLines.push(furniture.furniLine);
                     }
                 }
-                else if(matchesSearch)
+                else if(matchesSearch && isBuyable)
                 {
                     foundFurniture.push(furniture);
 
@@ -67,6 +68,10 @@ export const CatalogSearchView: FC<{}> = () =>
                     }
 
                     if(foundFurniture.length === 250) break;
+                }
+                else if(matchesSearch && furniture.furniLine && furniture.furniLine.length && (foundFurniLines.indexOf(furniture.furniLine) < 0))
+                {
+                    foundFurniLines.push(furniture.furniLine);
                 }
             }
 

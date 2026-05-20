@@ -13,8 +13,6 @@ declare global
     }
 }
 
-const SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-
 export interface TurnstileWidgetProps
 {
     siteKey: string;
@@ -98,19 +96,5 @@ export const TurnstileWidget: FC<TurnstileWidgetProps> = props =>
 
     if(!siteKey) return null;
 
-    return (
-        <>
-            <script
-                async
-                defer
-                src={ SCRIPT_SRC }
-                onLoad={ () => setScriptReady(true) }
-                onError={ () =>
-                {
-                    console.error('[Turnstile] script load failed');
-                    onError?.();
-                } } />
-            <div ref={ containerRef } className="turnstile-slot" />
-        </>
-    );
+    return <div ref={ containerRef } className="turnstile-slot" />;
 };
