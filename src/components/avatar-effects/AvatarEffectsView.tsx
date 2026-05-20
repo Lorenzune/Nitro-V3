@@ -36,8 +36,8 @@ export const AvatarEffectsView: FC<{}> = () =>
 
                 switch(parts[1])
                 {
-                    case 'show':   setIsVisible(true); return;
-                    case 'hide':   setIsVisible(false); return;
+                    case 'show': setIsVisible(true); return;
+                    case 'hide': setIsVisible(false); return;
                     case 'toggle': setIsVisible(prev => !prev); return;
                 }
             },
@@ -83,7 +83,10 @@ export const AvatarEffectsView: FC<{}> = () =>
             }
         })();
 
-        return () => { cancelled = true; };
+        return () =>
+        {
+            cancelled = true;
+        };
     }, [ isVisible, effects.length, loadError ]);
 
     const session = GetSessionDataManager();
@@ -107,6 +110,13 @@ export const AvatarEffectsView: FC<{}> = () =>
         SendMessageComposer(new AvatarEffectActivatedComposer(selectedId));
         setIsVisible(false);
     }, [ selectedId ]);
+
+    const removeCurrentEffect = useCallback(() =>
+    {
+        SendMessageComposer(new AvatarEffectActivatedComposer(0));
+        setSelectedId(0);
+        setIsVisible(false);
+    }, []);
 
     const onClose = useCallback(() => setIsVisible(false), []);
 
@@ -191,9 +201,14 @@ export const AvatarEffectsView: FC<{}> = () =>
                             </div>
                         }
                     </div>
-                    <Button variant="success" disabled={ !selectedId } onClick={ applySelectedEffect } className="w-full mt-2">
-                        { LocalizeText('inventory.effects.activate') || 'Use' }
-                    </Button>
+                    <div className="flex gap-1 mt-2">
+                        <Button variant="success" disabled={ !selectedId } onClick={ applySelectedEffect } className="flex-1">
+                            { LocalizeText('inventory.effects.activate') || 'Use effect' }
+                        </Button>
+                        <Button variant="danger" onClick={ removeCurrentEffect } className="flex-1">
+                            { LocalizeText('inventory.effects.remove') || 'Remove effect' }
+                        </Button>
+                    </div>
                 </Column>
                 <Column overflow="hidden" className="flex-1 min-h-0">
                     <div className="relative">
