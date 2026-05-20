@@ -26,11 +26,10 @@ export const ModToolsChatlogView: FC<ModToolsChatlogViewProps> = props =>
     if(!roomChatlog) return null;
 
     return (
-        <NitroCardView className="nitro-mod-tools-chatlog min-w-[400px] max-h-[500px]" theme="primary-slim" windowPosition={ DraggableWindowPosition.TOP_LEFT }>
+        <NitroCardView className="nitro-mod-tools-chatlog min-w-[460px] max-w-[520px] max-h-[500px]" theme="primary-slim" windowPosition={ DraggableWindowPosition.TOP_LEFT }>
             <NitroCardHeaderView headerText={ 'Room Chatlog' } onCloseClick={ onCloseClick } />
-            <NitroCardContentView className="text-black" overflow="auto">
-                { roomChatlog &&
-                    <ChatlogView records={ [ roomChatlog ] } /> }
+            <NitroCardContentView className="text-black" gap={ 1 } overflow="auto">
+                <ChatlogView records={ [ roomChatlog ] } />
             </NitroCardContentView>
         </NitroCardView>
     );

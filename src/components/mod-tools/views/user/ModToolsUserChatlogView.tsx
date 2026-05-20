@@ -1,5 +1,6 @@
 import { ChatRecordData, GetUserChatlogMessageComposer, UserChatlogEvent } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
+import { FaSpinner } from 'react-icons/fa';
 import { SendMessageComposer } from '../../../../api';
 import { DraggableWindowPosition, NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../../../common';
 import { useMessageEvent } from '../../../../hooks';
@@ -33,11 +34,15 @@ export const ModToolsUserChatlogView: FC<ModToolsUserChatlogViewProps> = props =
     }, [ userId ]);
 
     return (
-        <NitroCardView className="nitro-mod-tools-chatlog" theme="primary-slim" windowPosition={ DraggableWindowPosition.TOP_LEFT }>
-            <NitroCardHeaderView headerText={ `User Chatlog: ${ username || '' }` } onCloseClick={ onCloseClick } />
-            <NitroCardContentView className="text-black h-full">
-                { userChatlog &&
-                    <ChatlogView records={ userChatlog } /> }
+        <NitroCardView className="nitro-mod-tools-chatlog min-w-[460px] max-w-[520px] max-h-[500px]" theme="primary-slim" windowPosition={ DraggableWindowPosition.TOP_LEFT }>
+            <NitroCardHeaderView headerText={ username ? `User Chatlog: ${ username }` : 'User Chatlog' } onCloseClick={ onCloseClick } />
+            <NitroCardContentView className="text-black h-full" gap={ 1 }>
+                { userChatlog
+                    ? <ChatlogView records={ userChatlog } />
+                    : <div className="flex flex-col items-center justify-center gap-2 py-8 opacity-50 text-sm">
+                        <FaSpinner className="animate-spin" size={ 22 } />
+                        <span>Loading chatlog…</span>
+                    </div> }
             </NitroCardContentView>
         </NitroCardView>
     );

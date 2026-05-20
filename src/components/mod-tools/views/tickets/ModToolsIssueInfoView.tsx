@@ -1,7 +1,8 @@
 import { CloseIssuesMessageComposer, ReleaseIssuesMessageComposer } from '@nitrots/nitro-renderer';
 import { FC, useState } from 'react';
+import { FaBan, FaCheck, FaCommentDots, FaExternalLinkAlt, FaSignOutAlt, FaTrashAlt } from 'react-icons/fa';
 import { GetIssueCategoryName, LocalizeText, SendMessageComposer } from '../../../../api';
-import { Button, Column, Grid, NitroCardContentView, NitroCardHeaderView, NitroCardView, Text } from '../../../../common';
+import { Button, DraggableWindowPosition, NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../../../common';
 import { useModTools } from '../../../../hooks';
 import { CfhChatlogView } from './CfhChatlogView';
 
@@ -11,76 +12,102 @@ interface IssueInfoViewProps
     onIssueInfoClosed(issueId: number): void;
 }
 
+const Field: FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+    <>
+        <dt className="opacity-60 whitespace-nowrap">{ label }</dt>
+        <dd className="m-0 break-words font-medium">{ children || <span className="opacity-40 italic">—</span> }</dd>
+    </>
+);
+
 export const ModToolsIssueInfoView: FC<IssueInfoViewProps> = props =>
 {
     const { issueId = null, onIssueInfoClosed = null } = props;
-    const [ cfhChatlogOpen, setcfhChatlogOpen ] = useState(false);
+    const [ cfhChatlogOpen, setCfhChatlogOpen ] = useState(false);
     const { tickets = [], openUserInfo = null } = useModTools();
     const ticket = tickets.find(issue => (issue.issueId === issueId));
 
-    const releaseIssue = (issueId: number) =>
+    const releaseIssue = () =>
     {
         SendMessageComposer(new ReleaseIssuesMessageComposer([ issueId ]));
-
         onIssueInfoClosed(issueId);
     };
 
     const closeIssue = (resolutionType: number) =>
     {
         SendMessageComposer(new CloseIssuesMessageComposer([ issueId ], resolutionType));
-
         onIssueInfoClosed(issueId);
     };
 
+    if(!ticket) return null;
+
     return (
         <>
-            <NitroCardView className="nitro-mod-tools-handle-issue" theme="primary-slim">
-                <NitroCardHeaderView headerText={ 'Resolving issue ' + issueId } onCloseClick={ () => onIssueInfoClosed(issueId) } />
-                <NitroCardContentView className="text-black">
-                    <Text fontSize={ 4 }>Issue Information</Text>
-                    <Grid overflow="auto">
-                        <Column size={ 8 }>
-                            <table className="table table-striped table-sm table-text-small text-black m-0">
-                                <tbody>
-                                    <tr>
-                                        <th>Source</th>
-                                        <td>{ GetIssueCategoryName(ticket.categoryId) }</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Category</th>
-                                        <td className="text-break">{ LocalizeText('help.cfh.topic.' + ticket.reportedCategoryId) }</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Description</th>
-                                        <td className="text-break">{ ticket.message }</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Caller</th>
-                                        <td>
-                                            <Text bold pointer underline onClick={ event => openUserInfo(ticket.reporterUserId) }>{ ticket.reporterUserName }</Text>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Reported User</th>
-                                        <td>
-                                            <Text bold pointer underline onClick={ event => openUserInfo(ticket.reportedUserId) }>{ ticket.reportedUserName }</Text>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </Column>
-                        <Column gap={ 1 } size={ 4 }>
-                            <Button variant="secondary" onClick={ () => setcfhChatlogOpen(!cfhChatlogOpen) }>Chatlog</Button>
-                            <Button onClick={ event => closeIssue(CloseIssuesMessageComposer.RESOLUTION_USELESS) }>Close as useless</Button>
-                            <Button variant="danger" onClick={ event => closeIssue(CloseIssuesMessageComposer.RESOLUTION_ABUSIVE) }>Close as abusive</Button>
-                            <Button variant="success" onClick={ event => closeIssue(CloseIssuesMessageComposer.RESOLUTION_RESOLVED) }>Close as resolved</Button>
-                            <Button variant="secondary" onClick={ event => releaseIssue(issueId) } >Release</Button>
-                        </Column>
-                    </Grid>
+            <NitroCardView className="nitro-mod-tools-handle-issue min-w-[440px] max-w-[500px]" theme="primary-slim" windowPosition={ DraggableWindowPosition.TOP_LEFT }>
+                <NitroCardHeaderView headerText={ `Resolving issue #${ issueId }` } onCloseClick={ () => onIssueInfoClosed(issueId) } />
+                <NitroCardContentView className="text-black" gap={ 2 }>
+                    {/* Issue header */}
+                    <div className="flex items-center gap-2 bg-gradient-to-r from-amber-50 to-transparent rounded p-2 border border-amber-100">
+                        <FaCommentDots className="text-amber-600 shrink-0" size={ 16 } />
+                        <div className="flex flex-col grow min-w-0">
+                            <div className="text-[.7rem] uppercase tracking-wide opacity-60 font-semibold">Issue #{ issueId }</div>
+                            <div className="font-semibold leading-tight truncate">{ GetIssueCategoryName(ticket.categoryId) }</div>
+                        </div>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border bg-white border-amber-200 text-amber-800">
+                            { LocalizeText('help.cfh.topic.' + ticket.reportedCategoryId) }
+                        </span>
+                    </div>
+
+                    {/* Details */}
+                    <div className="flex flex-col gap-1">
+                        <div className="text-[.7rem] uppercase tracking-wide opacity-60 font-semibold border-b border-zinc-200 pb-1 mb-0.5">Details</div>
+                        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[.8rem] m-0">
+                            <Field label="Source">{ GetIssueCategoryName(ticket.categoryId) }</Field>
+                            <Field label="Category">{ LocalizeText('help.cfh.topic.' + ticket.reportedCategoryId) }</Field>
+                            <Field label="Description">{ ticket.message }</Field>
+                            <Field label="Caller">
+                                <button
+                                    className="font-semibold text-sky-700 hover:text-sky-900 hover:underline inline-flex items-center gap-1"
+                                    onClick={ () => openUserInfo(ticket.reporterUserId) }>
+                                    { ticket.reporterUserName } <FaExternalLinkAlt size={ 8 } className="opacity-60" />
+                                </button>
+                            </Field>
+                            <Field label="Reported">
+                                <button
+                                    className="font-semibold text-sky-700 hover:text-sky-900 hover:underline inline-flex items-center gap-1"
+                                    onClick={ () => openUserInfo(ticket.reportedUserId) }>
+                                    { ticket.reportedUserName } <FaExternalLinkAlt size={ 8 } className="opacity-60" />
+                                </button>
+                            </Field>
+                        </dl>
+                    </div>
+
+                    {/* Tools */}
+                    <Button gap={ 1 } variant="secondary" onClick={ () => setCfhChatlogOpen(prev => !prev) }>
+                        <FaCommentDots size={ 12 } /> { cfhChatlogOpen ? 'Close chatlog' : 'View chatlog' }
+                    </Button>
+
+                    {/* Resolution buttons */}
+                    <div className="flex flex-col gap-1.5 pt-1 border-t border-zinc-200">
+                        <div className="text-[.7rem] uppercase tracking-wide opacity-60 font-semibold">Resolve as</div>
+                        <div className="grid grid-cols-3 gap-1.5">
+                            <Button gap={ 1 } variant="success" onClick={ () => closeIssue(CloseIssuesMessageComposer.RESOLUTION_RESOLVED) }>
+                                <FaCheck size={ 11 } /> Resolved
+                            </Button>
+                            <Button gap={ 1 } variant="dark" onClick={ () => closeIssue(CloseIssuesMessageComposer.RESOLUTION_USELESS) }>
+                                <FaTrashAlt size={ 11 } /> Useless
+                            </Button>
+                            <Button gap={ 1 } variant="danger" onClick={ () => closeIssue(CloseIssuesMessageComposer.RESOLUTION_ABUSIVE) }>
+                                <FaBan size={ 11 } /> Abusive
+                            </Button>
+                        </div>
+                        <Button gap={ 1 } variant="secondary" onClick={ releaseIssue }>
+                            <FaSignOutAlt size={ 12 } /> Release back to queue
+                        </Button>
+                    </div>
                 </NitroCardContentView>
             </NitroCardView>
             { cfhChatlogOpen &&
-                <CfhChatlogView issueId={ issueId } onCloseClick={ () => setcfhChatlogOpen(false) }/> }
+                <CfhChatlogView issueId={ issueId } onCloseClick={ () => setCfhChatlogOpen(false) } /> }
         </>
     );
 };
