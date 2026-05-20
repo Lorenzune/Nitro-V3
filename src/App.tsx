@@ -72,6 +72,29 @@ export const App: FC<{}> = props =>
     const [ showLogin, setShowLogin ] = useState(false);
     const [ isEnteringHotel, setIsEnteringHotel ] = useState(() => !!window.NitroConfig?.['sso.ticket'] || hasRememberLogin());
     const [ prepareTrigger, setPrepareTrigger ] = useState(0);
+    const [ loadingProgress, setLoadingProgress ] = useState(0);
+    const [ loadingTask, setLoadingTask ] = useState('');
+    // Look up a loader-stage label from renderer-config so the strings the user
+    // sees during the boot ("Sto caricando il guardaroba", "Connessione…") can
+    // be translated by editing the JSON/JSON5 config — fallback keeps the
+    // Italian baseline shipped with the client.
+    const taskLabel = useCallback((key: string, fallback: string): string =>
+    {
+        try
+        {
+            const raw = GetConfiguration().getValue<string>(key, '');
+            return (typeof raw === 'string' && raw.length) ? raw : fallback;
+        }
+        catch
+        {
+            return fallback;
+        }
+    }, []);
+    const bumpProgress = useCallback((value: number, task?: string) =>
+    {
+        setLoadingProgress(prev => (value > prev ? value : prev));
+        if(task !== undefined) setLoadingTask(task);
+    }, []);
     const warmupPromiseRef = useRef<Promise<void>>(null);
     const rendererPromiseRef = useRef<Promise<any>>(null);
     const gameInitPromiseRef = useRef<Promise<void> | null>(null);
@@ -104,8 +127,36 @@ export const App: FC<{}> = props =>
         catch {}
     }, []);
 
+    const showSessionExpired = useCallback(() =>
+    {
+        console.warn('[App] showSessionExpired — diagnostic shown (mid-game close)');
+        clearStoredCredentials();
+
+        const baseUrl = window.location.origin + '/';
+        setHomeUrl(baseUrl);
+        setErrorMessage('Your session has expired.\nPlease log in again to enter the hotel.');
+        setIsReady(false);
+        setShowLogin(false);
+        setIsEnteringHotel(false);
+    }, [ clearStoredCredentials ]);
+
     const fallbackToLogin = useCallback(() =>
     {
+        // When login.screen.enabled is false this hotel uses SSO-only auth
+        // (CMS issues the ticket and redirects here). Surfacing a login form
+        // on init failure would just dump an empty/broken placeholder, since
+        // the form's backgrounds and Turnstile aren't even configured. Send
+        // the user back to the hotel home page instead.
+        const rawLoginEnabled = GetConfiguration().getValue<unknown>('login.screen.enabled', false);
+        const loginScreenEnabled = rawLoginEnabled === true || rawLoginEnabled === 'true' || rawLoginEnabled === 1;
+
+        if(!loginScreenEnabled)
+        {
+            console.warn('[App] fallbackToLogin — login.screen.enabled=false, redirecting to home instead');
+            showSessionExpired();
+            return;
+        }
+
         // Using console.warn (not NitroLogger.log) on purpose: NitroLogger
         // is gated on LOG_DEBUG, which only flips to true once startWarmup's
         // GetConfiguration().init() completes. Auth-failure paths fire before
@@ -119,20 +170,7 @@ export const App: FC<{}> = props =>
         setIsReady(false);
         setShowLogin(true);
         setIsEnteringHotel(false);
-    }, [ clearStoredCredentials ]);
-
-    const showSessionExpired = useCallback(() =>
-    {
-        console.warn('[App] showSessionExpired — diagnostic shown (mid-game close)');
-        clearStoredCredentials();
-
-        const baseUrl = window.location.origin + '/';
-        setHomeUrl(baseUrl);
-        setErrorMessage('Your session has expired.\nPlease log in again to enter the hotel.');
-        setIsReady(false);
-        setShowLogin(false);
-        setIsEnteringHotel(false);
-    }, [ clearStoredCredentials ]);
+    }, [ clearStoredCredentials, showSessionExpired ]);
 
     const applySsoTicket = useCallback((ssoTicket: string) =>
     {
@@ -352,6 +390,7 @@ export const App: FC<{}> = props =>
         warmupPromiseRef.current = (async () =>
         {
             await GetConfiguration().init();
+            bumpProgress(25, taskLabel('loading.task.warmup', 'Caricamento contenuti...'));
 
             GetTicker().maxFPS = GetConfiguration().getValue<number>('system.fps.max', 24);
             NitroLogger.LOG_DEBUG = GetConfiguration().getValue<boolean>('system.log.debug', true);
@@ -388,18 +427,29 @@ export const App: FC<{}> = props =>
             loginImageUrls.forEach(preloadImage);
             gamedataUrls.forEach(url => preloadUrl(url));
 
-            await Promise.all(
-                [
-                    GetAssetManager().downloadAssets(assetUrls),
-                    GetLocalizationManager().init(),
-                    GetAvatarRenderManager().init(),
-                    GetSoundManager().init()
-                ]
-            );
+            // Wire each warmup task to a progress bump so the bar reflects
+            // real subsystem-init completion, not a fake timer. Range 25→70.
+            // Each task carries a friendly label so the user sees what is
+            // currently being prepared instead of raw file names.
+            const warmupTasks: { promise: Promise<any>; label: string }[] = [
+                { promise: GetAssetManager().downloadAssets(assetUrls), label: taskLabel('loading.task.assets', 'Sto caricando gli asset di gioco') },
+                { promise: GetLocalizationManager().init(), label: taskLabel('loading.task.localization', 'Sto caricando le traduzioni') },
+                { promise: GetAvatarRenderManager().init(), label: taskLabel('loading.task.avatar', 'Sto caricando il guardaroba') },
+                { promise: GetSoundManager().init(), label: taskLabel('loading.task.sounds', 'Sto caricando i suoni') }
+            ];
+            let warmupDone = 0;
+            const warmupStart = 25;
+            const warmupSpan = 45;
+            await Promise.all(warmupTasks.map(t => t.promise.then(value =>
+            {
+                warmupDone++;
+                bumpProgress(warmupStart + Math.round((warmupSpan * warmupDone) / warmupTasks.length), t.label);
+                return value;
+            })));
         })();
 
         return warmupPromiseRef.current;
-    }, [ startRenderer ]);
+    }, [ startRenderer, bumpProgress, taskLabel ]);
 
     useEffect(() =>
     {
@@ -434,12 +484,18 @@ export const App: FC<{}> = props =>
                 urlSso: new URLSearchParams(window.location.search).get('sso')
             });
 
+            const bootLabel = taskLabel('loading.task.boot', 'Avvio in corso...');
+            setLoadingProgress(0);
+            setLoadingTask(bootLabel);
+            bumpProgress(5, bootLabel);
+
             try
             {
                 if(!window.NitroConfig) throw new Error('NitroConfig is not defined!');
 
                 let ssoTicket = window.NitroConfig['sso.ticket'];
                 if(ssoTicket) GetConfiguration().setValue('sso.ticket', ssoTicket);
+                bumpProgress(10, taskLabel('loading.task.session', 'Verifica sessione'));
 
                 if(!ssoTicket || ssoTicket === '')
                 {
@@ -506,17 +562,23 @@ export const App: FC<{}> = props =>
                 }
 
                 const renderer = await startRenderer(width, height);
+                bumpProgress(20, taskLabel('loading.task.renderer', 'Inizializzazione renderer'));
 
                 await startWarmup(width, height);
+                bumpProgress(70, taskLabel('loading.task.startsession', 'Avvio sessione'));
 
                 if(!gameInitPromiseRef.current)
                 {
                     gameInitPromiseRef.current = (async () =>
                     {
                         await GetSessionDataManager().init();
+                        bumpProgress(78, taskLabel('loading.task.userdata', 'Caricamento dati utente'));
                         await GetRoomSessionManager().init();
+                        bumpProgress(85, taskLabel('loading.task.rooms', 'Caricamento stanze'));
                         await GetRoomEngine().init();
+                        bumpProgress(92, taskLabel('loading.task.engine', 'Caricamento engine grafico'));
                         await GetCommunication().init();
+                        bumpProgress(98, taskLabel('loading.task.connect', 'Connessione al server'));
                     })();
                 }
 
@@ -545,6 +607,7 @@ export const App: FC<{}> = props =>
                     GetTicker().add(ticker => GetTexturePool().run());
                 }
 
+                bumpProgress(100, taskLabel('loading.task.ready', 'Pronto!'));
                 setIsReady(true);
                 setShowLogin(false);
                 setIsEnteringHotel(false);
@@ -581,12 +644,12 @@ export const App: FC<{}> = props =>
             if(heartbeatIntervalRef.current !== null) window.clearInterval(heartbeatIntervalRef.current);
             if(rememberRotateIntervalRef.current !== null) window.clearInterval(rememberRotateIntervalRef.current);
         };
-    }, [ prepareTrigger, startWarmup, startRenderer, tryRememberLogin, applySsoTicket, rotateRememberLogin ]);
+    }, [ prepareTrigger, startWarmup, startRenderer, tryRememberLogin, applySsoTicket, rotateRememberLogin, bumpProgress, taskLabel ]);
 
     return (
         <Base fit overflow="hidden" className={ `nitro-app-root ${ !(window.devicePixelRatio % 1) ? 'image-rendering-pixelated' : '' }` }>
             { !isReady && !showLogin &&
-                <LoadingView isError={ errorMessage.length > 0 } message={ errorMessage } homeUrl={ homeUrl } /> }
+                <LoadingView isError={ errorMessage.length > 0 } message={ errorMessage } homeUrl={ homeUrl } progress={ loadingProgress } currentTask={ loadingTask } /> }
             { !isReady && showLogin && <LoginView onAuthenticated={ handleAuthenticated } isEntering={ isEnteringHotel } /> }
             { isReady && <MainView /> }
             { /* Reconnect overlay must NOT render before we've actually entered
