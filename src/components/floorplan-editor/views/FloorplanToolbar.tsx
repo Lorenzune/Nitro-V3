@@ -42,19 +42,19 @@ export const FloorplanToolbar: FC<Props> = ({ state, dispatch, canUndo, canRedo,
 
     return (
         <Flex gap={ 1 } alignItems="center">
+            <Text bold small>{ LocalizeText('floor.plan.editor.draw.mode') }</Text>
             { setPanMode && (
                 <Base
                     pointer
                     data-testid="tool-pan"
                     data-active={ panMode ? 'true' : 'false' }
                     title={ panMode ? 'Modalità mano attiva — trascina per spostare la vista' : 'Modalità mano — trascina per spostare la vista' }
-                    className={ `w-7 h-7 flex items-center justify-center rounded border mr-1 ${ panMode ? 'bg-emerald-500 border-emerald-700 text-white shadow-inner' : 'border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-700' }` }
+                    className={ `w-7 h-7 flex items-center justify-center rounded border ${ panMode ? 'bg-emerald-500 border-emerald-700 text-white shadow-inner' : 'border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-700' }` }
                     onClick={ () => setPanMode(!panMode) }
                 >
                     <FaHandPaper size={ 12 } />
                 </Base>
             ) }
-            <Text bold small>{ LocalizeText('floor.plan.editor.draw.mode') }</Text>
             { BRUSH_BUTTONS.map(b =>
             {
                 const active = state.brush.action === b.mode && !panMode;
