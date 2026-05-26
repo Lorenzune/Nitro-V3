@@ -25,6 +25,7 @@
     "wired.action.mute.user.max.length": 100,
     "game.center.enabled": false,
     "guides.enabled": true,
+	"housekeeping.enabled": true,
     "toolbar.hide.quests": true,
     "catalog.style.new": true,
     "show.google.ads": false,

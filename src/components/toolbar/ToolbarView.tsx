@@ -1,7 +1,7 @@
 import { CreateLinkEvent, Dispose, DropBounce, EaseOut, JumpBy, Motions, NitroToolbarAnimateIconEvent, PerkAllowancesMessageEvent, PerkEnum, Queue, Wait, YouTubeRoomSettingsEvent } from '@nitrots/nitro-renderer';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { GetConfigurationValue, MessengerIconState, OpenMessengerChat, setYoutubeRoomEnabled, VisitDesktop } from '../../api';
+import { GetConfigurationValue, isHousekeepingEnabled, MessengerIconState, OpenMessengerChat, setYoutubeRoomEnabled, VisitDesktop } from '../../api';
 import { Flex, LayoutAvatarImageView, LayoutItemCountView } from '../../common';
 import { useAchievements, useFriends, useHasPermission, useInventoryUnseenTracker, useMessageEvent, useMessenger, useModTools, useNitroEvent, useSessionInfo, useWiredTools } from '../../hooks';
 import { ToolbarItemView } from './ToolbarItemView';
@@ -43,6 +43,8 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const { iconState = MessengerIconState.HIDDEN } = useMessenger();
     const { openMonitor, showToolbarButton } = useWiredTools();
     const isMod = useHasPermission('acc_supporttool');
+    const isHk = useHasPermission('acc_housekeeping');
+    const hkEnabled = useMemo(() => isHousekeepingEnabled(), []);
     const { tickets = [] } = useModTools();
     const openTicketsCount = useMemo(
         () => isMod ? tickets.filter(ticket => ticket && (ticket.state === 1)).length : 0,
@@ -270,6 +272,10 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                         <motion.div variants={ itemVariants }>
                             <ToolbarItemView icon="furnieditor" onClick={ () => CreateLinkEvent('furni-editor/toggle') } className="tb-icon" />
                         </motion.div> }
+                    { (isHk && hkEnabled) &&
+                        <motion.div variants={ itemVariants }>
+                            <ToolbarItemView icon="housekeeping" onClick={ () => CreateLinkEvent('housekeeping/toggle') } className="tb-icon" />
+                        </motion.div> }
                 </motion.div>
             </motion.div>
             <motion.div
@@ -377,6 +383,10 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                     { isMod &&
                         <motion.div variants={ itemVariants }>
                             <ToolbarItemView icon="furnieditor" onClick={ () => CreateLinkEvent('furni-editor/toggle') } className="tb-icon" />
+                        </motion.div> }
+                    { (isHk && hkEnabled) &&
+                        <motion.div variants={ itemVariants }>
+                            <ToolbarItemView icon="housekeeping" onClick={ () => CreateLinkEvent('housekeeping/toggle') } className="tb-icon" />
                         </motion.div> }
                     <motion.div variants={ itemVariants } className="relative">
                         <ToolbarItemView icon="friendall" onClick={ () => CreateLinkEvent('friends/toggle') } className="tb-icon" />

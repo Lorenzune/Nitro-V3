@@ -77,6 +77,13 @@
     height: 34px;
 }
 
+.nitro-icon.icon-housekeeping {
+    background-image: url("@/assets/images/toolbar/icons/modtools.png");
+    width: 29px;
+    height: 34px;
+    filter: hue-rotate(140deg);
+}
+
 .nitro-icon.icon-furnieditor {
     background-image: url("@/assets/images/toolbar/icons/furnieditor.png");
     width: 30px;
