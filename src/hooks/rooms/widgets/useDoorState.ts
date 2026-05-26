@@ -49,6 +49,11 @@ const useDoorStateStore = () =>
     const handleGuestRoom = useCallback((event: GetGuestRoomResultEvent) =>
     {
         const parser = event.getParser();
+        if(parser.roomEnter)
+        {
+            setSnapshot(INITIAL);
+            return;
+        }
         if(!parser.roomForward) return;
         if(parser.data.ownerName === GetSessionDataManager().userName) return;
         if(parser.isGroupMember) return;

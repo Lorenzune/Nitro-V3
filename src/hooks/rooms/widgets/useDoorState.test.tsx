@@ -1,8 +1,8 @@
-import { act, renderHook } from '@testing-library/react';
+import { act, cleanup, renderHook } from '@testing-library/react';
 import { DoorbellMessageEvent, FlatAccessDeniedMessageEvent,
     GenericErrorEvent, GetGuestRoomResultEvent, RoomDataParser,
     RoomDoorbellAcceptedEvent } from '@nitrots/nitro-renderer';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DoorStateType } from '../../../api';
 import { clearMockEventDispatcher, mockEventDispatcher } from '../../../nitro-renderer.mock';
 import { useDoorState } from './useDoorState';
@@ -19,6 +19,14 @@ describe('useDoorState', () =>
     beforeEach(() =>
     {
         clearMockEventDispatcher();
+        const { result, unmount } = renderHook(() => useDoorState());
+        act(() => result.current.reset());
+        unmount();
+    });
+
+    afterEach(() =>
+    {
+        cleanup();
     });
 
     it('exposes the initial NONE snapshot', () =>
@@ -134,6 +142,28 @@ describe('useDoorState', () =>
             }));
         });
         expect(result.current.snapshot.state).toBe(before);
+    });
+
+    it('GetGuestRoomResultEvent with roomEnter=true resets snapshot to NONE', () =>
+    {
+        const { result } = renderHook(() => useDoorState());
+        // First put the hook into a non-NONE state via doorbell
+        act(() =>
+        {
+            mockEventDispatcher.dispatchEvent(makeParserlessEvent(DoorbellMessageEvent, { userName: '' }));
+        });
+        expect(result.current.snapshot.state).toBe(DoorStateType.STATE_WAITING);
+        // Then roomEnter event should dismiss it
+        act(() =>
+        {
+            mockEventDispatcher.dispatchEvent(makeParserlessEvent(GetGuestRoomResultEvent, {
+                roomEnter: true,
+                roomForward: false,
+                data: {}
+            }));
+        });
+        expect(result.current.snapshot.state).toBe(DoorStateType.NONE);
+        expect(result.current.snapshot.roomInfo).toBeNull();
     });
 
     it('reset() returns snapshot to NONE', () =>
