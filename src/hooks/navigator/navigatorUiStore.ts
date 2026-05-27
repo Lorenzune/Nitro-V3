@@ -10,6 +10,8 @@ export type NavigatorUiState = {
     isLoading: boolean;
     needsInit: boolean;
     needsSearch: boolean;
+    currentTabCode: string;
+    currentFilter: string;
 };
 
 export type NavigatorUiActions = {
@@ -28,6 +30,8 @@ export type NavigatorUiActions = {
     markInitDone(): void;
     requestSearch(): void;
     consumeSearchRequest(): void;
+    setTab(code: string): void;
+    setFilter(value: string): void;
 };
 
 export const useNavigatorUiStore = createNitroStore<NavigatorUiState & NavigatorUiActions>()((set) => ({
@@ -40,6 +44,8 @@ export const useNavigatorUiStore = createNitroStore<NavigatorUiState & Navigator
     isLoading: false,
     needsInit: true,
     needsSearch: false,
+    currentTabCode: '',
+    currentFilter: '',
 
     show: () => set({ isVisible: true, needsSearch: true }),
     hide: () => set({ isVisible: false }),
@@ -57,5 +63,7 @@ export const useNavigatorUiStore = createNitroStore<NavigatorUiState & Navigator
     markReady: () => set({ isReady: true }),
     markInitDone: () => set({ needsInit: false }),
     requestSearch: () => set({ needsSearch: true }),
-    consumeSearchRequest: () => set({ needsSearch: false })
+    consumeSearchRequest: () => set({ needsSearch: false }),
+    setTab: (code) => set({ currentTabCode: code, currentFilter: '' }),
+    setFilter: (value) => set({ currentFilter: value })
 }));

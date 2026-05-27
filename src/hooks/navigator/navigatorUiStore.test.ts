@@ -10,7 +10,9 @@ const INITIAL = {
     isOpenSavesSearches: false,
     isLoading: false,
     needsInit: true,
-    needsSearch: false
+    needsSearch: false,
+    currentTabCode: '',
+    currentFilter: ''
 };
 
 describe('useNavigatorUiStore', () =>
@@ -32,6 +34,8 @@ describe('useNavigatorUiStore', () =>
         expect(s.isLoading).toBe(false);
         expect(s.needsInit).toBe(true);
         expect(s.needsSearch).toBe(false);
+        expect(s.currentTabCode).toBe('');
+        expect(s.currentFilter).toBe('');
     });
 
     describe('show / hide / toggle', () =>
@@ -139,6 +143,33 @@ describe('useNavigatorUiStore', () =>
             expect(useNavigatorUiStore.getState().needsSearch).toBe(true);
             useNavigatorUiStore.getState().consumeSearchRequest();
             expect(useNavigatorUiStore.getState().needsSearch).toBe(false);
+        });
+    });
+
+    describe('tab + filter', () =>
+    {
+        it("setTab('public') sets currentTabCode and clears currentFilter", () =>
+        {
+            useNavigatorUiStore.setState({ currentTabCode: 'events', currentFilter: 'habbo' });
+            useNavigatorUiStore.getState().setTab('public');
+            expect(useNavigatorUiStore.getState().currentTabCode).toBe('public');
+            expect(useNavigatorUiStore.getState().currentFilter).toBe('');
+        });
+
+        it("setFilter('cocco') sets currentFilter without touching tab", () =>
+        {
+            useNavigatorUiStore.getState().setTab('events');
+            useNavigatorUiStore.getState().setFilter('cocco');
+            expect(useNavigatorUiStore.getState().currentTabCode).toBe('events');
+            expect(useNavigatorUiStore.getState().currentFilter).toBe('cocco');
+        });
+
+        it('setTab on same code still resets currentFilter', () =>
+        {
+            useNavigatorUiStore.setState({ currentTabCode: 'public', currentFilter: 'test' });
+            useNavigatorUiStore.getState().setTab('public');
+            expect(useNavigatorUiStore.getState().currentTabCode).toBe('public');
+            expect(useNavigatorUiStore.getState().currentFilter).toBe('');
         });
     });
 });
