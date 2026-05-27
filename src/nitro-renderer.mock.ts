@@ -251,6 +251,29 @@ export class FlatAccessDeniedMessageEvent extends MessageEvent {}
 export class GenericErrorEvent extends MessageEvent {}
 export class GetGuestRoomResultEvent extends MessageEvent {}
 
+// ---------------------------------------------------------------------------
+// Navigator event classes — MessageEvent subclasses needed by useNavigatorStore
+// ---------------------------------------------------------------------------
+
+export class CanCreateRoomEventEvent extends MessageEvent {}
+export class FavouriteChangedEvent extends MessageEvent {}
+export class FavouritesEvent extends MessageEvent {}
+export class FlatCreatedEvent extends MessageEvent {}
+export class NavigatorHomeRoomEvent extends MessageEvent {}
+export class NavigatorMetadataEvent extends MessageEvent {}
+export class NavigatorOpenRoomCreatorEvent extends MessageEvent {}
+export class NavigatorSearchesEvent extends MessageEvent {}
+export class NavigatorSearchEvent extends MessageEvent {}
+export class RoomEnterErrorEvent extends MessageEvent {}
+export class RoomEntryInfoMessageEvent extends MessageEvent {}
+export class RoomForwardEvent extends MessageEvent {}
+export class RoomScoreEvent extends MessageEvent {}
+export class RoomSettingsUpdatedEvent extends MessageEvent {}
+export class UserEventCatsEvent extends MessageEvent {}
+export class UserFlatCatsEvent extends MessageEvent {}
+export class UserInfoEvent extends MessageEvent {}
+export class UserPermissionsEvent extends MessageEvent {}
+
 export class RoomEngineObjectEvent extends StubClass {}
 export class CreateLinkEvent extends StubClass {}
 export class EventDispatcher extends StubClass {}
@@ -268,6 +291,25 @@ export class RoomDataParser
 
 export class RoomModerationSettings extends StubClass {}
 export class StringDataType extends StubClass {}
+
+// Navigator data/parser stubs
+export class NavigatorCategoryDataParser extends StubClass {}
+export class NavigatorEventCategoryDataParser extends StubClass {}
+export class NavigatorSavedSearch extends StubClass {}
+export class NavigatorSearchResultSet extends StubClass {}
+export class NavigatorTopLevelContext extends StubClass {}
+export class CantConnectMessageParser extends StubClass
+{
+    static readonly REASON_FULL = 1;
+    static readonly REASON_QUEUE_ERROR = 2;
+    static readonly REASON_BANNED = 3;
+}
+
+export class LegacyExternalInterface
+{
+    static readonly available = false;
+    static call(..._args: unknown[]): void {}
+}
 export class SellablePetPaletteData extends StubClass {}
 export class PetFigureData extends StubClass {}
 export class PetData extends StubClass {}
@@ -289,6 +331,10 @@ export class HabboWebTools extends StubClass {}
 // codebase ("did the SUT call SendMessageComposer(new FooComposer(args))").
 export class AddFavouriteRoomMessageComposer extends StubClass {}
 export class DeleteFavouriteRoomMessageComposer extends StubClass {}
+export class FollowFriendMessageComposer extends StubClass {}
+export class GetUserEventCatsMessageComposer extends StubClass {}
+export class GetUserFlatCatsMessageComposer extends StubClass {}
+export class NavigatorSearchComposer extends StubClass {}
 export class DesktopViewComposer extends StubClass {}
 export class FurniturePlacePaintComposer extends StubClass {}
 export class GetGuestRoomMessageComposer extends StubClass {}
