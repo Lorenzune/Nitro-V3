@@ -11,8 +11,11 @@ export const useNavigatorUiState = () =>
     const isLoading           = useNavigatorUiStore(s => s.isLoading);
     const needsInit           = useNavigatorUiStore(s => s.needsInit);
     const needsSearch         = useNavigatorUiStore(s => s.needsSearch);
+    const currentTabCode      = useNavigatorUiStore(s => s.currentTabCode);
+    const currentFilter       = useNavigatorUiStore(s => s.currentFilter);
     return {
         isVisible, isReady, isCreatorOpen, isRoomInfoOpen, isRoomLinkOpen,
-        isOpenSavesSearches, isLoading, needsInit, needsSearch
+        isOpenSavesSearches, isLoading, needsInit, needsSearch,
+        currentTabCode, currentFilter
     };
 };

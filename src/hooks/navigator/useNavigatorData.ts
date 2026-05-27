@@ -6,12 +6,12 @@ export const useNavigatorData = () =>
     const {
         categories, eventCategories, favouriteRoomIds,
         topLevelContext, topLevelContexts,
-        searchResult, navigatorSearches, navigatorData
+        navigatorSearches, navigatorData
     } = useBetween(useNavigatorStore);
 
     return {
         categories, eventCategories, favouriteRoomIds,
         topLevelContext, topLevelContexts,
-        searchResult, navigatorSearches, navigatorData
+        navigatorSearches, navigatorData
     };
 };

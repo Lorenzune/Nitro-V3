@@ -6,13 +6,13 @@ import { CanCreateRoomEventEvent, CantConnectMessageParser, CreateLinkEvent,
     HabboWebTools, LegacyExternalInterface, NavigatorCategoryDataParser,
     NavigatorEventCategoryDataParser, NavigatorHomeRoomEvent,
     NavigatorMetadataEvent, NavigatorOpenRoomCreatorEvent, NavigatorSavedSearch,
-    NavigatorSearchComposer, NavigatorSearchesEvent, NavigatorSearchEvent,
-    NavigatorSearchResultSet, NavigatorTopLevelContext, NitroEventType,
+    NavigatorSearchesEvent,
+    NavigatorTopLevelContext, NitroEventType,
     RoomDataParser, RoomEnterErrorEvent, RoomEntryInfoMessageEvent,
-    RoomForwardEvent, RoomScoreEvent, RoomSettingsUpdatedEvent,
+    RoomForwardEvent, RoomScoreEvent,
     SecurityLevel, UserEventCatsEvent, UserFlatCatsEvent,
     UserInfoEvent, UserPermissionsEvent } from '@nitrots/nitro-renderer';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { CreateRoomSession, GetConfigurationValue, INavigatorData,
     LocalizeText, NotificationAlertType, SendMessageComposer,
     TryVisitRoom, VisitDesktop } from '../../api';
@@ -27,7 +27,6 @@ export const useNavigatorStore = () =>
     const [ favouriteRoomIds, setFavouriteRoomIds ] = useState<number[]>([]);
     const [ topLevelContext, setTopLevelContext ] = useState<NavigatorTopLevelContext>(null);
     const [ topLevelContexts, setTopLevelContexts ] = useState<NavigatorTopLevelContext[]>(null);
-    const [ searchResult, setSearchResult ] = useState<NavigatorSearchResultSet>(null);
     const [ navigatorSearches, setNavigatorSearches ] = useState<NavigatorSavedSearch[]>(null);
     const [ navigatorData, setNavigatorData ] = useState<INavigatorData>({
         settingsReceived: false,
@@ -44,40 +43,7 @@ export const useNavigatorStore = () =>
         canRate: true
     });
 
-    // Refs let handlers stay [] deps without losing access to fresh state.
-    const topLevelContextsRef = useRef(topLevelContexts);
-    topLevelContextsRef.current = topLevelContexts;
-    const topLevelContextRef = useRef(topLevelContext);
-    topLevelContextRef.current = topLevelContext;
-    const searchResultRef = useRef(searchResult);
-    searchResultRef.current = searchResult;
-
     const { simpleAlert = null } = useNotification();
-
-    const sendSearch = useCallback((searchValue: string, contextCode: string) =>
-    {
-        useNavigatorUiStore.getState().closeCreator();
-        SendMessageComposer(new NavigatorSearchComposer(contextCode, searchValue));
-        useNavigatorUiStore.getState().setLoading(true);
-    }, []);
-
-    const reloadCurrentSearch = useCallback(() =>
-    {
-        if(!useNavigatorUiStore.getState().isReady)
-        {
-            useNavigatorUiStore.getState().requestSearch();
-            return;
-        }
-        const sr = searchResultRef.current;
-        if(sr)
-        {
-            sendSearch(sr.data, sr.code);
-            return;
-        }
-        const ctx = topLevelContextRef.current;
-        if(!ctx) return;
-        sendSearch('', ctx.code);
-    }, [ sendSearch ]);
 
     useMessageEvent<FavouritesEvent>(FavouritesEvent, useCallback(event =>
     {
@@ -97,12 +63,6 @@ export const useNavigatorStore = () =>
             if(added) return ids.includes(roomId) ? ids : [ ...ids, roomId ];
             return ids.filter(id => id !== roomId);
         });
-    }, []));
-
-    useMessageEvent<RoomSettingsUpdatedEvent>(RoomSettingsUpdatedEvent, useCallback(event =>
-    {
-        const parser = event.getParser();
-        SendMessageComposer(new GetGuestRoomMessageComposer(parser.roomId, false, false));
     }, []));
 
     useMessageEvent<CanCreateRoomEventEvent>(CanCreateRoomEventEvent, useCallback(event =>
@@ -223,28 +183,8 @@ export const useNavigatorStore = () =>
         const parser = event.getParser();
         setTopLevelContexts(parser.topLevelContexts);
         setTopLevelContext(parser.topLevelContexts.length ? parser.topLevelContexts[0] : null);
-    }, []));
-
-    useMessageEvent<NavigatorSearchEvent>(NavigatorSearchEvent, useCallback(event =>
-    {
-        const parser = event.getParser();
-        const contexts = topLevelContextsRef.current;
-        setTopLevelContext(prev =>
-        {
-            let next = prev;
-            if(!next) next = (contexts && contexts.length && contexts[0]) || null;
-            if(!next) return null;
-            if(contexts && contexts.length)
-            {
-                for(const ctx of contexts)
-                {
-                    if(ctx.code === parser.result.code) next = ctx;
-                }
-            }
-            return next;
-        });
-        setSearchResult(parser.result);
-        useNavigatorUiStore.getState().setLoading(false);
+        // Seed the query's tab code so useNavigatorSearch activates immediately
+        useNavigatorUiStore.getState().setTab(parser.topLevelContexts[0]?.code ?? '');
     }, []));
 
     useMessageEvent<UserFlatCatsEvent>(UserFlatCatsEvent, useCallback(event =>
@@ -342,7 +282,6 @@ export const useNavigatorStore = () =>
     return {
         categories, eventCategories, favouriteRoomIds,
         topLevelContext, topLevelContexts,
-        searchResult, navigatorSearches, navigatorData,
-        sendSearch, reloadCurrentSearch
+        navigatorSearches, navigatorData
     };
 };
