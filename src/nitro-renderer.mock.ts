@@ -533,7 +533,9 @@ export const GetCommunication = vi.fn(() => ({
     {
         const wrapper = _msgEventWrappers.get(event);
         if(wrapper) msgListeners.get(event.type)?.delete(wrapper);
-    }
+    },
+    // Stub for SendMessageComposer which calls GetCommunication().connection.send(...)
+    connection: { send: vi.fn() }
 }));
 export const GetConfiguration = vi.fn(stubManager);
 export const GetLocalizationManager = vi.fn(stubManager);
