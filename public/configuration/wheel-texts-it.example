@@ -1,0 +1,9 @@
+{
+    "wheel.title": "Ruota della Fortuna",
+    "wheel.free.today": "Hai %count% giri gratis oggi!",
+    "wheel.extra": "Giri extra: %count%",
+    "wheel.spin": "GIRA",
+    "wheel.buy": "Compra giro",
+    "wheel.winners": "Ultimi vincitori",
+    "wheel.winners.empty": "Ancora nessun vincitore"
+}

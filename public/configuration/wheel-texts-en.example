@@ -1,0 +1,9 @@
+{
+    "wheel.title": "Fortune Wheel",
+    "wheel.free.today": "You have %count% free spins today!",
+    "wheel.extra": "Extra spins: %count%",
+    "wheel.spin": "SPIN",
+    "wheel.buy": "Buy spin",
+    "wheel.winners": "Latest winners",
+    "wheel.winners.empty": "No winners yet"
+}

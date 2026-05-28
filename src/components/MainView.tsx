@@ -24,6 +24,8 @@ import { HcCenterView } from './hc-center/HcCenterView';
 import { HelpView } from './help/HelpView';
 import { HotelView } from './hotel-view/HotelView';
 import { HousekeepingView } from './housekeeping/HousekeepingView';
+import { RareValuesView } from './rare-values/RareValuesView';
+import { FortuneWheelView } from './fortune-wheel/FortuneWheelView';
 import { InventoryView } from './inventory/InventoryView';
 import { ModToolsView } from './mod-tools/ModToolsView';
 import { NavigatorView } from './navigator/NavigatorView';
@@ -176,6 +178,8 @@ export const MainView: FC<{}> = props =>
             <GameCenterView />
             <FloorplanEditorView />
             <FurniEditorView />
+            <RareValuesView />
+            <FortuneWheelView />
             <ExternalPluginLoader />
         </>
     );

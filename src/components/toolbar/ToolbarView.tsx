@@ -250,6 +250,12 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                         { (getFullCount > 0) &&
                             <LayoutItemCountView count={ getFullCount } className="absolute -right-1 top-0" /> }
                     </motion.div>
+                    <motion.div variants={ itemVariants }>
+                        <ToolbarItemView icon="rare-values" onClick={ () => CreateLinkEvent('rare-values/toggle') } className="tb-icon" />
+                    </motion.div>
+                    <motion.div variants={ itemVariants }>
+                        <ToolbarItemView icon="fortune-wheel" onClick={ () => CreateLinkEvent('fortune-wheel/toggle') } className="tb-icon" />
+                    </motion.div>
                     { (isInRoom && showToolbarButton) &&
                         <motion.div variants={ itemVariants }>
                             <ToolbarItemView icon="wired-tools" onClick={ openMonitor } className="tb-icon" />
@@ -357,6 +363,12 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                         <ToolbarItemView icon="inventory" onClick={ () => CreateLinkEvent('inventory/toggle') } className="tb-icon" />
                         { (getFullCount > 0) &&
                             <LayoutItemCountView count={ getFullCount } className="absolute -right-1 top-0" /> }
+                    </motion.div>
+                    <motion.div variants={ itemVariants }>
+                        <ToolbarItemView icon="rare-values" onClick={ () => CreateLinkEvent('rare-values/toggle') } className="tb-icon" />
+                    </motion.div>
+                    <motion.div variants={ itemVariants }>
+                        <ToolbarItemView icon="fortune-wheel" onClick={ () => CreateLinkEvent('fortune-wheel/toggle') } className="tb-icon" />
                     </motion.div>
                 </motion.div>
                 <motion.div
