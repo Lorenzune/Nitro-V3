@@ -53,7 +53,7 @@ export const SoundboardView: FC<{}> = () =>
                             { sounds.map(sound => (
                                 <button
                                     key={ sound.id }
-                                    onClick={ () => play(sound.id) }
+                                    onClick={ () => play(sound) }
                                     title={ sound.name }
                                     className="flex h-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg bg-[#3a7bb5] px-2 text-white shadow transition-transform hover:bg-[#336ea3] active:scale-95">
                                     <span className="text-2xl leading-none">🔊</span>
