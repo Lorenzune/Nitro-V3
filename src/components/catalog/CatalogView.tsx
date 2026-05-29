@@ -1,26 +1,27 @@
-import { FC, useEffect } from 'react';
+import { FC } from 'react';
 import { useCatalogClassicStyle, useCatalogData } from '../../hooks';
 import { CatalogClassicView } from './CatalogClassicView';
+import { CatalogModernView } from './CatalogModernView';
 
 export const CatalogView: FC<{}> = () =>
 {
     const { catalogLocalizationVersion = 0 } = useCatalogData();
     const [ catalogClassicStyle ] = useCatalogClassicStyle();
 
-    // Toggle the legacy-skin marker on <body> so the scoped overrides in
-    // CatalogClassicLegacy.css (the pre-merge catalog look) take effect for
-    // every catalog element without touching the modern stylesheet.
-    useEffect(() =>
-    {
-        document.body.classList.toggle('catalog-skin-legacy', !!catalogClassicStyle);
-
-        return () => document.body.classList.remove('catalog-skin-legacy');
-    }, [ catalogClassicStyle ]);
+    // Modern (Hippiehotel style) is the default; the "stile classico" toggle in
+    // user settings (or the global catalog.classic.style flag) switches to the
+    // classic catalog. Both views are the Hippiehotel.nl Nitro-V3 originals.
+    if(catalogClassicStyle) return (
+        <>
+            <div className="hidden" data-catalog-localization-version={ catalogLocalizationVersion } />
+            <CatalogClassicView />
+        </>
+    );
 
     return (
         <>
             <div className="hidden" data-catalog-localization-version={ catalogLocalizationVersion } />
-            <CatalogClassicView />
+            <CatalogModernView />
         </>
     );
 };
