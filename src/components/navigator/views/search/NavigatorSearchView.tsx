@@ -1,5 +1,5 @@
 import { NavigatorSearchResultSet } from '@nitrots/nitro-renderer';
-import { FC, KeyboardEvent, useEffect, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { INavigatorSearchFilter, LocalizeText, SearchFilterOptions } from '../../../../api';
 import { Button } from '../../../../common';
@@ -16,6 +16,7 @@ export const NavigatorSearchView: FC<NavigatorSearchViewProps> = props =>
     const { searchResult } = props;
     const [ searchFilterIndex, setSearchFilterIndex ] = useState(0);
     const [ inputText, setInputText ] = useState('');
+    const formRef = useRef<HTMLFormElement>(null);
     const { topLevelContext } = useNavigatorData();
 
     // Sync the input text display when a server result arrives (e.g. on tab switch
@@ -61,31 +62,27 @@ export const NavigatorSearchView: FC<NavigatorSearchViewProps> = props =>
         return () => clearTimeout(timer);
     }, [ inputText, searchFilterIndex ]);
 
-    const processSearch = () =>
+    // React 19 form action — fires on Enter or the submit button, skipping the
+    // debounce timer for an immediate search.
+    const submitSearch = (formData: FormData) =>
     {
         if(!topLevelContext) return;
-        // Immediate submit — skip the debounce timer
+        const raw = formData.get('q');
+        const value = (typeof raw === 'string') ? raw : inputText;
         const searchFilter = SearchFilterOptions[searchFilterIndex] ?? SearchFilterOptions[0];
-        const searchQuery = (searchFilter.query ? (searchFilter.query + ':') : '') + inputText;
+        const searchQuery = (searchFilter.query ? (searchFilter.query + ':') : '') + value;
         useNavigatorUiStore.getState().setFilter(searchQuery);
-    };
-
-    const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) =>
-    {
-        if(event.key !== 'Enter') return;
-
-        processSearch();
     };
 
     return (
         <div className="flex w-full flex-col gap-1">
             <NavigatorFilterChipsView value={ searchFilterIndex } onChange={ setSearchFilterIndex } />
-            <div className="flex w-full gap-1">
-                <input className="w-full form-control" placeholder={ LocalizeText('navigator.filter.input.placeholder') } type="text" value={ inputText } onChange={ event => setInputText(event.target.value) } onKeyDown={ event => handleKeyDown(event) } />
-                <Button variant="primary" onClick={ processSearch }>
+            <form ref={ formRef } action={ submitSearch } className="flex w-full gap-1">
+                <input className="w-full form-control" name="q" placeholder={ LocalizeText('navigator.filter.input.placeholder') } type="text" value={ inputText } onChange={ event => setInputText(event.target.value) } />
+                <Button variant="primary" onClick={ () => formRef.current?.requestSubmit() }>
                     <FaSearch className="fa-icon" />
                 </Button>
-            </div>
+            </form>
         </div>
     );
 };
