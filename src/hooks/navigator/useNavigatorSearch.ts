@@ -1,5 +1,5 @@
-import { NavigatorSearchComposer, NavigatorSearchEvent,
-    NavigatorSearchResultSet } from '@nitrots/nitro-renderer';
+import { FlatCreatedEvent, NavigatorSearchComposer, NavigatorSearchEvent, NavigatorSearchResultSet } from '@nitrots/nitro-renderer';
+import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { SendMessageComposer } from '../../api';
 import { useMessageEvent } from '../events';
@@ -23,6 +23,7 @@ export const useNavigatorSearch = () =>
 {
     const tabCode = useNavigatorUiStore(s => s.currentTabCode);
     const filter  = useNavigatorUiStore(s => s.currentFilter);
+    const queryClient = useQueryClient();
 
     const [ searchResult, setSearchResult ] = useState<NavigatorSearchResultSet | null>(null);
     const [ isFetching, setIsFetching ] = useState(false);
@@ -40,13 +41,23 @@ export const useNavigatorSearch = () =>
         const result = event.getParser()?.result;
         if(!result) return;
 
-        // Accept any incoming result for the currently active tab. Server
-        // can push extra results unprompted (e.g. after a room is
-        // created); accepting them keeps the panel in sync.
-        if(tabCode && result.code !== tabCode) return;
+        // No active tab → the search query is disabled, ignore any event.
+        // Otherwise only accept the event whose code matches the active tab.
+        if(!tabCode || (result.code !== tabCode)) return;
 
         setSearchResult(result);
         setIsFetching(false);
+    });
+
+    // A newly created room invalidates the current search so it refetches.
+    useMessageEvent<FlatCreatedEvent>(FlatCreatedEvent, () =>
+    {
+        queryClient.invalidateQueries({ queryKey: [ 'navigator', 'search' ] });
+
+        if(!tabCode) return;
+
+        setIsFetching(true);
+        SendMessageComposer(new NavigatorSearchComposer(tabCode, filter));
     });
 
     return {
