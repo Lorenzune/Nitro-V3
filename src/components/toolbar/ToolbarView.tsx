@@ -336,7 +336,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                     </motion.div>
                     { mentionsEnabled &&
                         <motion.div variants={ itemVariants } className="relative">
-                            <ToolbarItemView icon="message" onClick={ () => CreateLinkEvent('mentions/toggle') } className="tb-icon" />
+                            <ToolbarItemView icon="mentions" onClick={ () => CreateLinkEvent('mentions/toggle') } className="tb-icon" />
                             { (mentionsUnread > 0) &&
                                 <LayoutItemCountView count={ mentionsUnread } className="absolute -right-2 -top-1" /> }
                         </motion.div> }
@@ -432,7 +432,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                     </motion.div>
                     { mentionsEnabled &&
                         <motion.div variants={ itemVariants } className="relative">
-                            <ToolbarItemView icon="message" onClick={ () => CreateLinkEvent('mentions/toggle') } className="tb-icon" />
+                            <ToolbarItemView icon="mentions" onClick={ () => CreateLinkEvent('mentions/toggle') } className="tb-icon" />
                             { (mentionsUnread > 0) &&
                                 <LayoutItemCountView count={ mentionsUnread } className="absolute -right-2 -top-1" /> }
                         </motion.div> }
