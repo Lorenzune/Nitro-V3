@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="980" viewBox="0 0 1440 980">
+  <rect width="1440" height="980" fill="#e8edf1"/>
+  <text x="64" y="64" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#203746">Catalog responsive redesign</text>
+  <text x="64" y="96" font-family="Arial, sans-serif" font-size="16" fill="#607684">Navigation stays close to search, product preview remains visible, item grid grows with available space.</text>
+
+  <g transform="translate(64 140)">
+    <rect width="760" height="520" rx="12" fill="#ffffff" stroke="#9cafbd" stroke-width="2"/>
+    <rect width="760" height="42" rx="12" fill="#4b7a94"/>
+    <rect y="34" width="760" height="8" fill="#4b7a94"/>
+    <text x="24" y="27" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#ffffff">Laptop / desktop</text>
+    <rect x="0" y="42" width="760" height="42" fill="#d9e2e8"/>
+    <g fill="#b7c7d1" stroke="#7a9cb0">
+      <rect x="12" y="52" width="92" height="32" rx="6"/>
+      <rect x="108" y="52" width="118" height="32" rx="6"/>
+      <rect x="230" y="52" width="94" height="32" rx="6"/>
+      <rect x="328" y="52" width="110" height="32" rx="6"/>
+    </g>
+    <rect x="16" y="100" width="216" height="404" rx="8" fill="#eef2f5" stroke="#b7c7d1"/>
+    <rect x="30" y="114" width="188" height="30" rx="5" fill="#ffffff" stroke="#7a9cb0"/>
+    <g font-family="Arial, sans-serif" font-size="13" fill="#233a47">
+      <rect x="30" y="158" width="188" height="32" fill="#ffffff"/>
+      <rect x="30" y="190" width="188" height="32" fill="#e1e7ec"/>
+      <rect x="30" y="222" width="188" height="32" fill="#3a82a7" opacity="0.16"/>
+      <text x="54" y="179">Front page</text>
+      <text x="54" y="211">Furniture</text>
+      <text x="54" y="243">Rooms</text>
+    </g>
+    <rect x="248" y="100" width="496" height="404" rx="8" fill="#ffffff" stroke="#b7c7d1"/>
+    <rect x="264" y="116" width="464" height="54" rx="6" fill="#f6f8fa" stroke="#d0d9df"/>
+    <rect x="264" y="184" width="180" height="132" rx="8" fill="#d4dadf" stroke="#b7c7d1"/>
+    <rect x="444" y="184" width="284" height="132" rx="8" fill="#ffffff" stroke="#b7c7d1"/>
+    <rect x="612" y="272" width="94" height="28" rx="5" fill="#009900"/>
+    <g fill="#ffffff" stroke="#b7c7d1">
+      <rect x="264" y="334" width="60" height="60" rx="6"/>
+      <rect x="332" y="334" width="60" height="60" rx="6"/>
+      <rect x="400" y="334" width="60" height="60" rx="6"/>
+      <rect x="468" y="334" width="60" height="60" rx="6"/>
+      <rect x="536" y="334" width="60" height="60" rx="6"/>
+      <rect x="604" y="334" width="60" height="60" rx="6"/>
+      <rect x="672" y="334" width="56" height="60" rx="6"/>
+      <rect x="264" y="404" width="60" height="60" rx="6"/>
+      <rect x="332" y="404" width="60" height="60" rx="6"/>
+      <rect x="400" y="404" width="60" height="60" rx="6"/>
+      <rect x="468" y="404" width="60" height="60" rx="6"/>
+    </g>
+  </g>
+
+  <g transform="translate(880 140)">
+    <rect width="440" height="520" rx="12" fill="#ffffff" stroke="#9cafbd" stroke-width="2"/>
+    <rect width="440" height="42" rx="12" fill="#4b7a94"/>
+    <rect y="34" width="440" height="8" fill="#4b7a94"/>
+    <text x="20" y="27" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#ffffff">Tablet portrait</text>
+    <rect x="0" y="42" width="440" height="42" fill="#d9e2e8"/>
+    <rect x="14" y="100" width="412" height="124" rx="8" fill="#eef2f5" stroke="#b7c7d1"/>
+    <rect x="28" y="114" width="384" height="32" rx="5" fill="#ffffff" stroke="#7a9cb0"/>
+    <g fill="#e1e7ec" stroke="#b7c7d1">
+      <rect x="28" y="158" width="118" height="34" rx="6"/>
+      <rect x="154" y="158" width="118" height="34" rx="6"/>
+      <rect x="280" y="158" width="118" height="34" rx="6"/>
+    </g>
+    <rect x="14" y="238" width="412" height="266" rx="8" fill="#ffffff" stroke="#b7c7d1"/>
+    <rect x="28" y="252" width="384" height="86" rx="8" fill="#f7f9fa" stroke="#d0d9df"/>
+    <g fill="#ffffff" stroke="#b7c7d1">
+      <rect x="28" y="354" width="64" height="64" rx="6"/>
+      <rect x="100" y="354" width="64" height="64" rx="6"/>
+      <rect x="172" y="354" width="64" height="64" rx="6"/>
+      <rect x="244" y="354" width="64" height="64" rx="6"/>
+      <rect x="316" y="354" width="64" height="64" rx="6"/>
+      <rect x="28" y="426" width="64" height="64" rx="6"/>
+      <rect x="100" y="426" width="64" height="64" rx="6"/>
+      <rect x="172" y="426" width="64" height="64" rx="6"/>
+    </g>
+  </g>
+
+  <g transform="translate(64 710)">
+    <rect width="300" height="220" rx="10" fill="#ffffff" stroke="#9cafbd" stroke-width="2"/>
+    <rect width="300" height="32" rx="10" fill="#4b7a94"/>
+    <text x="14" y="22" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff">Mobile landscape</text>
+    <rect x="10" y="44" width="92" height="166" rx="7" fill="#eef2f5" stroke="#b7c7d1"/>
+    <rect x="112" y="44" width="178" height="166" rx="7" fill="#ffffff" stroke="#b7c7d1"/>
+    <rect x="122" y="54" width="158" height="48" rx="6" fill="#d4dadf"/>
+    <g fill="#ffffff" stroke="#b7c7d1">
+      <rect x="122" y="116" width="42" height="42" rx="5"/>
+      <rect x="170" y="116" width="42" height="42" rx="5"/>
+      <rect x="218" y="116" width="42" height="42" rx="5"/>
+      <rect x="122" y="164" width="42" height="36" rx="5"/>
+      <rect x="170" y="164" width="42" height="36" rx="5"/>
+    </g>
+  </g>
+
+  <g transform="translate(420 710)">
+    <rect width="180" height="220" rx="10" fill="#ffffff" stroke="#9cafbd" stroke-width="2"/>
+    <rect width="180" height="32" rx="10" fill="#4b7a94"/>
+    <text x="12" y="22" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff">Mobile portrait</text>
+    <rect x="10" y="44" width="160" height="66" rx="7" fill="#eef2f5" stroke="#b7c7d1"/>
+    <rect x="10" y="120" width="160" height="90" rx="7" fill="#ffffff" stroke="#b7c7d1"/>
+    <rect x="20" y="130" width="140" height="34" rx="6" fill="#d4dadf"/>
+    <g fill="#ffffff" stroke="#b7c7d1">
+      <rect x="20" y="174" width="36" height="28" rx="5"/>
+      <rect x="62" y="174" width="36" height="28" rx="5"/>
+      <rect x="104" y="174" width="36" height="28" rx="5"/>
+    </g>
+  </g>
+</svg>

@@ -15,8 +15,8 @@ export const NavigatorSearchSavesResultView: FC<NavigatorSearchSavesResultViewPr
     const { searches = [] } = props;
 
     return (
-        <Column className="nitro-navigator-search-saves-result min-w-[100px]">
-            <Flex className="rounded px-2 py-1 bg-orange-500" gap={ 1 } alignItems="center">
+        <Column className="nitro-navigator-search-saves-result min-w-[100px] gap-1">
+            <Flex className="rounded-[8px] px-2 py-2 bg-[#f8a900]" gap={ 1 } alignItems="center">
                 <FaBolt color="white" />
                 <Text variant="white">{ LocalizeText('navigator.quick.links.title') }</Text>
             </Flex>

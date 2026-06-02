@@ -1,7 +1,8 @@
-import { NavigatorDeleteSavedSearchComposer, NavigatorSavedSearch, NavigatorSearchComposer } from '@nitrots/nitro-renderer';
+import { NavigatorDeleteSavedSearchComposer, NavigatorSavedSearch } from '@nitrots/nitro-renderer';
 import { FC, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../api';
 import { Flex, Text } from '../../../../common';
+import { useNavigatorUiStore } from '../../../../hooks';
 
 export interface NavigatorSearchSavesResultItemViewProps
 {
@@ -24,6 +25,15 @@ export const NavigatorSearchSavesResultItemView: FC<NavigatorSearchSavesResultIt
         return ('navigator.searchcode.title.' + name);
     };
 
+    const openSavedSearch = () =>
+    {
+        const store = useNavigatorUiStore.getState();
+
+        store.closeCreator();
+        store.setTab(search.code.split('.').reverse()[0]);
+        store.setFilter(search.filter);
+    };
+
     return (
         <Flex grow pointer alignItems="center" gap={ 1 } onMouseEnter={ () => setIsHovered(true) } onMouseLeave={ () => setIsHovered(false) }>
             { isHovered &&
@@ -37,7 +47,7 @@ export const NavigatorSearchSavesResultItemView: FC<NavigatorSearchSavesResultIt
                 pointer
                 variant="black"
                 title={ LocalizeText('navigator.tooltip.open.saved.search') }
-                onClick={ () => SendMessageComposer(new NavigatorSearchComposer(search.code.split('.').reverse()[0], search.filter)) }
+                onClick={ openSavedSearch }
             >
                 { LocalizeText(getResultTitle()) }
             </Text>

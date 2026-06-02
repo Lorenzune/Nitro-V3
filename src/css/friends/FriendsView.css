@@ -139,8 +139,8 @@
 
     & .nitro-card-accordion-set-content,
     & .nitro-card-content-shell {
-        scrollbar-width: thin;
-        scrollbar-color: #6d7b84 #cdd4d8;
+        scrollbar-width: auto;
+        scrollbar-color: auto;
     }
 
     & .nitro-card-accordion-set-content::-webkit-scrollbar,
@@ -461,8 +461,8 @@
 
     & .nitro-card-content-shell,
     & .chat-messages {
-        scrollbar-width: thin;
-        scrollbar-color: #6d7b84 #cdd4d8;
+        scrollbar-width: auto;
+        scrollbar-color: auto;
     }
 
     & .nitro-card-content-shell::-webkit-scrollbar,

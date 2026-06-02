@@ -1,7 +1,7 @@
 import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
 import { FaBars, FaCog, FaEdit, FaEye, FaEyeSlash, FaPlus, FaTrash } from 'react-icons/fa';
-import { CatalogType, GetConfigurationValue, LocalizeShortNumber, LocalizeText } from '../../api';
+import { CatalogType, GetConfigurationValue, LocalizeShortNumber, LocalizeText, SanitizeHtml } from '../../api';
 import { Column, Grid, LayoutCurrencyIcon, NitroCardContentView, NitroCardHeaderView, NitroCardTabsItemView, NitroCardTabsView, NitroCardView } from '../../common';
 import { useCatalogActions, useCatalogData, useCatalogUiState, useHasPermission, usePurse } from '../../hooks';
 import { CatalogAdminProvider, useCatalogAdmin } from './CatalogAdminContext';
@@ -34,6 +34,8 @@ const CatalogClassicViewInner: FC<{}> = () =>
     const [ mobileMenuOpen, setMobileMenuOpen ] = useState(false);
     const { purse = null } = usePurse();
     const displayedCurrencies = GetConfigurationValue<number[]>('system.currency.types', []);
+    const activeCatalogNode = activeNodes?.[activeNodes.length - 1] ?? null;
+    const getSwfTabLabel = (label: string) => (label || '').replace(/\s*\([^)]*\)\s*$/g, '').trim();
     const buildersClubHeaderStyle = (currentType === CatalogType.BUILDER)
         ? { borderColor: '#d79d2e', borderBottomColor: '#000', background: 'linear-gradient(180deg, #d89f2d 0%, #c68515 100%)' }
         : undefined;
@@ -122,7 +124,7 @@ const CatalogClassicViewInner: FC<{}> = () =>
     return (
         <>
             { isVisible &&
-                <NitroCardView classNames={ [ 'nitro-catalog-classic-window' ] } isResizable={ false } uniqueKey="catalog">
+                <NitroCardView classNames={ [ 'habbo-swf-window', 'habbo-swf-catalog-window', 'nitro-catalog-classic-window' ] } isResizable={ false } uniqueKey="catalog">
                     <NitroCardHeaderView className={ currentType === CatalogType.BUILDER ? 'builders-club-card-header' : '' } headerText={ LocalizeText('catalog.title') } onCloseClick={ () => setIsVisible(false) } style={ buildersClubHeaderStyle } />
                     <div className="nitro-catalog-classic-mobile-header">
                         { isMod &&
@@ -175,6 +177,7 @@ const CatalogClassicViewInner: FC<{}> = () =>
                         { rootNode && (rootNode.children.length > 0) && rootNode.children.map((child, index) =>
                         {
                             if(!adminMode && !child.isVisible) return null;
+                            if(!adminMode && (index === 0) && getSwfTabLabel(child.localization).toLowerCase().includes('rari')) return null;
 
                             const isHidden = !child.isVisible;
 
@@ -186,8 +189,7 @@ const CatalogClassicViewInner: FC<{}> = () =>
                                     activateNode(child);
                                 } }>
                                     <div className={ `flex items-center gap-1 ${ isHidden ? 'opacity-40' : '' }` }>
-                                        <CatalogIconView icon={ child.iconId } />
-                                        <span className="nitro-catalog-classic-tab-label truncate">{ child.localization }</span>
+                                        <span className="nitro-catalog-classic-tab-label truncate">{ getSwfTabLabel(child.localization) }</span>
                                         { adminMode && isHidden && <FaEyeSlash className="text-[8px] text-danger ml-1" /> }
                                         { adminMode &&
                                             <div className="flex items-center gap-0.5 ml-1" onClick={ e => e.stopPropagation() }>
@@ -215,6 +217,20 @@ const CatalogClassicViewInner: FC<{}> = () =>
                                 <FaCog className={ `text-[10px] ${ adminMode ? 'animate-spin' : '' }` } style={ adminMode ? { animationDuration: '3s' } : {} } />
                             </NitroCardTabsItemView> }
                     </NitroCardTabsView>
+                    <div className="nitro-catalog-classic-swf-header">
+                        <div className="nitro-catalog-classic-swf-header-bg" style={ currentPage?.localization?.getImage(0) ? { backgroundImage: `url(${ currentPage.localization.getImage(0) })` } : undefined } />
+                        <div className="nitro-catalog-classic-swf-header-icon">
+                            <CatalogIconView icon={ activeCatalogNode?.iconId ?? rootNode?.iconId ?? 1 } />
+                        </div>
+                        <div className="nitro-catalog-classic-swf-header-copy">
+                            <div className="nitro-catalog-classic-swf-header-title">
+                                { currentType === CatalogType.BUILDER ? LocalizeText('builder.header.title') : getSwfTabLabel(activeCatalogNode?.localization ?? LocalizeText('catalog.title')) }
+                            </div>
+                            { currentType === CatalogType.BUILDER
+                                ? <div className="nitro-catalog-classic-swf-header-description">{ LocalizeText('builder.header.status.membership') }</div>
+                                : <div className="nitro-catalog-classic-swf-header-description" dangerouslySetInnerHTML={ { __html: SanitizeHtml(currentPage?.localization?.getText(0) || '') } } /> }
+                        </div>
+                    </div>
                     <NitroCardContentView classNames={ [ 'nitro-catalog-classic-content-shell' ] }>
                         <CatalogBuildersClubStatusView />
                         { adminMode && rootNode &&

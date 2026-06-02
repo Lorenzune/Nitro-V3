@@ -44,6 +44,7 @@ import './css/layout/LayoutTrophy.css';
 
 
 import './css/nitrocard/NitroCardView.css';
+import './css/navigator/HabboNavigatorDesktop.css';
 
 import './css/notification/NotificationCenterView.css';
 
@@ -59,6 +60,7 @@ import './css/toolbar/ToolBar.css';
 import './css/user-profile/UserProfileView.css';
 
 import './css/widgets/FurnitureWidgets.css';
+import './css/habbo/HabboSwfSkin.css';
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>

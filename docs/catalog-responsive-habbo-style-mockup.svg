@@ -1,0 +1,315 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1536" height="960" viewBox="0 0 1536 960">
+  <defs>
+    <linearGradient id="pageBg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f7f9fb"/>
+      <stop offset="1" stop-color="#e7edf3"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#0c2741"/>
+      <stop offset="1" stop-color="#031728"/>
+    </linearGradient>
+    <linearGradient id="panel2" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#143655"/>
+      <stop offset="1" stop-color="#092039"/>
+    </linearGradient>
+    <linearGradient id="hero" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#322a88"/>
+      <stop offset="0.48" stop-color="#5e2eb5"/>
+      <stop offset="1" stop-color="#c226ba"/>
+    </linearGradient>
+    <linearGradient id="greenBtn" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#42cc3e"/>
+      <stop offset="1" stop-color="#19990f"/>
+    </linearGradient>
+    <linearGradient id="coin" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffe769"/>
+      <stop offset="1" stop-color="#d99200"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#00101e" flood-opacity="0.26"/>
+    </filter>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#00d9ff" flood-opacity="0.18"/>
+    </filter>
+    <pattern id="isoGrid" width="28" height="16" patternUnits="userSpaceOnUse">
+      <path d="M0 8 L14 0 L28 8 L14 16 Z" fill="none" stroke="#21425f" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1536" height="960" fill="url(#pageBg)"/>
+  <g font-family="Arial, sans-serif">
+    <text x="38" y="47" font-size="31" font-weight="800" fill="#11223a">HABBO CATALOGO MOBILE</text>
+    <text x="39" y="78" font-size="20" fill="#46566d">100% responsive | verticale e orizzontale | desktop, laptop e tablet</text>
+  </g>
+
+  <g transform="translate(432 22)" filter="url(#shadow)">
+    <rect width="1002" height="520" rx="12" fill="url(#panel)" stroke="#07101b" stroke-width="4"/>
+    <rect x="8" y="8" width="986" height="50" rx="9" fill="#0b2239" stroke="#1c4568"/>
+    <g font-family="Arial Black, Arial, sans-serif" font-weight="900">
+      <text x="28" y="41" font-size="24" fill="#ffef2d" stroke="#6d3500" stroke-width="2">HABBO</text>
+    </g>
+    <g transform="translate(450 14)" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#fff">
+      <rect width="82" height="30" rx="7" fill="#07182a" stroke="#1f4869"/>
+      <circle cx="16" cy="15" r="9" fill="url(#coin)" stroke="#704400"/>
+      <text x="35" y="20">999 +</text>
+      <rect x="100" width="86" height="30" rx="7" fill="#07182a" stroke="#1f4869"/>
+      <path d="M116 7 L127 7 L135 15 L126 24 L108 15 Z" fill="#72eaff" stroke="#226d90"/>
+      <text x="143" y="20">250 +</text>
+    </g>
+    <rect x="944" y="12" width="34" height="34" rx="6" fill="#102944" stroke="#264a68"/>
+    <path d="M953 21 L969 37 M969 21 L953 37" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+
+    <rect x="18" y="61" width="252" height="450" rx="9" fill="#082038" stroke="#214766"/>
+    <text x="32" y="101" font-family="Arial, sans-serif" font-size="25" font-weight="800" fill="#fff">Catalogo</text>
+    <text x="32" y="127" font-family="Arial, sans-serif" font-size="14" fill="#d8e9f4">Scegli il tuo stile, arreda le</text>
+    <text x="32" y="145" font-family="Arial, sans-serif" font-size="14" fill="#d8e9f4">tue Stanze e vivi Habbo!</text>
+    <rect x="32" y="166" width="220" height="31" rx="6" fill="#0d2b47" stroke="#2b5b7c"/>
+    <text x="44" y="186" font-family="Arial, sans-serif" font-size="12" fill="#bccfe0">Cerca nel catalogo</text>
+    <circle cx="234" cy="181" r="6" fill="none" stroke="#d5e7f5" stroke-width="1.5"/>
+    <path d="M238 185 L244 191" stroke="#d5e7f5" stroke-width="1.5"/>
+
+    <g font-family="Arial, sans-serif" font-size="13" fill="#dbe9f5">
+      <g transform="translate(32 209)">
+        <rect width="220" height="29" rx="4" fill="#104d7d"/>
+        <text x="36" y="20">In evidenza</text>
+        <path d="M18 5 L22 14 L31 14 L24 19 L27 28 L18 23 L9 28 L12 19 L5 14 L14 14 Z" fill="#ffd51f" stroke="#a46d00"/>
+      </g>
+      <g transform="translate(32 244)">
+        <rect x="2" y="1" width="22" height="22" rx="4" fill="#1db56c" stroke="#0c6f3f"/>
+        <text x="36" y="18">Furni</text>
+      </g>
+      <g transform="translate(32 279)">
+        <circle cx="13" cy="12" r="12" fill="#d45291" stroke="#8d2b69"/>
+        <text x="36" y="18">Vestiti</text>
+      </g>
+      <g transform="translate(32 314)">
+        <circle cx="13" cy="12" r="12" fill="#d79716" stroke="#875500"/>
+        <text x="36" y="18">Cuccioli</text>
+      </g>
+      <g transform="translate(32 349)">
+        <circle cx="13" cy="12" r="12" fill="#693bb2" stroke="#3a1f75"/>
+        <text x="36" y="18">Iscrizioni</text>
+      </g>
+      <text x="68" y="398">Furni di Credito</text>
+      <text x="68" y="433">Rari</text>
+      <text x="68" y="468">Per tipo</text>
+    </g>
+
+    <rect x="286" y="74" width="416" height="136" rx="7" fill="url(#hero)" stroke="#7049e2"/>
+    <text x="327" y="117" font-family="Arial, sans-serif" font-size="29" font-weight="900" fill="#fff">JUKEBOX</text>
+    <text x="327" y="146" font-family="Arial, sans-serif" font-size="14" fill="#fff">Musica, amici e stile senza tempo</text>
+    <rect x="327" y="169" width="95" height="31" rx="5" fill="url(#greenBtn)"/>
+    <text x="348" y="189" font-family="Arial, sans-serif" font-size="12" font-weight="800" fill="#fff">Scopri ora</text>
+    <g transform="translate(555 78)">
+      <ellipse cx="58" cy="110" rx="82" ry="23" fill="#2b085b" opacity="0.35"/>
+      <rect x="37" y="42" width="48" height="80" rx="7" fill="#10283c" stroke="#07101b" stroke-width="4"/>
+      <rect x="43" y="48" width="36" height="31" rx="14" fill="#14a7b6" stroke="#e4f4ff" stroke-width="3"/>
+      <rect x="45" y="82" width="32" height="30" rx="4" fill="#1b1427" stroke="#ef2fb7" stroke-width="3"/>
+      <rect x="51" y="88" width="20" height="8" fill="#ffdd3d"/>
+      <circle cx="32" cy="65" r="6" fill="#ff314f"/>
+      <circle cx="91" cy="65" r="6" fill="#31f4ff"/>
+      <path d="M19 27 v35 M103 32 v42" stroke="#63a7ff" stroke-width="3"/>
+      <path d="M10 33 q12 -7 18 3" stroke="#63a7ff" stroke-width="3" fill="none"/>
+      <path d="M105 38 q12 -7 18 3" stroke="#63a7ff" stroke-width="3" fill="none"/>
+    </g>
+
+    <text x="286" y="246" font-family="Arial, sans-serif" font-size="18" font-weight="800" fill="#fff">In evidenza</text>
+    <g transform="translate(286 264)" font-family="Arial, sans-serif">
+      <g>
+        <rect width="108" height="126" rx="7" fill="#0b2742" stroke="#00d8ff" stroke-width="2"/>
+        <rect x="24" y="13" width="58" height="53" rx="5" fill="#183b51" stroke="#050b12"/>
+        <rect x="33" y="24" width="40" height="26" fill="#6c949f"/>
+        <text x="10" y="93" font-size="11" font-weight="700" fill="#fff">Mega Jukebox</text>
+        <circle cx="17" cy="111" r="6" fill="url(#coin)"/>
+        <text x="29" y="115" font-size="10" font-weight="700" fill="#fff">9</text>
+        <path d="M74 106 L82 106 L88 112 L81 119 L68 112 Z" fill="#6ee9ff"/>
+        <text x="91" y="115" font-size="10" font-weight="700" fill="#fff">10</text>
+      </g>
+      <g transform="translate(116 0)">
+        <rect width="98" height="126" rx="7" fill="#102a45" stroke="#1d4567"/>
+        <circle cx="49" cy="43" r="27" fill="#ff69d4" stroke="#72efff" stroke-width="4"/>
+        <circle cx="49" cy="43" r="13" fill="#a55cff"/>
+        <text x="11" y="93" font-size="11" font-weight="700" fill="#fff">Disco Neon</text>
+        <circle cx="17" cy="111" r="6" fill="url(#coin)"/>
+        <text x="29" y="115" font-size="10" font-weight="700" fill="#fff">5</text>
+      </g>
+      <g transform="translate(222 0)">
+        <rect width="98" height="126" rx="7" fill="#102a45" stroke="#1d4567"/>
+        <circle cx="49" cy="43" r="27" fill="#d86d00" stroke="#543800" stroke-width="3"/>
+        <path d="M33 43 h32 M49 27 v32 M39 32 l21 21 M60 32 l-21 21" stroke="#ffc13b" stroke-width="3"/>
+        <text x="11" y="93" font-size="11" font-weight="700" fill="#fff">Palla Habbo</text>
+        <circle cx="17" cy="111" r="6" fill="url(#coin)"/>
+        <text x="29" y="115" font-size="10" font-weight="700" fill="#fff">3</text>
+      </g>
+      <g transform="translate(328 0)">
+        <rect width="98" height="126" rx="7" fill="#102a45" stroke="#1d4567"/>
+        <circle cx="49" cy="42" r="26" fill="#d8f9ff" stroke="#51c9ff" stroke-width="3"/>
+        <path d="M49 15 v55 M23 42 h52 M30 26 q20 15 38 0 M30 58 q20 -15 38 0" stroke="#79a9ff" stroke-width="2"/>
+        <text x="11" y="93" font-size="11" font-weight="700" fill="#fff">Luci Disco</text>
+        <circle cx="17" cy="111" r="6" fill="url(#coin)"/>
+        <text x="29" y="115" font-size="10" font-weight="700" fill="#fff">6</text>
+      </g>
+      <g transform="translate(0 137)">
+        <rect width="108" height="107" rx="7" fill="#102a45" stroke="#1d4567"/>
+        <text x="38" y="61" font-size="54" fill="#ff69b8">?</text>
+        <text x="10" y="83" font-size="11" font-weight="700" fill="#fff">Fenicottero</text>
+        <circle cx="17" cy="100" r="6" fill="url(#coin)"/>
+        <text x="29" y="104" font-size="10" font-weight="700" fill="#fff">4</text>
+      </g>
+      <g transform="translate(116 137)">
+        <rect width="98" height="107" rx="7" fill="#102a45" stroke="#1d4567"/>
+        <rect x="33" y="25" width="33" height="33" rx="5" fill="#ffd321" stroke="#966000" stroke-width="3"/>
+        <text x="11" y="83" font-size="11" font-weight="700" fill="#fff">Puff Arco</text>
+        <circle cx="17" cy="100" r="6" fill="url(#coin)"/>
+        <text x="29" y="104" font-size="10" font-weight="700" fill="#fff">7</text>
+      </g>
+    </g>
+
+    <rect x="720" y="74" width="258" height="438" rx="7" fill="url(#panel2)" stroke="#193a59"/>
+    <text x="746" y="111" font-family="Arial, sans-serif" font-size="18" font-weight="800" fill="#fff">Mega Jukebox</text>
+    <text x="746" y="142" font-family="Arial, sans-serif" font-size="13" fill="#e6f2fb">Metti un jukebox nella tua</text>
+    <text x="746" y="160" font-family="Arial, sans-serif" font-size="13" fill="#e6f2fb">Stanza e invita i tuoi Amici!</text>
+    <rect x="746" y="178" width="205" height="132" fill="url(#isoGrid)"/>
+    <polygon points="784,252 860,210 936,252 860,294" fill="#d6e1e9" stroke="#eef7ff"/>
+    <rect x="832" y="187" width="55" height="78" rx="6" fill="#173146" stroke="#050b12" stroke-width="4"/>
+    <rect x="840" y="201" width="39" height="27" fill="#6c949f"/>
+    <rect x="841" y="235" width="38" height="19" fill="#1e111a" stroke="#ffbf28" stroke-width="2"/>
+    <rect x="746" y="319" width="36" height="18" rx="4" fill="#115489"/>
+    <text x="755" y="332" font-family="Arial, sans-serif" font-size="10" fill="#fff">Raro</text>
+    <rect x="787" y="319" width="45" height="18" rx="4" fill="#115489"/>
+    <text x="796" y="332" font-family="Arial, sans-serif" font-size="10" fill="#fff">Musica</text>
+    <line x1="746" y1="352" x2="951" y2="352" stroke="#294b67"/>
+    <text x="746" y="383" font-family="Arial, sans-serif" font-size="18" font-weight="800" fill="#fff">9</text>
+    <circle cx="775" cy="377" r="8" fill="url(#coin)"/>
+    <text x="803" y="383" font-family="Arial, sans-serif" font-size="18" font-weight="800" fill="#fff">+ 10</text>
+    <path d="M856 369 L868 369 L877 378 L866 390 L847 378 Z" fill="#6ee9ff"/>
+    <rect x="746" y="405" width="205" height="32" rx="6" fill="#0d2b47" stroke="#2b5b7c"/>
+    <text x="760" y="426" font-family="Arial, sans-serif" font-size="13" fill="#c7dced">1</text>
+    <rect x="912" y="405" width="39" height="32" rx="5" fill="url(#greenBtn)"/>
+    <text x="925" y="427" font-family="Arial, sans-serif" font-size="24" font-weight="900" fill="#fff">+</text>
+    <rect x="746" y="448" width="205" height="36" rx="6" fill="url(#greenBtn)"/>
+    <text x="820" y="471" font-family="Arial, sans-serif" font-size="13" font-weight="800" fill="#fff">Acquista</text>
+  </g>
+
+  <g transform="translate(28 98)" filter="url(#shadow)">
+    <rect width="388" height="776" rx="29" fill="#030910"/>
+    <rect x="15" y="15" width="358" height="746" rx="22" fill="url(#panel)" stroke="#123a5d" stroke-width="2"/>
+    <g font-family="Arial Black, Arial, sans-serif" font-weight="900">
+      <text x="37" y="57" font-size="22" fill="#ffef2d" stroke="#6d3500" stroke-width="2">HABBO</text>
+    </g>
+    <g transform="translate(234 28)" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#fff">
+      <rect width="72" height="30" rx="7" fill="#07182a" stroke="#1f4869"/>
+      <circle cx="14" cy="15" r="8" fill="url(#coin)"/>
+      <text x="31" y="20">999 +</text>
+      <rect x="80" width="72" height="30" rx="7" fill="#07182a" stroke="#1f4869"/>
+      <path d="M94 8 L104 8 L111 15 L103 23 L88 15 Z" fill="#72eaff"/>
+      <text x="119" y="20">250 +</text>
+    </g>
+    <text x="37" y="101" font-family="Arial, sans-serif" font-size="25" font-weight="800" fill="#fff">Catalogo</text>
+    <text x="37" y="129" font-family="Arial, sans-serif" font-size="14" fill="#d8e9f4">Scegli il tuo stile, arreda le tue Stanze e</text>
+    <text x="37" y="148" font-family="Arial, sans-serif" font-size="14" fill="#d8e9f4">vivi al massimo Habbo!</text>
+    <rect x="37" y="168" width="318" height="34" rx="6" fill="#0d2b47" stroke="#2b5b7c"/>
+    <text x="51" y="190" font-family="Arial, sans-serif" font-size="13" fill="#bccfe0">Cerca nel catalogo</text>
+    <circle cx="333" cy="185" r="7" fill="none" stroke="#d5e7f5" stroke-width="1.6"/>
+    <path d="M338 190 L345 197" stroke="#d5e7f5" stroke-width="1.6"/>
+    <g transform="translate(38 218)" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#fff">
+      <g><circle cx="28" cy="28" r="28" fill="#09476b" stroke="#00d8ff" stroke-width="2"/><path d="M28 9 L34 23 L49 23 L37 32 L42 48 L28 39 L14 48 L19 32 L7 23 L22 23 Z" fill="#ffd51f" stroke="#9b6600"/><text x="0" y="76">In evidenza</text></g>
+      <g transform="translate(72 0)"><circle cx="28" cy="28" r="28" fill="#138d53"/><rect x="17" y="18" width="24" height="24" rx="3" fill="#e5a91a"/><text x="12" y="76">Furni</text></g>
+      <g transform="translate(144 0)"><circle cx="28" cy="28" r="28" fill="#9b367e"/><text x="18" y="43" font-size="29">T</text><text x="12" y="76">Vestiti</text></g>
+      <g transform="translate(216 0)"><circle cx="28" cy="28" r="28" fill="#a66e07"/><text x="16" y="43" font-size="27">B</text><text x="8" y="76">Cuccioli</text></g>
+      <g transform="translate(288 0)"><circle cx="28" cy="28" r="28" fill="#6033a6"/><text x="19" y="43" font-size="27">H</text><text x="-1" y="76">Iscrizioni</text></g>
+    </g>
+    <rect x="38" y="307" width="318" height="129" rx="7" fill="url(#hero)" stroke="#7049e2"/>
+    <text x="57" y="347" font-family="Arial, sans-serif" font-size="25" font-weight="900" fill="#fff">JUKEBOX</text>
+    <text x="57" y="374" font-family="Arial, sans-serif" font-size="14" fill="#fff">Musica, amici e</text>
+    <text x="57" y="392" font-family="Arial, sans-serif" font-size="14" fill="#fff">stile senza tempo</text>
+    <rect x="57" y="405" width="89" height="31" rx="5" fill="url(#greenBtn)"/>
+    <text x="75" y="425" font-family="Arial, sans-serif" font-size="12" font-weight="800" fill="#fff">Scopri ora</text>
+    <g transform="translate(230 312)">
+      <rect x="22" y="18" width="48" height="80" rx="7" fill="#10283c" stroke="#07101b" stroke-width="4"/>
+      <rect x="29" y="27" width="34" height="29" rx="14" fill="#14a7b6" stroke="#e4f4ff" stroke-width="3"/>
+      <rect x="31" y="59" width="30" height="28" rx="4" fill="#1b1427" stroke="#ef2fb7" stroke-width="3"/>
+      <path d="M4 23 v32 M91 15 v34" stroke="#63a7ff" stroke-width="3"/>
+    </g>
+    <text x="38" y="483" font-family="Arial, sans-serif" font-size="18" font-weight="800" fill="#fff">In evidenza</text>
+    <text x="307" y="483" font-family="Arial, sans-serif" font-size="12" font-weight="800" fill="#00d8ff">Vedi tutto ></text>
+    <g transform="translate(38 497)" font-family="Arial, sans-serif">
+      <rect width="106" height="134" rx="7" fill="#0b2742" stroke="#00d8ff" stroke-width="2"/>
+      <rect x="26" y="18" width="54" height="49" rx="5" fill="#183b51" stroke="#050b12"/>
+      <text x="10" y="99" font-size="11" font-weight="700" fill="#fff">Mega Jukebox</text>
+      <circle cx="17" cy="118" r="6" fill="url(#coin)"/><text x="29" y="122" font-size="10" font-weight="700" fill="#fff">9</text>
+      <path d="M76 113 L84 113 L90 119 L83 126 L70 119 Z" fill="#6ee9ff"/>
+      <rect x="115" width="106" height="134" rx="7" fill="#102a45" stroke="#1d4567"/>
+      <circle cx="168" cy="48" r="29" fill="#ff69d4" stroke="#72efff" stroke-width="4"/>
+      <text x="127" y="99" font-size="11" font-weight="700" fill="#fff">Disco Neon</text>
+      <circle cx="132" cy="118" r="6" fill="url(#coin)"/><text x="144" y="122" font-size="10" font-weight="700" fill="#fff">5</text>
+      <rect x="230" width="88" height="134" rx="7" fill="#102a45" stroke="#1d4567"/>
+      <circle cx="274" cy="48" r="27" fill="#d86d00" stroke="#543800" stroke-width="3"/>
+      <text x="241" y="99" font-size="11" font-weight="700" fill="#fff">Palla Habbo</text>
+      <circle cx="247" cy="118" r="6" fill="url(#coin)"/><text x="259" y="122" font-size="10" font-weight="700" fill="#fff">3</text>
+    </g>
+    <rect x="15" y="675" width="358" height="86" rx="0" fill="#061b2d"/>
+    <g font-family="Arial, sans-serif" font-size="10" fill="#fff" text-anchor="middle">
+      <path d="M55 707 L72 693 L89 707 V731 H63 V713 H55 Z" fill="#30c8ff"/>
+      <text x="72" y="741">Home</text>
+      <circle cx="147" cy="706" r="9" fill="none" stroke="#d6e8f4" stroke-width="2"/><path d="M154 713 L164 723" stroke="#d6e8f4" stroke-width="2"/>
+      <text x="147" y="741">Catalogo</text>
+      <path d="M222 697 h22 l-4 23 h-16 z M224 724 h18" fill="none" stroke="#d6e8f4" stroke-width="2"/>
+      <text x="232" y="741">Carrello</text>
+      <rect x="285" y="700" width="18" height="18" rx="3" fill="none" stroke="#d6e8f4" stroke-width="2"/><path d="M290 700 q4 -9 9 0" fill="none" stroke="#d6e8f4" stroke-width="2"/>
+      <text x="294" y="741">Inventario</text>
+      <text x="346" y="716" font-size="24">...</text>
+      <text x="346" y="741">Altro</text>
+    </g>
+  </g>
+
+  <g transform="translate(432 562)" filter="url(#shadow)">
+    <rect width="1002" height="328" rx="12" fill="url(#panel)" stroke="#07101b" stroke-width="4"/>
+    <rect x="8" y="8" width="986" height="50" rx="9" fill="#0b2239" stroke="#1c4568"/>
+    <text x="28" y="42" font-family="Arial Black, Arial, sans-serif" font-size="24" font-weight="900" fill="#ffef2d" stroke="#6d3500" stroke-width="2">HABBO</text>
+    <g transform="translate(28 71)" font-family="Arial, sans-serif" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">
+      <g><circle cx="28" cy="28" r="25" fill="#09476b" stroke="#00d8ff" stroke-width="2"/><path d="M28 10 L33 23 L47 23 L36 31 L40 45 L28 37 L16 45 L20 31 L9 23 L23 23 Z" fill="#ffd51f"/><text x="28" y="66">In evidenza</text></g>
+      <g transform="translate(68 0)"><circle cx="28" cy="28" r="25" fill="#138d53"/><rect x="17" y="18" width="23" height="23" rx="3" fill="#e5a91a"/><text x="28" y="66">Furni</text></g>
+      <g transform="translate(136 0)"><circle cx="28" cy="28" r="25" fill="#9b367e"/><text x="28" y="41" font-size="24">T</text><text x="28" y="66">Vestiti</text></g>
+      <g transform="translate(204 0)"><circle cx="28" cy="28" r="25" fill="#a66e07"/><text x="28" y="41" font-size="24">B</text><text x="28" y="66">Cuccioli</text></g>
+      <g transform="translate(272 0)"><circle cx="28" cy="28" r="25" fill="#6033a6"/><text x="28" y="41" font-size="24">H</text><text x="28" y="66">Iscrizioni</text></g>
+      <g transform="translate(340 0)"><circle cx="28" cy="28" r="25" fill="#c88c08"/><text x="28" y="41" font-size="21">C</text><text x="28" y="66">Credito</text></g>
+      <g transform="translate(408 0)"><circle cx="28" cy="28" r="25" fill="#a43879"/><text x="28" y="41" font-size="21">D</text><text x="28" y="66">Tendenza</text></g>
+      <g transform="translate(476 0)"><circle cx="28" cy="28" r="25" fill="#49677e"/><text x="28" y="41" font-size="21">A</text><text x="28" y="66">Argento</text></g>
+      <g transform="translate(544 0)"><circle cx="28" cy="28" r="25" fill="#6438a6"/><text x="28" y="41" font-size="21">R</text><text x="28" y="66">Rari</text></g>
+      <g transform="translate(612 0)"><circle cx="28" cy="28" r="25" fill="#13927a"/><text x="28" y="41" font-size="21">S</text><text x="28" y="66">Stanza</text></g>
+      <g transform="translate(680 0)"><circle cx="28" cy="28" r="25" fill="#b2394a"/><text x="28" y="41" font-size="21">E</text><text x="28" y="66">Eventi</text></g>
+      <g transform="translate(748 0)"><circle cx="28" cy="28" r="25" fill="#17304a"/><text x="28" y="38" font-size="26">...</text><text x="28" y="66">Altro</text></g>
+    </g>
+    <rect x="28" y="139" width="144" height="152" rx="7" fill="url(#hero)" stroke="#7049e2"/>
+    <text x="44" y="181" font-family="Arial, sans-serif" font-size="22" font-weight="900" fill="#fff">JUKEBOX</text>
+    <text x="44" y="208" font-family="Arial, sans-serif" font-size="13" fill="#fff">Musica, amici e</text>
+    <text x="44" y="225" font-family="Arial, sans-serif" font-size="13" fill="#fff">stile senza tempo</text>
+    <rect x="44" y="252" width="78" height="29" rx="5" fill="url(#greenBtn)"/>
+    <text x="60" y="271" font-family="Arial, sans-serif" font-size="11" font-weight="800" fill="#fff">Scopri ora</text>
+    <text x="190" y="157" font-family="Arial, sans-serif" font-size="16" font-weight="800" fill="#fff">In evidenza</text>
+    <g transform="translate(190 173)" font-family="Arial, sans-serif">
+      <g><rect width="98" height="101" rx="7" fill="#0b2742" stroke="#00d8ff" stroke-width="2"/><rect x="25" y="12" width="48" height="43" rx="5" fill="#183b51" stroke="#050b12"/><text x="9" y="76" font-size="10" font-weight="700" fill="#fff">Mega Jukebox</text><circle cx="16" cy="93" r="5" fill="url(#coin)"/><text x="27" y="97" font-size="9" fill="#fff">9 + 10</text></g>
+      <g transform="translate(105 0)"><rect width="91" height="101" rx="7" fill="#102a45" stroke="#1d4567"/><circle cx="46" cy="34" r="24" fill="#ff69d4" stroke="#72efff" stroke-width="3"/><text x="11" y="76" font-size="10" font-weight="700" fill="#fff">Disco Neon</text><circle cx="16" cy="93" r="5" fill="url(#coin)"/><text x="27" y="97" font-size="9" fill="#fff">5</text></g>
+      <g transform="translate(202 0)"><rect width="91" height="101" rx="7" fill="#102a45" stroke="#1d4567"/><circle cx="46" cy="34" r="24" fill="#d86d00" stroke="#543800" stroke-width="3"/><text x="11" y="76" font-size="10" font-weight="700" fill="#fff">Palla Habbo</text><circle cx="16" cy="93" r="5" fill="url(#coin)"/><text x="27" y="97" font-size="9" fill="#fff">3</text></g>
+      <g transform="translate(299 0)"><rect width="91" height="101" rx="7" fill="#102a45" stroke="#1d4567"/><circle cx="46" cy="34" r="24" fill="#d8f9ff" stroke="#51c9ff" stroke-width="3"/><text x="11" y="76" font-size="10" font-weight="700" fill="#fff">Luci Disco</text><circle cx="16" cy="93" r="5" fill="url(#coin)"/><text x="27" y="97" font-size="9" fill="#fff">6</text></g>
+      <g transform="translate(396 0)"><rect width="91" height="101" rx="7" fill="#102a45" stroke="#1d4567"/><text x="35" y="53" font-size="42" fill="#ff69b8">?</text><text x="10" y="76" font-size="10" font-weight="700" fill="#fff">Fenicottero</text><circle cx="16" cy="93" r="5" fill="url(#coin)"/><text x="27" y="97" font-size="9" fill="#fff">4</text></g>
+      <g transform="translate(493 0)"><rect width="91" height="101" rx="7" fill="#102a45" stroke="#1d4567"/><rect x="30" y="23" width="31" height="31" rx="5" fill="#19bdd1"/><text x="11" y="76" font-size="10" font-weight="700" fill="#fff">Puff Arco</text><circle cx="16" cy="93" r="5" fill="url(#coin)"/><text x="27" y="97" font-size="9" fill="#fff">7</text></g>
+    </g>
+    <rect x="800" y="88" width="174" height="216" rx="7" fill="url(#panel2)" stroke="#193a59"/>
+    <text x="819" y="116" font-family="Arial, sans-serif" font-size="16" font-weight="800" fill="#fff">Mega Jukebox</text>
+    <text x="819" y="142" font-family="Arial, sans-serif" font-size="12" fill="#e6f2fb">Metti un jukebox nella</text>
+    <text x="819" y="158" font-family="Arial, sans-serif" font-size="12" fill="#e6f2fb">tua Stanza e invita i tuoi</text>
+    <rect x="839" y="172" width="61" height="52" rx="5" fill="#183b51" stroke="#050b12"/>
+    <text x="819" y="246" font-family="Arial, sans-serif" font-size="14" font-weight="800" fill="#fff">9 + 10</text>
+    <rect x="819" y="262" width="136" height="28" rx="5" fill="url(#greenBtn)"/>
+    <text x="864" y="280" font-family="Arial, sans-serif" font-size="11" font-weight="800" fill="#fff">Acquista</text>
+  </g>
+
+  <g transform="translate(48 910)" font-family="Arial, sans-serif" fill="#18263d">
+    <g><rect x="0" y="-1" width="31" height="42" rx="3" fill="none" stroke="#40506a" stroke-width="3"/><rect x="31" y="22" width="31" height="24" rx="3" fill="none" stroke="#40506a" stroke-width="3"/><text x="82" y="17" font-size="14" font-weight="900">100% RESPONSIVE</text><text x="82" y="42" font-size="12">Smartphone, tablet, laptop e desktop.</text></g>
+    <g transform="translate(330 0)"><circle cx="24" cy="22" r="25" fill="none" stroke="#40506a" stroke-width="3"/><path d="M15 30 L35 14 L27 38 Z" fill="#40506a"/><text x="70" y="17" font-size="14" font-weight="900">NAVIGAZIONE INTUITIVA</text><text x="70" y="42" font-size="12">Categorie chiare e ricerca rapida.</text></g>
+    <g transform="translate(650 0)"><path d="M22 4 v41 M12 22 h21 M33 13 q16 4 8 20" fill="none" stroke="#40506a" stroke-width="4"/><text x="70" y="17" font-size="14" font-weight="900">TOUCH FRIENDLY</text><text x="70" y="42" font-size="12">Target ampi, grid leggibile, CTA visibili.</text></g>
+    <g transform="translate(1015 0)"><path d="M0 7 h18 l12 33 h45 M34 47 a6 6 0 1 0 0 1 M64 47 a6 6 0 1 0 0 1" fill="none" stroke="#40506a" stroke-width="4"/><text x="92" y="17" font-size="14" font-weight="900">ACQUISTO FACILE</text><text x="92" y="42" font-size="12">Dettagli, prezzo e acquisto in pochi tap.</text></g>
+  </g>
+</svg>

@@ -1,16 +1,21 @@
-
 import { CreateFlatMessageComposer, HabboClubLevelEnum } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
 import { GetClubMemberLevel, GetConfigurationValue, IRoomModel, LocalizeText, SendMessageComposer } from '../../../api';
 import { Button, Flex, Grid, LayoutCurrencyIcon, LayoutGridItem, Text } from '../../../common';
-import { useNavigatorData } from '../../../hooks';
+import { useNavigatorData, useNavigatorUiStore } from '../../../hooks';
 import { NitroInput } from '../../../layout';
 import { useRoomCreatorStore } from './navigatorRoomCreatorStore';
 
 const MAX_VISITORS_LIST: number[] = Array.from({ length: 10 }, (_, i) => (i + 1) * 10);
 
-export const NavigatorRoomCreatorView: FC = () =>
+export interface NavigatorRoomCreatorViewProps
 {
+    showBackButton?: boolean;
+}
+
+export const NavigatorRoomCreatorView: FC<NavigatorRoomCreatorViewProps> = props =>
+{
+    const { showBackButton = false } = props;
     const [ name, setName ] = useState<string>(null);
     const [ description, setDescription ] = useState<string>(null);
     const [ category, setCategory ] = useState<number>(null);
@@ -106,7 +111,13 @@ export const NavigatorRoomCreatorView: FC = () =>
                     }
                 </div>
             </Grid>
-            <Button fullWidth disabled={ isCreating || !name || (name.length < 3) } variant={ (isCreating || !name || (name.length < 3)) ? 'danger' : 'success' } onClick={ createRoom }>{ LocalizeText('navigator.createroom.create') }</Button>
+            <Flex gap={ 2 }>
+                { showBackButton &&
+                    <Button fullWidth variant="secondary" onClick={ () => useNavigatorUiStore.getState().closeCreator() }>
+                        { LocalizeText('widget.memenu.back') }
+                    </Button> }
+                <Button fullWidth disabled={ isCreating || !name || (name.length < 3) } variant={ (isCreating || !name || (name.length < 3)) ? 'danger' : 'success' } onClick={ createRoom }>{ LocalizeText('navigator.createroom.create') }</Button>
+            </Flex>
         </div>
     );
 };

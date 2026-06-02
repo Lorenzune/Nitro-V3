@@ -1,4 +1,4 @@
-import { GetEventDispatcher, GetRenderer, RoomObjectMouseEvent, RoomObjectTileMouseEvent, RoomSession } from '@nitrots/nitro-renderer';
+import { GetEventDispatcher, GetRenderer, MouseEventType, RoomObjectMouseEvent, RoomObjectTileMouseEvent, RoomSession } from '@nitrots/nitro-renderer';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FC, useEffect, useRef } from 'react';
 import { DispatchMouseEvent, DispatchTouchEvent } from '../../api';
@@ -20,15 +20,22 @@ export const RoomView: FC<{}> = (props) =>
 
         if(!canvas) return;
 
+        canvas.style.touchAction = 'none';
+        canvas.style.webkitTouchCallout = 'none';
+        canvas.style.webkitUserSelect = 'none';
+        canvas.style.userSelect = 'none';
+
+        const supportsPointerEvents = ('PointerEvent' in window);
+
         canvas.onclick = (event) => DispatchMouseEvent(event);
         canvas.onmousemove = (event) => DispatchMouseEvent(event);
         canvas.onmousedown = (event) => DispatchMouseEvent(event);
         canvas.onmouseup = (event) => DispatchMouseEvent(event);
 
-        canvas.ontouchstart = (event) => DispatchTouchEvent(event);
-        canvas.ontouchmove = (event) => DispatchTouchEvent(event);
-        canvas.ontouchend = (event) => DispatchTouchEvent(event);
-        canvas.ontouchcancel = (event) => DispatchTouchEvent(event);
+        canvas.ontouchstart = supportsPointerEvents ? null : (event) => { event.preventDefault(); DispatchTouchEvent(event); };
+        canvas.ontouchmove = supportsPointerEvents ? null : (event) => { event.preventDefault(); DispatchTouchEvent(event); };
+        canvas.ontouchend = supportsPointerEvents ? null : (event) => { event.preventDefault(); DispatchTouchEvent(event); };
+        canvas.ontouchcancel = supportsPointerEvents ? null : (event) => { event.preventDefault(); DispatchTouchEvent(event); };
 
         let touchStartX = 0;
         let touchStartY = 0;
@@ -66,6 +73,11 @@ export const RoomView: FC<{}> = (props) =>
             lastTileTap = { x: touch.clientX, y: touch.clientY, time: Date.now() };
         };
 
+        const registerTapFeedback = (x: number, y: number) =>
+        {
+            lastTileTap = { x, y, time: Date.now() };
+        };
+
         const showTouchFeedback = () =>
         {
             if(!lastTileTap || ((Date.now() - lastTileTap.time) > 250)) return;
@@ -87,9 +99,91 @@ export const RoomView: FC<{}> = (props) =>
             if(event instanceof RoomObjectTileMouseEvent) window.setTimeout(showTouchFeedback, 0);
         };
 
-        canvas.addEventListener('touchstart', onTouchStart, { passive: true });
-        canvas.addEventListener('touchmove', onTouchMove, { passive: true });
-        canvas.addEventListener('touchend', onTouchEnd, { passive: true });
+        if(supportsPointerEvents)
+        {
+            let pointerStartX = 0;
+            let pointerStartY = 0;
+            let pointerMoved = false;
+
+            const dispatchPointerMouse = (type: string, event: PointerEvent) =>
+            {
+                DispatchMouseEvent(new MouseEvent(type, {
+                    bubbles: true,
+                    cancelable: true,
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+                    buttons: ((type === MouseEventType.MOUSE_DOWN) || (type === MouseEventType.MOUSE_MOVE)) ? 1 : 0,
+                    altKey: event.altKey,
+                    ctrlKey: event.ctrlKey,
+                    shiftKey: event.shiftKey,
+                    button: 0
+                }));
+            };
+
+            canvas.onpointerdown = (event) =>
+            {
+                event.preventDefault();
+                pointerStartX = event.clientX;
+                pointerStartY = event.clientY;
+                pointerMoved = false;
+
+                if(canvas.setPointerCapture) canvas.setPointerCapture(event.pointerId);
+                dispatchPointerMouse(MouseEventType.MOUSE_DOWN, event);
+            };
+
+            canvas.onpointermove = (event) =>
+            {
+                event.preventDefault();
+
+                if(Math.abs(event.clientX - pointerStartX) > 8 || Math.abs(event.clientY - pointerStartY) > 8) pointerMoved = true;
+
+                dispatchPointerMouse(MouseEventType.MOUSE_MOVE, event);
+            };
+
+            canvas.onpointerup = (event) =>
+            {
+                event.preventDefault();
+
+                try
+                {
+                    if(canvas.releasePointerCapture) canvas.releasePointerCapture(event.pointerId);
+                }
+                catch(err)
+                {
+                    // Ignore capture release failures
+                }
+
+                dispatchPointerMouse(MouseEventType.MOUSE_UP, event);
+
+                if(!pointerMoved)
+                {
+                    registerTapFeedback(event.clientX, event.clientY);
+                    dispatchPointerMouse(MouseEventType.MOUSE_CLICK, event);
+                }
+            };
+
+            canvas.onpointercancel = (event) =>
+            {
+                event.preventDefault();
+
+                try
+                {
+                    if(canvas.releasePointerCapture) canvas.releasePointerCapture(event.pointerId);
+                }
+                catch(err)
+                {
+                    // Ignore capture release failures
+                }
+
+                dispatchPointerMouse(MouseEventType.MOUSE_UP, event);
+            };
+        }
+        else
+        {
+            canvas.addEventListener('touchstart', onTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+            canvas.addEventListener('touchend', onTouchEnd, { passive: false });
+        }
         GetEventDispatcher().addEventListener(RoomObjectMouseEvent.CLICK, onTileClick);
 
         const element = elementRef.current;
@@ -102,6 +196,11 @@ export const RoomView: FC<{}> = (props) =>
 
         return () =>
         {
+            canvas.onpointerdown = null;
+            canvas.onpointermove = null;
+            canvas.onpointerup = null;
+            canvas.onpointercancel = null;
+
             canvas.removeEventListener('touchstart', onTouchStart);
             canvas.removeEventListener('touchmove', onTouchMove);
             canvas.removeEventListener('touchend', onTouchEnd);

@@ -8,6 +8,7 @@ export const DispatchTouchEvent = (event: TouchEvent, canvasId: number = 1, long
 {
     let x = 0;
     let y = 0;
+    let clickEventType: string = null;
 
     if(event.touches[0])
     {
@@ -22,37 +23,12 @@ export const DispatchTouchEvent = (event: TouchEvent, canvasId: number = 1, long
     }
 
     let eventType = event.type;
+    const buttonDown = (eventType === TouchEventType.TOUCH_START) || (eventType === TouchEventType.TOUCH_MOVE) || (eventType === TouchEventType.TOUCH_LONG);
 
     if(longTouch) eventType = TouchEventType.TOUCH_LONG;
 
-    if(eventType === MouseEventType.MOUSE_CLICK || eventType === TouchEventType.TOUCH_END)
-    {
-        eventType = MouseEventType.MOUSE_CLICK;
-
-        if(lastClick)
-        {
-            clickCount = 1;
-
-            if(lastClick >= (Date.now() - 300)) clickCount++;
-        }
-
-        lastClick = Date.now();
-
-        if(clickCount === 2)
-        {
-            if(!didMouseMove) eventType = MouseEventType.DOUBLE_CLICK;
-
-            clickCount = 0;
-            lastClick = null;
-        }
-    }
-
     switch(eventType)
     {
-        case MouseEventType.MOUSE_CLICK:
-            break;
-        case MouseEventType.DOUBLE_CLICK:
-            break;
         case TouchEventType.TOUCH_START:
             eventType = MouseEventType.MOUSE_DOWN;
 
@@ -65,6 +41,27 @@ export const DispatchTouchEvent = (event: TouchEvent, canvasId: number = 1, long
             break;
         case TouchEventType.TOUCH_END:
             eventType = MouseEventType.MOUSE_UP;
+
+            if(!didMouseMove)
+            {
+                clickEventType = MouseEventType.MOUSE_CLICK;
+
+                if(lastClick)
+                {
+                    clickCount = 1;
+
+                    if(lastClick >= (Date.now() - 300)) clickCount++;
+                }
+
+                lastClick = Date.now();
+
+                if(clickCount === 2)
+                {
+                    clickEventType = MouseEventType.DOUBLE_CLICK;
+                    clickCount = 0;
+                    lastClick = null;
+                }
+            }
             break;
         case TouchEventType.TOUCH_LONG:
             eventType = MouseEventType.MOUSE_DOWN_LONG;
@@ -72,10 +69,7 @@ export const DispatchTouchEvent = (event: TouchEvent, canvasId: number = 1, long
         default: return;
     }
 
-    if(eventType === TouchEventType.TOUCH_START)
-    {
-        GetRoomEngine().dispatchMouseEvent(canvasId, x, y, eventType, altKey, ctrlKey, shiftKey, false);
-    }
+    GetRoomEngine().dispatchMouseEvent(canvasId, x, y, eventType, altKey, ctrlKey, shiftKey, buttonDown);
 
-    GetRoomEngine().dispatchMouseEvent(canvasId, x, y, eventType, altKey, ctrlKey, shiftKey, false);
+    if(clickEventType) GetRoomEngine().dispatchMouseEvent(canvasId, x, y, clickEventType, altKey, ctrlKey, shiftKey, false);
 };

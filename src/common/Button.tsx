@@ -19,7 +19,7 @@ export const Button: FC<ButtonProps> = props =>
 
         // fucked up method i know (i dont have a clue what im doing because im a ninja)
 
-        const newClassNames: string[] = [ 'pointer-events-auto font-normal leading-normal text-[#fff] text-center no-underline cursor-pointer select-none border border-[solid] border-transparent px-[.75rem] py-[.375rem] text-[.9rem] rounded-[.25rem] [transition:color_.15s_ease-in-out,background-color_.15s_ease-in-out,border-color_.15s_ease-in-out,box-shadow_.15s_ease-in-out]' ];
+        const newClassNames: string[] = [ 'nitro-swf-button', `nitro-swf-button-${ variant }`, 'pointer-events-auto font-normal leading-normal text-[#fff] text-center no-underline cursor-pointer select-none border border-[solid] border-transparent px-[.75rem] py-[.375rem] text-[.9rem] rounded-[.25rem] [transition:color_.15s_ease-in-out,background-color_.15s_ease-in-out,border-color_.15s_ease-in-out,box-shadow_.15s_ease-in-out]' ];
 
         if(variant)
         {

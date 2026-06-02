@@ -8,6 +8,7 @@ export const DispatchMouseEvent = (event: MouseEvent, canvasId: number = 1) =>
 {
     const x = event.clientX;
     const y = event.clientY;
+    const buttonDown = ((event.buttons ?? 0) > 0) || (event.type === MouseEventType.MOUSE_DOWN) || (event.type === MouseEventType.MOUSE_DOWN_LONG);
 
     let eventType = event.type;
 
@@ -50,5 +51,5 @@ export const DispatchMouseEvent = (event: MouseEvent, canvasId: number = 1) =>
         default: return;
     }
 
-    GetRoomEngine().dispatchMouseEvent(canvasId, x, y, eventType, event.altKey, (event.ctrlKey || event.metaKey), event.shiftKey, false);
+    GetRoomEngine().dispatchMouseEvent(canvasId, x, y, eventType, event.altKey, (event.ctrlKey || event.metaKey), event.shiftKey, buttonDown);
 };
