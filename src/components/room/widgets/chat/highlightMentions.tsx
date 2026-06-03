@@ -51,9 +51,14 @@ const isMentionToken = (token: string, ownUsernameLower: string, aliases: Readon
 
     if(!nick) return false;
 
+    // Own nick and room-broadcast aliases always count.
     if(ownUsernameLower && nick === ownUsernameLower) return true;
+    if(aliases.has(nick)) return true;
 
-    return aliases.has(nick);
+    // Any other valid @nick token is also highlighted (blue), so a direct
+    // @username mention reads the same as @all — visual feedback that it is a
+    // recognised mention. (Cosmetic only; the server decides actual delivery.)
+    return true;
 };
 
 /**
