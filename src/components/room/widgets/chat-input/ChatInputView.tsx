@@ -3,9 +3,10 @@ import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChatMessageTypeEnum, GetClubMemberLevel, GetConfigurationValue, LocalizeText, RoomWidgetUpdateChatInputContentEvent } from '../../../../api';
 import { Text } from '../../../../common';
-import { useChatCommandSelector, useChatInputWidget, useRoom, useSessionInfo, useUiEvent } from '../../../../hooks';
+import { useChatCommandSelector, useChatInputWidget, useMentionAutocomplete, useRoom, useSessionInfo, useUiEvent } from '../../../../hooks';
 import { ChatInputCommandSelectorView } from './ChatInputCommandSelectorView';
 import { ChatInputEmojiSelectorView } from './ChatInputEmojiSelectorView';
+import { ChatInputMentionSelectorView } from './ChatInputMentionSelectorView';
 import { ChatInputStyleSelectorView } from './ChatInputStyleSelectorView';
 
 export const ChatInputView: FC<{}> = props =>
@@ -16,6 +17,7 @@ export const ChatInputView: FC<{}> = props =>
     const { roomSession = null } = useRoom();
     const inputRef = useRef<HTMLInputElement>(null);
     const { isVisible: commandSelectorVisible, filteredCommands, selectedIndex, setSelectedIndex, moveUp, moveDown, selectCurrent, close: closeCommandSelector } = useChatCommandSelector(chatValue);
+    const mention = useMentionAutocomplete(chatValue);
 
     const chatModeIdWhisper = useMemo(() => LocalizeText('widgets.chatinput.mode.whisper'), []);
     const chatModeIdShout = useMemo(() => LocalizeText('widgets.chatinput.mode.shout'), []);
@@ -171,6 +173,36 @@ export const ChatInputView: FC<{}> = props =>
 
         const value = (event.target as HTMLInputElement).value;
 
+        if(mention.isVisible)
+        {
+            switch(event.key)
+            {
+                case 'ArrowUp':
+                    event.preventDefault();
+                    mention.moveUp();
+                    return;
+                case 'ArrowDown':
+                    event.preventDefault();
+                    mention.moveDown();
+                    return;
+                case 'Tab':
+                    event.preventDefault();
+                    // fall through
+                case 'NumpadEnter':
+                case 'Enter': {
+                    const current = mention.current();
+
+                    if(current)
+                    {
+                        event.preventDefault();
+                        setChatValue(prev => mention.applyTo(prev, current.name));
+                        return;
+                    }
+                    break;
+                }
+            }
+        }
+
         switch(event.key)
         {
             case ' ':
@@ -194,7 +226,7 @@ export const ChatInputView: FC<{}> = props =>
                 return;
         }
 
-    }, [ floodBlocked, inputRef, chatModeIdWhisper, anotherInputHasFocus, setInputFocus, checkSpecialKeywordForInput, sendChatValue, commandSelectorVisible, moveUp, moveDown, selectCurrent, closeCommandSelector ]);
+    }, [ floodBlocked, inputRef, chatModeIdWhisper, anotherInputHasFocus, setInputFocus, checkSpecialKeywordForInput, sendChatValue, commandSelectorVisible, moveUp, moveDown, selectCurrent, closeCommandSelector, mention ]);
 
     useUiEvent<RoomWidgetUpdateChatInputContentEvent>(RoomWidgetUpdateChatInputContentEvent.CHAT_INPUT_CONTENT, event =>
     {
@@ -289,6 +321,16 @@ export const ChatInputView: FC<{}> = props =>
                             setChatValue(':' + cmd.key + ' '); inputRef.current?.focus();
                         } }
                         onHover={ setSelectedIndex }
+                    /> }
+                { (!commandSelectorVisible && mention.isVisible) &&
+                    <ChatInputMentionSelectorView
+                        suggestions={ mention.suggestions }
+                        selectedIndex={ mention.selectedIndex }
+                        onSelect={ (suggestion) =>
+                        {
+                            setChatValue(prev => mention.applyTo(prev, suggestion.name)); inputRef.current?.focus();
+                        } }
+                        onHover={ mention.setSelectedIndex }
                     /> }
                 <div className="flex-1 items-center input-sizer">
                     { !floodBlocked &&
