@@ -1,4 +1,4 @@
-import { BuildersClubFurniCountMessageEvent, BuildersClubPlaceRoomItemMessageComposer, BuildersClubPlaceWallItemMessageComposer, BuildersClubQueryFurniCountMessageComposer, BuildersClubSubscriptionStatusMessageEvent, CatalogPageMessageEvent, CatalogPagesListEvent, CatalogPublishedMessageEvent, CreateLinkEvent, FrontPageItem, FurniturePlaceComposer, FurniturePlacePaintComposer, GetCatalogIndexComposer, GetCatalogPageComposer, GetConfiguration, GetRoomContentLoader, GetRoomEngine, GetSessionDataManager, GetTickerTime, LegacyDataType, LimitedEditionSoldOutEvent, MarketplaceMakeOfferResult, ProductOfferEvent, PurchaseErrorMessageEvent, PurchaseFromCatalogComposer, PurchaseNotAllowedMessageEvent, PurchaseOKMessageEvent, RoomEngineObjectPlacedEvent, RoomObjectPlacementSource, RoomObjectVariable, RoomPreviewer, Vector3d } from '@nitrots/nitro-renderer';
+import { BuildersClubFurniCountMessageEvent, BuildersClubPlaceRoomItemMessageComposer, BuildersClubPlaceWallItemMessageComposer, BuildersClubQueryFurniCountMessageComposer, BuildersClubSubscriptionStatusMessageEvent, CatalogPageMessageEvent, CatalogPagesListEvent, CatalogPublishedMessageEvent, CreateLinkEvent, FrontPageItem, FurniturePlaceComposer, FurniturePlacePaintComposer, GetCatalogIndexComposer, GetCatalogPageComposer, GetRoomEngine, GetSessionDataManager, GetTickerTime, LegacyDataType, LimitedEditionSoldOutEvent, MarketplaceMakeOfferResult, ProductOfferEvent, PurchaseErrorMessageEvent, PurchaseFromCatalogComposer, PurchaseNotAllowedMessageEvent, PurchaseOKMessageEvent, RoomEngineObjectPlacedEvent, RoomObjectPlacementSource, RoomObjectVariable, RoomPreviewer, Vector3d } from '@nitrots/nitro-renderer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useBetween } from 'use-between';
 import { BuilderFurniPlaceableStatus, CatalogPage, CatalogType, DispatchUiEvent, FurniCategory, GetFurnitureData, GetProductDataForLocalization, GetRoomSession, ICatalogNode, ICatalogPage, IPageLocalization, IProduct, IPurchasableOffer, IPurchaseOptions, LocalizeText, NotificationAlertType, Offer, PageLocalization, PlacedObjectPurchaseData, PlaySound, Product, ProductTypeEnum, RequestedPage, SearchResult, SendMessageComposer, SoundNames } from '../../api';
@@ -89,27 +89,6 @@ const useCatalogStore = () =>
         setCurrentType(normalizeCatalogType(type));
     }, []);
 
-    // Real-time furni importati: ri-mergia il chunk custom/imported.json5 nelle Map
-    // furnidata + RoomContentLoader all'apertura del catalogo, SENZA reload del client.
-    const refreshImportedFurnidata = useCallback(() =>
-    {
-        try
-        {
-            const base = GetConfiguration().getValue<string>('furnidata.url');
-
-            if(!base || !base.length) return;
-
-            const importedUrl = base.replace(/\/+$/, '') + '/custom/imported.json5';
-
-            GetSessionDataManager().mergeFurnitureDataFromUrl(importedUrl).then(added =>
-            {
-                if(added && added.length) GetRoomContentLoader().processFurnitureData(added);
-            }).catch(() => {});
-        }
-        catch
-        {}
-    }, []);
-
     const openCatalogByType = useCallback((type?: string) =>
     {
         const catalogType = normalizeCatalogType(type);
@@ -119,10 +98,8 @@ const useCatalogStore = () =>
             resetVisibleCatalogState(catalogType);
         }
 
-        refreshImportedFurnidata();
-
         setIsVisible(true);
-    }, [ currentType, resetVisibleCatalogState, refreshImportedFurnidata ]);
+    }, [ currentType, resetVisibleCatalogState ]);
 
     const toggleCatalogByType = useCallback((type?: string) =>
     {
@@ -140,10 +117,8 @@ const useCatalogStore = () =>
             resetVisibleCatalogState(catalogType);
         }
 
-        refreshImportedFurnidata();
-
         setIsVisible(true);
-    }, [ isVisible, currentType, resetVisibleCatalogState, refreshImportedFurnidata ]);
+    }, [ isVisible, currentType, resetVisibleCatalogState ]);
 
     const getBuilderFurniPlaceableStatus = useCallback((offer: IPurchasableOffer) =>
     {

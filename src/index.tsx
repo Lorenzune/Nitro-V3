@@ -23,7 +23,6 @@ import './css/catalog/CatalogClassicView.css';
 import './css/emustats/EmuStatsView.css';
 
 import './css/chat/Chats.css';
-import './css/mentions/MentionToasts.css';
 
 import './css/common/Buttons.css';
 
