@@ -13,6 +13,7 @@ const isQuotaError = (error: unknown): boolean =>
     if(!error || typeof error !== 'object') return false;
     const name = (error as { name?: string }).name;
     if(name === 'QuotaExceededError') return true;
+    // Firefox legacy:
     if(name === 'NS_ERROR_DOM_QUOTA_REACHED') return true;
     return false;
 };
@@ -27,6 +28,12 @@ const trimArrayForQuota = <T>(value: T): T =>
 
 interface UseLocalStorageOptions<T>
 {
+    /**
+     * Optional projection applied right before the value is written to
+     * localStorage. The in-memory React state is unaffected. Use this to
+     * strip heavy ephemeral fields (e.g. base64 image URLs) that would
+     * otherwise blow past the storage quota.
+     */
     toStorage?: (value: T) => unknown;
 }
 
@@ -52,6 +59,7 @@ const useLocalStorageState = <T>(key: string, initialValue: T, options: UseLocal
     const writeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const optionsRef = useRef(options);
 
+    // Keep the latest toStorage projection without re-running effects.
     optionsRef.current = options;
 
     const flushWrite = (value: T) =>
@@ -75,6 +83,8 @@ const useLocalStorageState = <T>(key: string, initialValue: T, options: UseLocal
             }
         }
 
+        // Quota exceeded - trim and retry once. Anything that isn't an
+        // array gets cleared, since we have no generic trimming rule.
         try
         {
             const trimmed = trimArrayForQuota(projected as T);
@@ -84,10 +94,14 @@ const useLocalStorageState = <T>(key: string, initialValue: T, options: UseLocal
         catch(retryError)
         {
             NitroLogger.error(retryError);
-            try { window.localStorage.removeItem(key); } catch(_) { }
+            // Last resort: drop the key entirely so future writes have room.
+            try { window.localStorage.removeItem(key); } catch(_) { /* ignore */ }
         }
     };
 
+    // Debounce: high-frequency chat would otherwise trigger one full
+    // JSON.stringify + setItem per message. We coalesce bursts into one
+    // write per STORAGE_WRITE_DEBOUNCE_MS window with the latest value.
     const scheduleWrite = (value: T) =>
     {
         pendingWriteRef.current = value;
@@ -103,6 +117,8 @@ const useLocalStorageState = <T>(key: string, initialValue: T, options: UseLocal
         }, STORAGE_WRITE_DEBOUNCE_MS);
     };
 
+    // Flush a pending write on tab close / hide so we don't lose the last
+    // burst of activity.
     useEffect(() =>
     {
         const flushOnLeave = () =>

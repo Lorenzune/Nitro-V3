@@ -23,6 +23,11 @@ const useChatWidgetState = () =>
     const { addChatEntry, updateChatEntry } = useChatHistory();
     const { settings, translateIncoming, consumeOutgoingTranslation } = useTranslation();
     const isDisposed = useRef(false);
+    // Reactive: re-renders if the session-data snapshot flips (e.g.
+    // reconnect under a different user id). Safe to call here —
+    // useChatWidget is NOT wrapped in useBetween (see export below),
+    // so the real React dispatcher is in scope and
+    // useSyncExternalStore installs correctly.
     const ownUserId = (useUserDataSnapshot().userId || -1);
 
     const applyTranslationToBubble = useCallback((chatMessage: ChatBubbleMessage, originalText: string, translatedText: string, detectedLanguage: string, targetLanguage: string) =>
@@ -226,6 +231,12 @@ const useChatWidgetState = () =>
             return newValue;
         });
 
+        // Pet, Bot and Rentable Bot chat is fire-and-forget ("UDP-style"):
+        // the live bubble already rendered above, but we deliberately skip
+        // addChatEntry so the entry never lands in localStorage. A pet-heavy
+        // room used to push 30+ KB per message (base64 head data URL) into
+        // the chat history, exhausting the localStorage quota in minutes.
+        // Real users still go through the full persisted path.
         const chatEntryId = (userType === RoomObjectType.USER)
             ? addChatEntry({
                 id: -1,

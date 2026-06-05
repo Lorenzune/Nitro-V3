@@ -119,5 +119,5 @@ export const CatalogViewProductWidgetView: FC<{}> = props =>
         );
     }
 
-    return <LayoutRoomPreviewerView height={ 140 } roomPreviewer={ roomPreviewer } />;
+    return <LayoutRoomPreviewerView height={ 240 } roomPreviewer={ roomPreviewer } />;
 };

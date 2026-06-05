@@ -3,7 +3,7 @@ import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChatMessageTypeEnum, GetClubMemberLevel, GetConfigurationValue, LocalizeText, RoomWidgetUpdateChatInputContentEvent } from '../../../../api';
 import { Text } from '../../../../common';
-import { useChatCommandSelector, useChatInputWidget, useRoom, useSessionInfo, useUiEvent } from '../../../../hooks';
+import { useCatalogClassicStyle, useChatCommandSelector, useChatInputWidget, useRoom, useSessionInfo, useUiEvent } from '../../../../hooks';
 import { useRoomUserListSnapshot } from '../../../../hooks/session/useSessionSnapshots';
 import { ChatInputCommandSelectorView } from './ChatInputCommandSelectorView';
 import { ChatInputEmojiSelectorView } from './ChatInputEmojiSelectorView';
@@ -58,6 +58,11 @@ export const ChatInputView: FC<{}> = props =>
 
     const roomUserList = useRoomUserListSnapshot();
     const [ mentionSelectedIndex, setMentionSelectedIndex ] = useState<number>(0);
+    // The "New style" user-setting (memenu.settings.other.catalog.classic.style)
+    // drives BOTH the catalog layout and the mention-picker chrome:
+    //   false (default) = Habbo old-school NitroCard cardstock look
+    //   true            = flat minimalist gray look
+    const [ newStyle ] = useCatalogClassicStyle();
 
     const mentionContext = useMemo(() =>
     {
@@ -485,6 +490,7 @@ export const ChatInputView: FC<{}> = props =>
                             setChatValue(':' + cmd.key + ' '); inputRef.current?.focus();
                         } }
                         onHover={ setSelectedIndex }
+                        newStyle={ newStyle }
                     /> }
                 { mentionSelectorVisible && !commandSelectorVisible &&
                     <ChatInputMentionSelectorView
@@ -492,6 +498,7 @@ export const ChatInputView: FC<{}> = props =>
                         selectedIndex={ mentionSelectedIndex }
                         onSelect={ applyMentionSuggestion }
                         onHover={ setMentionSelectedIndex }
+                        newStyle={ newStyle }
                     /> }
                 <div className="flex-1 items-center input-sizer">
                     { !floodBlocked &&
