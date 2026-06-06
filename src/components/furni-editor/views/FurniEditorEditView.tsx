@@ -341,8 +341,11 @@ export const FurniEditorEditView: FC<FurniEditorEditViewProps> = props =>
                                             key={ key }
                                             type="button"
                                             onClick={ () => setField(key, !on) }
-                                            className={ `text-[11px] px-2.5 py-1 rounded-lg border transition ${ on ? 'bg-primary/10 border-primary/40 text-primary font-medium' : 'bg-[#ffffff] border-slate-200 text-slate-400 hover:border-slate-300' }` }
+                                            aria-pressed={ on }
+                                            title={ on ? 'Enabled — click to disable' : 'Disabled — click to enable' }
+                                            className={ `inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-lg border font-medium transition ${ on ? 'bg-[#1E7295] border-[#1E7295] text-[#ffffff] shadow-sm' : 'bg-slate-100 border-slate-200 text-slate-400 hover:bg-slate-200 hover:text-slate-600' }` }
                                         >
+                                            <span className={ `inline-block w-1.5 h-1.5 rounded-full ${ on ? 'bg-[#ffffff]' : 'bg-slate-300' }` } />
                                             { key.replace('allow', '') }
                                         </button>
                                     );
