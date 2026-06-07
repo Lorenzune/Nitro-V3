@@ -1,17 +1,6 @@
 import { FC, useEffect, useRef } from 'react';
 import { LayoutAvatarImageView } from '../../../../common';
-
-export type MentionSuggestionKind = 'user' | 'alias';
-
-export interface MentionSuggestion
-{
-    key: string;
-    kind: MentionSuggestionKind;
-    name: string;
-    insertToken: string;
-    figure?: string;
-    description?: string;
-}
+import { MentionSuggestion } from '../../../../hooks/rooms/widgets/useChatMentions.helpers';
 
 interface ChatInputMentionSelectorViewProps
 {

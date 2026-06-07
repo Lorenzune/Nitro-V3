@@ -25,6 +25,7 @@ import './css/emustats/EmuStatsView.css';
 import './css/chat/Chats.css';
 import './css/chat/ChatInputMentionSelectorView.css';
 import './css/mentions/MentionToasts.css';
+import './css/mentions/MentionsPanel.css';
 
 import './css/common/Buttons.css';
 import './css/common/ClassicScrollbar.css';
