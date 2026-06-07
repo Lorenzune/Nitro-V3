@@ -522,8 +522,12 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                             <Text small wrap variant="white">{ avatarInfo.name }</Text>
                             <FaTimes className="cursor-pointer fa-icon" onClick={ onClose } />
                         </Flex>
-                        <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
                     </div>
+                    { avatarInfo.description &&
+                        <Column gap={ 1 }>
+                            <Text fullWidth wrap textBreak variant="white" small>{ avatarInfo.description }</Text>
+                            <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
+                        </Column> }
                     { !isBranded &&
                         <div className="flex flex-col gap-1">
                             <Flex gap={ 1 } position="relative">
