@@ -523,11 +523,6 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                             <FaTimes className="cursor-pointer fa-icon" onClick={ onClose } />
                         </Flex>
                     </div>
-                    { avatarInfo.description &&
-                        <Column gap={ 1 }>
-                            <Text fullWidth wrap textBreak variant="white" small>{ avatarInfo.description }</Text>
-                            <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
-                        </Column> }
                     { !isBranded &&
                         <div className="flex flex-col gap-1">
                             <Flex gap={ 1 } position="relative">
@@ -556,6 +551,11 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                             <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
                         </div>
                     }
+                    { avatarInfo.description &&
+                        <Column gap={ 1 }>
+                            <Text fullWidth wrap textBreak variant="white" small>{ avatarInfo.description }</Text>
+                            <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
+                        </Column> }
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-1">
                             { showOwnerProfileIcon && <UserProfileIconView userId={ avatarInfo.ownerId } /> }
