@@ -1409,9 +1409,6 @@
 }
 
 .nitro-catalog-classic-window *::-webkit-scrollbar-thumb {
-    /* Grip: a single 2px #a0a0a0 stripe in an 8px-wide centered band,
-       repeated every 5px (2px stripe + 3px body gap).
-       Outline: 1px black border, then a 2px white inset frame inside it. */
     min-height: 24px !important;
     background:
         url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='5'><rect x='0' y='0' width='8' height='2' fill='%23a0a0a0'/></svg>") center top / 8px 5px repeat-y,
@@ -1433,9 +1430,6 @@
         #bcbcbc !important;
 }
 
-/* Arrow buttons: light grey cap with rounded OUTER corners (up button
-   rounded at the top, down button rounded at the bottom), 1px black
-   border, dark chevron via inline SVG. */
 .nitro-catalog-classic-window *::-webkit-scrollbar-button:single-button:vertical:decrement {
     display: block !important;
     width: 18px !important;
@@ -1540,6 +1534,8 @@
 
     .nitro-catalog-classic-content-shell {
         padding: 6px !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
     }
 
     .nitro-catalog-classic-welcome {
@@ -1552,24 +1548,39 @@
 
     .nitro-catalog-classic-stage,
     .nitro-catalog-classic-stage.is-navigation-hidden {
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: auto minmax(0, 1fr);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
         width: 100%;
-    }
-
-    .nitro-catalog-classic-sidebar {
-        max-height: 34vh;
-    }
-
-    .nitro-catalog-classic-layout-shell,
-    .nitro-catalog-classic-default-layout {
-        width: 100%;
-        height: 100%;
+        height: auto;
         min-height: 0;
     }
 
+    .nitro-catalog-classic-sidebar {
+        flex: 0 0 auto;
+        max-height: 30vh;
+    }
+
+    .nitro-catalog-classic-layout-shell {
+        flex: 0 0 auto;
+        width: 100%;
+        height: auto;
+        min-height: 0;
+        overflow: visible;
+    }
+
+    .nitro-catalog-classic-layout-container {
+        flex: 0 0 auto;
+        height: auto;
+        min-height: 460px;
+        overflow: visible;
+    }
+
     .nitro-catalog-classic-default-layout {
-        grid-template-rows: minmax(150px, 1fr) minmax(120px, 38vh) 30px;
+        width: 100%;
+        height: 460px;
+        min-height: 460px;
+        overflow: visible;
     }
 
     .nitro-catalog-classic-grid {
