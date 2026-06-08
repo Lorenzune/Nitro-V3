@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+  <!-- Habbo-style housekeeping broom -->
+  <g stroke="#3a2a14" stroke-linejoin="round" stroke-linecap="round">
+    <!-- bristle fan (flared, curved sweep) -->
+    <path d="M16 19 L22.5 24.5 L18 38 Q11 34.5 4 30.5 Z" fill="#f2c14e" stroke-width="1.2"/>
+    <!-- straw lines -->
+    <g stroke="#b5862a" stroke-width="1">
+      <line x1="9" y1="29" x2="7.5" y2="34.5"/>
+      <line x1="12" y1="31.5" x2="10.8" y2="37"/>
+      <line x1="15" y1="33.5" x2="14.2" y2="38.5"/>
+      <line x1="18" y1="29.5" x2="17.5" y2="35"/>
+    </g>
+    <!-- binding -->
+    <rect x="14.6" y="18.4" width="8" height="4" rx="1.4" transform="rotate(42 19.2 20.6)" fill="#c0863a" stroke-width="1.1"/>
+    <!-- handle -->
+    <line x1="31.5" y1="6" x2="19.4" y2="20.6" fill="none" stroke="#3a2a14" stroke-width="5.4"/>
+    <line x1="31.5" y1="6" x2="19.4" y2="20.6" fill="none" stroke="#a86a2d" stroke-width="3.1"/>
+    <circle cx="31.3" cy="6.2" r="1.1" fill="#caa063" stroke="none"/>
+  </g>
+</svg>

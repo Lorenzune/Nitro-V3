@@ -101,10 +101,12 @@
 }
 
 .nitro-icon.icon-housekeeping {
-    background-image: url("@/assets/images/toolbar/icons/modtools.png");
-    width: 29px;
-    height: 34px;
-    filter: hue-rotate(140deg);
+    background-image: url("@/assets/images/toolbar/icons/housekeeping.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 40px;
+    height: 40px;
 }
 
 .nitro-icon.icon-furnieditor {
