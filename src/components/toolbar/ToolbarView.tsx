@@ -498,9 +498,7 @@ const TOOLBAR_STYLES = `
      Negative inset margins on the clip path keep vertical breathing
      room for the popover even on engines that fall back to 'hidden'. */
   .tb-nav-clip {
-    overflow-x: clip;
-    overflow-y: visible;
-    overflow-clip-margin: 0 0 200px 0;
+    overflow: visible;
   }
 
   .tb-icon {
