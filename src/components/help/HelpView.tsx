@@ -12,6 +12,22 @@ import { SelectReportedUserView } from './views/SelectReportedUserView';
 import { SelectTopicView } from './views/SelectTopicView';
 import { NameChangeView } from './views/name-change/NameChangeView';
 
+// Scoped colour override for the Aiuto window: classic blue header + light grey
+// body (the shared 'primary-slim' theme is teal + cream). Higher specificity
+// (.nitro-card.nitro-help ...) than the theme so it wins. The body element
+// renders `.nitro-card-content-shell`, NOT `.content-area`.
+const HELP_STYLES = `
+  .nitro-card.nitro-help .nitro-card-header {
+    background: linear-gradient(180deg, #5a80b8 0%, #3f63a0 100%);
+    border-color: #34548a;
+  }
+  .nitro-card.nitro-help,
+  .nitro-card.nitro-help .content-area,
+  .nitro-card.nitro-help .nitro-card-content-shell {
+    background: #ebebe3 !important;
+  }
+`;
+
 export const HelpView: FC<{}> = props =>
 {
     const [ isVisible, setIsVisible ] = useState(false);
@@ -96,17 +112,20 @@ export const HelpView: FC<{}> = props =>
     return (
         <>
             { isVisible &&
-                <NitroCardView className="nitro-help" theme="primary-slim">
+                <NitroCardView className={ `nitro-help${ activeReport ? '' : ' w-[420px]' }` } theme="primary-slim">
                     <NitroCardHeaderView headerText={ LocalizeText('help.button.cfh') } onCloseClick={ onClose } />
                     <NitroCardContentView className="text-black">
-                        <Grid>
-                            <Column center overflow="hidden" size={ 5 }>
-                                <div className="index-image" />
-                            </Column>
-                            <Column justifyContent="between" overflow="hidden" size={ 7 }>
-                                <CurrentStepView />
-                            </Column>
-                        </Grid>
+                        <style>{ HELP_STYLES }</style>
+                        { activeReport
+                            ? <Grid>
+                                <Column center overflow="hidden" size={ 5 }>
+                                    <div className="index-image" />
+                                </Column>
+                                <Column justifyContent="between" overflow="hidden" size={ 7 }>
+                                    <CurrentStepView />
+                                </Column>
+                            </Grid>
+                            : <CurrentStepView /> }
                     </NitroCardContentView>
                 </NitroCardView> }
             <SanctionSatusView />
