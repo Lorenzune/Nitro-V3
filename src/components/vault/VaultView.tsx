@@ -22,6 +22,9 @@ const localizeWithFallback = (key: string, fallback: string) =>
 interface EarningRow
 {
     key: string;
+    // Standard gamedata localization key (ExternalTexts). 'label' is only the
+    // fallback shown when the key is missing in the active texts.
+    textKey: string;
     label: string;
     img: string;
     currencies: number[];
@@ -29,18 +32,19 @@ interface EarningRow
 
 // Icons are the hotel's real earnings_icon_* assets. Amounts are placeholders
 // (0) and claims are disabled until the emulator exposes the data + packets.
-// 'clubwork' has no dedicated earnings icon — uses the generic one for now.
+// 'games' and 'clubwork' have no standard earnings.*.label key — they use a
+// custom key (add it to your texts) and fall back to the Italian label.
 const EARNINGS: EarningRow[] = [
-    { key: 'daily', label: 'Regalo giornaliero', img: imgDailygift, currencies: [ 5 ] },
-    { key: 'games', label: 'Giochi', img: imgGames, currencies: [ 0 ] },
-    { key: 'achievements', label: 'Traguardi', img: imgAchievements, currencies: [ 5, 0 ] },
-    { key: 'marketplace', label: 'Mercatino', img: imgMarketplace, currencies: [ 0 ] },
-    { key: 'hcpayday', label: 'Bonus giorno di paga HC', img: imgHcpayday, currencies: [ 0 ] },
-    { key: 'level', label: 'Progressione Livello', img: imgLevel, currencies: [ 5, 0 ] },
-    { key: 'donations', label: 'Donazioni', img: imgDonations, currencies: [ 0 ] },
-    { key: 'bonusbag', label: 'Sacco Bonus', img: imgBonusbag, currencies: [ 0 ] },
-    { key: 'surprise', label: 'Scatole Sorprese', img: imgSurprise, currencies: [ 5, 0 ] },
-    { key: 'clubwork', label: 'Club e Lavoro', img: imgGeneric, currencies: [ 0 ] }
+    { key: 'daily', textKey: 'earnings.dailygift.label', label: 'Regalo giornaliero', img: imgDailygift, currencies: [ 5 ] },
+    { key: 'games', textKey: 'earnings.games.label', label: 'Giochi', img: imgGames, currencies: [ 0 ] },
+    { key: 'achievements', textKey: 'earnings.achievements.label', label: 'Traguardi', img: imgAchievements, currencies: [ 5, 0 ] },
+    { key: 'marketplace', textKey: 'earnings.marketplace.label', label: 'Mercatino', img: imgMarketplace, currencies: [ 0 ] },
+    { key: 'hcpayday', textKey: 'earnings.hc.label', label: 'Bonus giorno di paga HC', img: imgHcpayday, currencies: [ 0 ] },
+    { key: 'level', textKey: 'earnings.levelprogression.label', label: 'Progressione Livello', img: imgLevel, currencies: [ 5, 0 ] },
+    { key: 'donations', textKey: 'earnings.donations.label', label: 'Donazioni', img: imgDonations, currencies: [ 0 ] },
+    { key: 'bonusbag', textKey: 'earnings.bonusbag.label', label: 'Sacco Bonus', img: imgBonusbag, currencies: [ 0 ] },
+    { key: 'surprise', textKey: 'earnings.surpriseboxes.label', label: 'Scatole Sorprese', img: imgSurprise, currencies: [ 5, 0 ] },
+    { key: 'clubwork', textKey: 'earnings.clubwork.label', label: 'Club e Lavoro', img: imgGeneric, currencies: [ 0 ] }
 ];
 
 export const VaultView: FC<{}> = props =>
@@ -82,7 +86,7 @@ export const VaultView: FC<{}> = props =>
 
     return (
         <NitroCardView className="nitro-vault w-[430px]" theme="primary-slim" uniqueKey="vault">
-            <NitroCardHeaderView headerText="Guadagni" onCloseClick={ () => setIsVisible(false) } />
+            <NitroCardHeaderView headerText={ localizeWithFallback('earnings.title', 'Guadagni') } onCloseClick={ () => setIsVisible(false) } />
             <NitroCardContentView className="flex flex-col gap-[5px] text-black">
                 { EARNINGS.map(row => (
                     <div key={ row.key } className="flex items-center gap-2">
@@ -90,7 +94,7 @@ export const VaultView: FC<{}> = props =>
                             <span className="flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded border border-black/15 bg-white">
                                 <img src={ row.img } alt="" className="max-h-[24px] max-w-[24px] object-contain [image-rendering:pixelated]" />
                             </span>
-                            <Text bold className="truncate">{ localizeWithFallback('earnings.' + row.key, row.label) }</Text>
+                            <Text bold className="truncate">{ localizeWithFallback(row.textKey, row.label) }</Text>
                         </div>
                         <div className="flex min-w-[92px] shrink-0 items-center justify-end gap-2.5">
                             { row.currencies.map((currency, index) => (
@@ -101,7 +105,7 @@ export const VaultView: FC<{}> = props =>
                             )) }
                         </div>
                         <button type="button" disabled className="shrink-0 cursor-default rounded-[4px] border border-[#909090] bg-[linear-gradient(180deg,#f2f2f2_0%,#cdcdcd_100%)] px-2.5 py-[3px] text-[0.72rem] font-bold text-[#7c7c7c] shadow-[inset_0_1px_0_#ffffff]">
-                            { localizeWithFallback('earnings.claim', 'Riscatta') }
+                            { localizeWithFallback('earnings.claim.button', 'Riscatta') }
                         </button>
                     </div>
                 )) }
