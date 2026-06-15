@@ -92,11 +92,11 @@ export const VaultView: FC<{}> = props =>
                             </span>
                             <Text bold className="truncate">{ localizeWithFallback('earnings.' + row.key, row.label) }</Text>
                         </div>
-                        <div className="flex min-w-[78px] shrink-0 items-center justify-end gap-2">
+                        <div className="flex min-w-[92px] shrink-0 items-center justify-end gap-2.5">
                             { row.currencies.map((currency, index) => (
                                 <span key={ index } className="flex items-center gap-1">
                                     <LayoutCurrencyIcon type={ currency } />
-                                    <Text bold small>0</Text>
+                                    <Text bold>0</Text>
                                 </span>
                             )) }
                         </div>
