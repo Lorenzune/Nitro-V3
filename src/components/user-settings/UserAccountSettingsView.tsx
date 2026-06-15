@@ -34,7 +34,7 @@ const passwordStrength = (value: string): { score: number; labelKey: string; col
     return { score: 4, labelKey: 'usersettings.strength.strong', color: 'bg-[#00800b]' };
 };
 
-export const UserAccountSettingsView: FC<{ embedded?: boolean }> = ({ embedded = false }) =>
+export const UserAccountSettingsView: FC<{}> = () =>
 {
     const [ isVisible, setIsVisible ] = useState(false);
     const [ section, setSection ] = useState<Section>('menu');
@@ -390,10 +390,12 @@ export const UserAccountSettingsView: FC<{ embedded?: boolean }> = ({ embedded =
         }
     };
 
-    if(!embedded && !isVisible) return null;
+    if(!isVisible) return null;
 
-    const accountBody = (
-        <>
+    return (
+        <NitroCardView className="user-account-settings-window w-[360px]" theme="primary-slim" uniqueKey="user-account-settings">
+            <NitroCardHeaderView headerText={ LocalizeText('usersettings.title') } onCloseClick={ close } />
+
             <div className="relative flex items-center gap-3 px-3 py-2 bg-[linear-gradient(180deg,#2e8fb8_0%,#1e7295_100%)] text-white">
                 <div className="absolute inset-0 opacity-20 pointer-events-none [background-image:radial-gradient(rgba(255,255,255,0.5)_1px,transparent_1px)] [background-size:6px_6px]" />
                 { session.figure && (
@@ -751,15 +753,6 @@ export const UserAccountSettingsView: FC<{ embedded?: boolean }> = ({ embedded =
                     </div>
                 ) }
             </NitroCardContentView>
-        </>
-    );
-
-    if(embedded) return accountBody;
-
-    return (
-        <NitroCardView className="user-account-settings-window w-[360px]" theme="primary-slim" uniqueKey="user-account-settings">
-            <NitroCardHeaderView headerText={ LocalizeText('usersettings.title') } onCloseClick={ close } />
-            { accountBody }
         </NitroCardView>
     );
 };
