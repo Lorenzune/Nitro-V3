@@ -55,9 +55,7 @@ export const PurseView: FC<{}> = props =>
     const openClub = useCallback((event: React.MouseEvent) =>
     {
         event.stopPropagation();
-
-        const page = GetConfigurationValue<string>('hc.buy_hc', 'habbo_club');
-        CreateLinkEvent('catalog/open/' + page);
+        CreateLinkEvent('habboUI/open/hccenter');
     }, []);
 
     const openEarnings = useCallback((event: React.MouseEvent) =>
