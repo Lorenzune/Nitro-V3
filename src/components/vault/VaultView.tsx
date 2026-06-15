@@ -56,8 +56,9 @@ const VAULT_STYLES = `
     border-color: #34548a;
   }
   .nitro-card.nitro-vault,
-  .nitro-card.nitro-vault .content-area {
-    background: #dde1e6;
+  .nitro-card.nitro-vault .content-area,
+  .nitro-card.nitro-vault .nitro-card-content-shell {
+    background: #dde1e6 !important;
   }
 `;
 
@@ -101,13 +102,13 @@ export const VaultView: FC<{}> = props =>
     return (
         <NitroCardView className="nitro-vault w-[430px]" theme="primary-slim" uniqueKey="vault">
             <NitroCardHeaderView headerText={ localizeWithFallback('earnings.title', 'Guadagni') } onCloseClick={ () => setIsVisible(false) } />
-            <NitroCardContentView className="flex flex-col gap-[5px] text-black">
+            <NitroCardContentView className="flex flex-col gap-[3px] text-black">
                 <style>{ VAULT_STYLES }</style>
                 { EARNINGS.map(row => (
                     <div key={ row.key } className="flex items-center gap-2">
                         <div className="flex min-w-0 flex-1 items-center gap-2 rounded-[5px] border border-[#9aa0a8] bg-white px-1.5 py-1">
-                            <span className="flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded border border-black/15 bg-white">
-                                <img src={ row.img } alt="" className="max-h-[24px] max-w-[24px] object-contain [image-rendering:pixelated]" />
+                            <span className="flex h-[24px] w-[24px] shrink-0 items-center justify-center rounded border border-black/15 bg-white">
+                                <img src={ row.img } alt="" className="max-h-[20px] max-w-[20px] object-contain [image-rendering:pixelated]" />
                             </span>
                             <Text bold className="truncate">{ localizeWithFallback(row.textKey, row.label) }</Text>
                         </div>
