@@ -14,6 +14,7 @@ export * from './PlaySound';
 export * from './PrefixUtils';
 export * from './ProductImageUtility';
 export * from './Randomizer';
+export * from './localizeWithFallback';
 export * from './RememberLogin';
 export * from './isSafeExternalUrl';
 export * from './RoomChatFormatter';

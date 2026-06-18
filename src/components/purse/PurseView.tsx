@@ -1,17 +1,11 @@
 import { CreateLinkEvent } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useMemo, useState } from 'react';
 import { FaChartBar, FaCog, FaSignOutAlt } from 'react-icons/fa';
-import { ClearRememberLogin, GetConfigurationValue, GetRememberLogin, LocalizeText } from '../../api';
+import { ClearRememberLogin, GetConfigurationValue, GetRememberLogin, localizeWithFallback, LocalizeText } from '../../api';
 import { Column, LayoutCurrencyIcon } from '../../common';
 import { usePurse } from '../../hooks';
 import { CurrencyView } from './views/CurrencyView';
 import { SeasonalView } from './views/SeasonalView';
-
-const localizeWithFallback = (key: string, fallback: string) =>
-{
-    const text = LocalizeText(key);
-    return (text && text !== key) ? text : fallback;
-};
 
 export const PurseView: FC<{}> = props =>
 {
