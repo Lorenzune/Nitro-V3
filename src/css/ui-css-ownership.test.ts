@@ -40,6 +40,8 @@ describe('UI CSS ownership', () =>
         const catalogAdminModalView = readSource('src/components/catalog/views/admin/CatalogAdminModalView.tsx');
         const catalogAdminQuickActionsView = readSource('src/components/catalog/views/admin/CatalogAdminQuickActionsView.tsx');
         const catalogLayoutDefaultView = readSource('src/components/catalog/views/page/layout/CatalogLayoutDefaultView.tsx');
+        const catalogLayoutColorGroupingView = readSource('src/components/catalog/views/page/layout/CatalogLayoutColorGroupingView.tsx');
+        const catalogLayoutSoundMachineView = readSource('src/components/catalog/views/page/layout/CatalogLayoutSoundMachineView.tsx');
         const catalogLayoutPetView = readSource('src/components/catalog/views/page/layout/pets/CatalogLayoutPetView.tsx');
         const catalogLayoutTrophiesView = readSource('src/components/catalog/views/page/layout/CatalogLayoutTrophiesView.tsx');
         const getCatalogLayout = readSource('src/components/catalog/views/page/layout/GetCatalogLayout.tsx');
@@ -78,6 +80,11 @@ describe('UI CSS ownership', () =>
         expect(catalogLayoutDefaultView).toContain('<CatalogAdminQuickActionsView');
         expect(catalogLayoutPetView).toContain('<CatalogAdminQuickActionsView');
         expect(catalogLayoutTrophiesView).toContain('<CatalogAdminQuickActionsView');
+        expect(catalogLayoutColorGroupingView).not.toContain('style={ { maxHeight: 154 } }');
+        expect(catalogLayoutSoundMachineView).not.toContain('style={ { height: 140 } }');
+        expect(catalogLayoutTrophiesView).not.toContain("boxShadow: '0 0 8px");
+        expect(catalogLayoutTrophiesView).not.toContain("background: trophyText.length");
+        expect(catalogLayoutTrophiesView).toContain('nitro-catalog-trophy-inscription');
         expect(catalogAdminPageEditView).toContain('<CatalogAdminModalView');
         expect(catalogAdminPageEditView).toContain('widthClassName="w-[520px]"');
         expect(getCatalogLayout).not.toContain('custom_prefix');
@@ -85,6 +92,8 @@ describe('UI CSS ownership', () =>
         expect(catalogCss).toContain('.nitro-catalog-window :where(.bg-white, .bg-gray-50, .bg-card-grid-item)');
         expect(catalogCss).toContain('.nitro-catalog-window :where(input, select, textarea)');
         expect(catalogCss).toContain('.nitro-catalog-window :where(.text-muted, .text-dark)');
+        expect(catalogCss).toContain('.nitro-catalog-admin-body :where(.uppercase.font-bold)');
+        expect(catalogCss).toContain('.nitro-catalog-trophy-inscription.has-text');
         expect(inventoryCategoryFilterView).not.toContain('style={ { width: currentTab === TAB_BADGES');
         expect(inventoryCategoryFilterView).toContain('nitro-inventory-filter-bar');
         expect(inventoryCss).toContain('.nitro-inventory-window .nitro-inventory-filter-bar.is-badges');

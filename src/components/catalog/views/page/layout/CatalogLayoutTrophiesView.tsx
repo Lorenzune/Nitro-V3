@@ -46,9 +46,9 @@ export const CatalogLayoutTrophiesView: FC<CatalogLayoutProps> = props =>
                  Buy button stays inside the panel even when the grid below
                  holds many trophies. */ }
             { currentOffer
-                ? <div className="flex gap-0 bg-white rounded border-2 border-warning/40 shrink-0" style={ { boxShadow: '0 0 8px rgba(255,193,7,0.15)' } }>
+                ? <div className="nitro-catalog-trophy-card flex gap-0 bg-white rounded border-2 border-warning/40 shrink-0">
                     { /* Preview */ }
-                    <div className="w-[120px] min-w-[120px] relative flex items-center justify-center border-r-2 border-warning/30" style={ { background: 'linear-gradient(180deg, #fff9e6 0%, #fff3cc 100%)' } }>
+                    <div className="nitro-catalog-trophy-preview w-[120px] min-w-[120px] relative flex items-center justify-center border-r-2 border-warning/30">
                         { (currentOffer.product.productType !== ProductTypeEnum.BADGE)
                             ? <>
                                 <CatalogViewProductWidgetView />
@@ -102,13 +102,9 @@ export const CatalogLayoutTrophiesView: FC<CatalogLayoutProps> = props =>
                 </div>
                 <div className="relative">
                     <textarea
-                        className="w-full h-[60px] text-[11px] rounded p-2 pr-3 resize-none focus:outline-none transition-all border-2"
+                        className={ `nitro-catalog-trophy-inscription w-full h-[60px] text-[11px] rounded p-2 pr-3 resize-none focus:outline-none transition-all border-2 ${ trophyText.length > 0 ? 'has-text' : '' }` }
                         maxLength={ 200 }
                         placeholder={ LocalizeText('catalog.trophies.inscription.placeholder') }
-                        style={ {
-                            background: trophyText.length > 0 ? 'linear-gradient(180deg, #fffdf5 0%, #fff8e8 100%)' : '#fff',
-                            borderColor: trophyText.length > 0 ? 'rgba(255,193,7,0.4)' : undefined
-                        } }
                         value={ trophyText }
                         onChange={ event => setTrophyText(event.target.value) }
                     />

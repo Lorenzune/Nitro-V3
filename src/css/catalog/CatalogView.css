@@ -210,6 +210,7 @@
     --catalog-admin-bg: #ecece4;
     --catalog-admin-panel: #f7f7f2;
     --catalog-admin-panel-alt: #e5e5dc;
+    --catalog-admin-panel-top: #fffdf5;
     --catalog-admin-border: #9d9d96;
     --catalog-admin-border-dark: #5f5f59;
     --catalog-admin-text: #20201d;
@@ -254,7 +255,8 @@
 }
 
 .nitro-catalog-admin-modal :where(.bg-white, .bg-gray-50, .bg-card-grid-item) {
-    background: var(--catalog-admin-panel) !important;
+    background: linear-gradient(180deg, var(--catalog-admin-panel-top) 0%, var(--catalog-admin-panel) 100%) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76), 0 1px 0 rgba(0, 0, 0, 0.08) !important;
 }
 
 .nitro-catalog-admin-modal :where(.border, .border-card-grid-item-border, .border-primary\/40) {
@@ -269,7 +271,8 @@
     color: var(--catalog-admin-muted) !important;
 }
 
-.nitro-catalog-admin-modal :where(label, span, div, p) {
+.nitro-catalog-admin-body :where(label, p),
+.nitro-catalog-admin-body :where(span[class*="text-"], div[class*="text-"]) {
     color: inherit;
 }
 
@@ -298,7 +301,9 @@
 
 .nitro-catalog-admin-modal button {
     border-image: none !important;
+    border-radius: 4px !important;
     text-shadow: none !important;
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.58), 0 1px 0 rgba(0, 0, 0, 0.16) !important;
 }
 
 .nitro-catalog-admin-modal button.bg-primary,
@@ -333,6 +338,15 @@
     border: 1px solid var(--catalog-admin-border-dark) !important;
     background: linear-gradient(180deg, #ffffff 0%, var(--catalog-admin-panel-alt) 100%) !important;
     color: var(--catalog-admin-text) !important;
+}
+
+.nitro-catalog-admin-body :where(.uppercase.font-bold) {
+    color: var(--catalog-admin-blue-dark) !important;
+    letter-spacing: 0.04em;
+}
+
+.nitro-catalog-admin-body :where(.font-mono) {
+    color: #383833 !important;
 }
 
 .nitro-catalog-admin-modal .font-mono {
@@ -862,6 +876,31 @@
     background-position: center bottom !important;
     background-repeat: no-repeat !important;
     background-size: contain !important;
+}
+
+.nitro-catalog-color-grid-shell {
+    max-height: 154px;
+}
+
+.nitro-catalog-sound-preview {
+    height: 140px;
+}
+
+.nitro-catalog-trophy-card {
+    box-shadow: 0 0 8px rgba(255, 193, 7, 0.15);
+}
+
+.nitro-catalog-trophy-preview {
+    background: linear-gradient(180deg, #fff9e6 0%, #fff3cc 100%);
+}
+
+.nitro-catalog-trophy-inscription {
+    background: #ffffff;
+}
+
+.nitro-catalog-trophy-inscription.has-text {
+    background: linear-gradient(180deg, #fffdf5 0%, #fff8e8 100%);
+    border-color: rgba(255, 193, 7, 0.4) !important;
 }
 
 .nitro-catalog-offer-info {

@@ -136,7 +136,7 @@ export const CatalogLayoutColorGroupingView: FC<CatalogLayoutColorGroupViewProps
             { /* Top: two visible rows of furni tiles. Tile is 70px tall
                and the AutoGrid handles its own overflow if there are
                more than two rows worth of offers. */ }
-            <div className="shrink-0" style={ { maxHeight: 154 } }>
+            <div className="nitro-catalog-color-grid-shell shrink-0">
                 { (!colorsShowing || !currentOffer || !colorableItems.has(currentOffer.product.furnitureData.className)) &&
                     <AutoGrid columnCount={ 7 } columnMinHeight={ 70 } columnMinWidth={ 45 }>
                         { offers.map((offer, index) => <CatalogGridOfferView key={ index } itemActive={ (currentOffer && (currentOffer.product.furnitureData.hasIndexedColor ? currentOffer.product.furnitureData.className === offer.product.furnitureData.className : currentOffer.offerId === offer.offerId)) } offer={ offer } selectOffer={ selectOffer } />) }
