@@ -38,20 +38,18 @@ export const RoomToolsWidgetView: FC<{}> = props =>
                 CreateLinkEvent('navigator/toggle-room-info');
                 return;
             case 'zoom':
-                setIsZoomedIn(prevValue =>
-                {
-                    if (GetConfigurationValue('room.zoom.enabled', true))
-                    {
-                        const scale = GetRoomEngine().getRoomInstanceRenderingCanvasScale(roomSession.roomId, 1);
-                        GetRoomEngine().setRoomInstanceRenderingCanvasScale(roomSession.roomId, 1, scale === 1 ? 0.5 : 1);
-                    }
-                    else
-                    {
-                        const geometry = GetRoomEngine().getRoomInstanceGeometry(roomSession.roomId, 1);
-                        if (geometry) geometry.performZoom();
-                    }
-                    return !prevValue;
-                });
+                // Side effects must NOT live inside a setState updater: React StrictMode
+                // double-invokes updaters in dev, so reading the scale and writing the
+                // opposite ran twice and cancelled out (1 -> 0.5 -> 1), making zoom do
+                // nothing. Run the renderer side effect once here, keep the updater pure.
+                if (GetConfigurationValue('room.zoom.enabled', true)) {
+                    const scale = GetRoomEngine().getRoomInstanceRenderingCanvasScale(roomSession.roomId, 1);
+                    GetRoomEngine().setRoomInstanceRenderingCanvasScale(roomSession.roomId, 1, scale === 1 ? 0.5 : 1);
+                } else {
+                    const geometry = GetRoomEngine().getRoomInstanceGeometry(roomSession.roomId, 1);
+                    if (geometry) geometry.performZoom();
+                }
+                setIsZoomedIn(prevValue => !prevValue);
                 return;
             case 'chat_history':
                 CreateLinkEvent('chat-history/toggle');
