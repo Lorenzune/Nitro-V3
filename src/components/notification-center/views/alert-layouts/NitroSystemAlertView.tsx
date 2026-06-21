@@ -23,7 +23,7 @@ export const NitroSystemAlertView: FC<NotificationDefaultAlertViewProps> = props
                     <Column alignItems="center">
                         <Text><b>Renderer:</b> v{ GetRendererVersion() }</Text>
                         <Column fullWidth gap={ 1 }>
-                            <Button fullWidth variant="success" onClick={ event => window.open('https://discord.nitrodev.co') }>Discord</Button>
+                            <Button fullWidth variant="success" onClick={ event => window.open('https://discord.gg/CuYZsbEwc') }>Discord</Button>
                             { adsEnabled &&
                                 <Button fullWidth onClick={ () => window.dispatchEvent(new CustomEvent('ads:toggle')) }>Show Ad</Button> }
                         </Column>
@@ -31,14 +31,13 @@ export const NitroSystemAlertView: FC<NotificationDefaultAlertViewProps> = props
                     <div className="alertView_nitro-coolui-logo"></div>
                     <Column size={ 12 }>
                         <Column alignItems="center" gap={ 0 }>
-                            <Text center bold fontSize={ 5 }>Cool UI</Text>
-                            <Text>- DuckieTM (Design)</Text>
-                            <Text center bold small>v3.0.0</Text>
-                            <Button fullWidth onClick={ event => window.open('https://github.com/duckietm/Nitro-Cool-UI') }>Cool UI Git</Button>
+                            <Text center bold fontSize={ 5 }>Nitro V3</Text>
+                            <Text>DuckieTM, simoleo89, Medievalshell, Lorenzo (the wired master), Remco</Text>
+                            <Text center bold small>v3.6.0</Text>
+                            <Button fullWidth onClick={ event => window.open('https://github.com/duckietm/Nitro-V3') }>Cool UI Git</Button>
                         </Column>
                     </Column>
                 </Column>
-
             </Grid>
         </LayoutNotificationAlertView>
     );
