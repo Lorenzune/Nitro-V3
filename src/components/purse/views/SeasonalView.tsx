@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { GetConfigurationValue, LocalizeFormattedNumber, LocalizeText } from '../../../api';
+import { GetConfigurationValue, localizeWithFallback, LocalizeFormattedNumber } from '../../../api';
 import { Flex, Text } from '../../../common';
 
 interface SeasonalViewProps {
@@ -22,7 +22,7 @@ export const SeasonalView: FC<SeasonalViewProps> = props =>
         >
             <Flex fullWidth className="seasonal-row">
                 <Text truncate fullWidth variant="white" className="seasonal-text-padding seasonal-text">
-                    {LocalizeText(`purse.seasonal.currency.${type}`)}
+                    {localizeWithFallback(`purse.seasonal.currency.${type}`, '')}
                 </Text>
                 <Text
                     variant="white"

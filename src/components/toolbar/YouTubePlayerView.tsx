@@ -637,9 +637,9 @@ export const YouTubePlayerView: FC<{}> = () =>
                                         if (videoId)
                                         {
                                             const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                                                'Now watching: https://youtube.com/watch?v=${videoId}',
+                                                `Now watching: https://youtube.com/watch?v=${videoId}`,
                                             )}`;
-                                            window.open(url, '_blank');
+                                            window.open(url, '_blank', 'noopener,noreferrer');
                                         }
                                     }}
                                     disabled={!videoId}
