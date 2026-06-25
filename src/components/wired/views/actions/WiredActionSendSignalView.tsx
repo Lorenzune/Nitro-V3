@@ -1,5 +1,5 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { LocalizeText, WiredFurniType, WiredSelectionVisualizer } from '../../../../api';
+import { LocalizeText, WiredFurniType, WiredSelectionVisualizer , localizeWithFallback} from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
 import { WiredFurniSelectionSourceRow } from '../WiredFurniSelectionSourceRow';
@@ -198,7 +198,7 @@ export const WiredActionSendSignalView: FC<{}> = () =>
                         {} }
                         onSelectionActivate={ () => switchSelection('antenna') } />
                     <WiredFurniSelectionSourceRow
-                        title="Furni da mandare avanti:"
+                        title={ localizeWithFallback('wiredfurni.sendsignal.furni', 'Furniture to send forward:') }
                         titleIsLiteral={ true }
                         options={ FURNI_SOURCES }
                         value={ furniSource }
@@ -210,7 +210,7 @@ export const WiredActionSendSignalView: FC<{}> = () =>
                         onChange={ onChangeFurniSource }
                         onSelectionActivate={ () => switchSelection('furni') } />
                     <WiredFurniSelectionSourceRow
-                        title="Utenti da mandare avanti:"
+                        title={ localizeWithFallback('wiredfurni.sendsignal.users', 'Users to send forward:') }
                         titleIsLiteral={ true }
                         options={ USER_SOURCES }
                         value={ userSource }

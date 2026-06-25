@@ -59,16 +59,16 @@ const normalizeLanguageCode = (value: string) =>
     return `${ parts[0].toLowerCase() }-${ parts[1].toUpperCase() }`;
 };
 
+// UI-text locales backed by the per-language UITexts_<file>.json files in
+// gamedata. `file` must match the UITexts_<file>.json filename, since
+// external.texts.translation.url is `.../UITexts_%locale%.json`.
 const TEXT_TRANSLATION_LOCALES: ITranslationTextLocale[] = [
-    { code: 'pt-BR', name: 'Portuguese (Brazil)', file: 'br' },
-    { code: 'en', name: 'English', file: 'com' },
-    { code: 'de', name: 'German', file: 'de' },
-    { code: 'es', name: 'Spanish', file: 'es' },
-    { code: 'fi', name: 'Finnish', file: 'fi' },
-    { code: 'fr', name: 'French', file: 'fr' },
+    { code: 'en', name: 'English', file: 'en' },
     { code: 'it', name: 'Italian', file: 'it' },
     { code: 'nl', name: 'Dutch', file: 'nl' },
-    { code: 'tr', name: 'Turkish', file: 'tr' }
+    { code: 'fr', name: 'French', file: 'fr' },
+    { code: 'es', name: 'Spanish', file: 'es' },
+    { code: 'ar', name: 'Arabic', file: 'ar' }
 ];
 
 const resolveTextTranslationLocale = (value: string) =>

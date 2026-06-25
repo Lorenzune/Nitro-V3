@@ -228,8 +228,8 @@ export const UserSettingsView: FC<{}> = props =>
                                 <FaUserCog size={ 12 } />
                             </div>
                             <div className="flex flex-col flex-1 leading-tight">
-                                <Text bold>{ LocalizeText('usersettings.open.title') }</Text>
-                                <Text small className="text-black/60">{ LocalizeText('usersettings.open.subtitle') }</Text>
+                                <Text bold>{ localizeWithFallback('usersettings.open.title', "User Settings") }</Text>
+                                <Text small className="text-black/60">{ localizeWithFallback('usersettings.open.subtitle', "Password and account") }</Text>
                             </div>
                             <span className="text-black/30 group-hover:text-[#1e7295] text-[10px]">›</span>
                         </button>

@@ -1,7 +1,7 @@
 import { CreateLinkEvent, Dispose, DropBounce, EaseOut, FindNewFriendsMessageComposer, JumpBy, Motions, NitroToolbarAnimateIconEvent, PerkAllowancesMessageEvent, PerkEnum, Queue, Wait, YouTubeRoomSettingsEvent } from '@nitrots/nitro-renderer';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { FC, useEffect, useMemo, useState } from 'react';
-import { GetConfigurationValue, isHousekeepingEnabled, MessengerIconState, OpenMessengerChat, SendMessageComposer, setYoutubeRoomEnabled, VisitDesktop } from '../../api';
+import { GetConfigurationValue, isHousekeepingEnabled, MessengerIconState, OpenMessengerChat, SendMessageComposer, setYoutubeRoomEnabled, VisitDesktop , localizeWithFallback} from '../../api';
 import { Flex, LayoutAvatarImageView, LayoutItemCountView } from '../../common';
 import { useAchievements, useFriends, useHasPermission, useInventoryUnseenTracker, useMentionsSnapshot, useMessageEvent, useMessenger, useModTools, useNitroEvent, useSessionInfo, useSoundboard, useWiredTools } from '../../hooks';
 import { ToolbarItemView } from './ToolbarItemView';
@@ -203,7 +203,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                 <button
                     type="button"
                     onClick={ () => setLeftCollapsed(value => !value) }
-                    aria-label="Mostra/Nascondi icone"
+                    aria-label={ localizeWithFallback('toolbar.icons.toggle', 'Show/hide icons') }
                     className="tb-collapse pointer-events-auto mt-[6px] mr-[3px]">
                     <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 3 } d={ leftCollapsed ? 'M9 5l7 7-7 7' : 'M15 19l-7-7 7-7' } />
@@ -344,7 +344,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                 <button
                     type="button"
                     onClick={ () => setRightCollapsed(value => !value) }
-                    aria-label="Mostra/Nascondi icone"
+                    aria-label={ localizeWithFallback('toolbar.icons.toggle', 'Show/hide icons') }
                     className="tb-collapse pointer-events-auto mt-[6px] ml-[3px]">
                     <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 3 } d={ rightCollapsed ? 'M15 19l-7-7 7-7' : 'M9 5l7 7-7 7' } />

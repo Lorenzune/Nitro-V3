@@ -1,6 +1,6 @@
 import { GetTickerTime } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
-import { CatalogType, FriendlyTime, GetConfigurationValue, LocalizeText } from '../../../../api';
+import { CatalogType, FriendlyTime, GetConfigurationValue, LocalizeText , localizeWithFallback} from '../../../../api';
 import buildersClubIcon from '../../../../assets/images/toolbar/icons/buildersclub.png';
 import { useCatalogData, useCatalogUiState } from '../../../../hooks';
 
@@ -41,7 +41,7 @@ export const CatalogBuildersClubStatusView: FC = () =>
     const isFullMember = (secondsLeft > 0);
     const membershipStatus = localizeOrDefault(
         isFullMember ? 'builder.header.status.member' : 'builder.header.status.trial',
-        isFullMember ? 'Membro Completo' : 'Prova Gratuita'
+        isFullMember ? localizeWithFallback('catalog.bc.member.full', 'Full Member') : localizeWithFallback('catalog.bc.member.trial', 'Free Trial')
     );
 
     const title = localizeOrDefault(

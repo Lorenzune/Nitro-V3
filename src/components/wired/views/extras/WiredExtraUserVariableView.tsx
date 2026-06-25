@@ -1,5 +1,5 @@
 ﻿import { FC, useEffect, useMemo, useState } from 'react';
-import { LocalizeText, WiredFurniType } from '../../../../api';
+import { LocalizeText, WiredFurniType , localizeWithFallback} from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
 import { NitroInput } from '../../../../layout';
@@ -63,7 +63,7 @@ export const WiredExtraVariableView: FC<WiredExtraVariableViewProps> = props =>
 
         if(localizedText && (localizedText !== 'wiredfurni.params.variables.availability.1')) return localizedText;
 
-        return 'Mentre la stanza è attiva';
+        return localizeWithFallback('wiredfurni.condition.room.active', 'While the room is active');
     }, [ props.availabilityRoomText ]);
     const normalizeAvailability = useMemo(() => (value: number) =>
     {
