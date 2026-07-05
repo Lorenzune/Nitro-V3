@@ -12,16 +12,16 @@ const FURNI_SOURCE_OPTIONS: WiredSourceOption[] = [
     { value: 200, label: 'wiredfurni.params.sources.furni.200' }
 ];
 
-const normalizeFurniSource = (value: number) => (FURNI_SOURCE_OPTIONS.some((option) => option.value === value) ? value : 0);
+const normalizeFurniSource = (value: number) => (FURNI_SOURCE_OPTIONS.some((option) => option.value === value) ? value : 100);
 
 export const WiredTriggerClickFurniView: FC<{}> = () => {
     const { trigger = null, setIntParams = null } = useWired();
-    const [furniSource, setFurniSource] = useState(0);
+    const [furniSource, setFurniSource] = useState(100);
 
     const save = () => setIntParams([furniSource]);
 
     useEffect(() => {
-        setFurniSource(trigger?.intData?.length > 0 ? normalizeFurniSource(trigger.intData[0]) : 0);
+        setFurniSource(trigger?.intData?.length > 0 ? normalizeFurniSource(trigger.intData[0]) : 100);
     }, [trigger]);
 
     return (

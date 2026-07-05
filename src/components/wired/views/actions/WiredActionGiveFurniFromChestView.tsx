@@ -1,36 +1,34 @@
-import { FC, useEffect, useState } from 'react';
-import { localizeWithFallback, WiredFurniType } from '../../../../api';
+import { FC, useEffect, useMemo, useState } from 'react';
+import { localizeWithFallback, LocalizeText, WiredFurniType } from '../../../../api';
 import { Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
+import { sortWiredSourceOptions, USER_SOURCES, useAvailableUserSources } from '../WiredSourcesSelector';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
 // Wire contract (WiredEffectGiveFurniFromChest): intData = [amount, userSource].
-// userSource is resolved server-side via WiredSourceUtil.resolveUsers (TRIGGER / SELECTOR / SIGNAL).
+// userSource is resolved server-side via WiredSourceUtil.resolveUsers — TRIGGER(0)/SELECTOR(200)/
+// SIGNAL(201), plus CLICKED_USER(11) when a click-user trigger sits in the stack.
 const SOURCE_TRIGGER = 0;
-const SOURCE_SELECTOR = 200;
-const SOURCE_SIGNAL = 201;
-
-const SOURCE_OPTIONS: { value: number; key: string; fallback: string }[] = [
-    { value: SOURCE_TRIGGER, key: 'wiredfurni.params.source.trigger', fallback: 'The user who triggered' },
-    { value: SOURCE_SELECTOR, key: 'wiredfurni.params.source.selector', fallback: 'Users picked by a selector' },
-    { value: SOURCE_SIGNAL, key: 'wiredfurni.params.source.signal', fallback: 'Users forwarded by a signal' },
-];
-
-const normalizeSource = (value: number): number =>
-    SOURCE_OPTIONS.some((option) => option.value === value) ? value : SOURCE_TRIGGER;
 
 export const WiredActionGiveFurniFromChestView: FC<{}> = () => {
     const { trigger = null, setIntParams = null } = useWired();
     const [amount, setAmount] = useState(1);
     const [userSource, setUserSource] = useState(SOURCE_TRIGGER);
+    const rawAvailableSources = useAvailableUserSources(trigger, USER_SOURCES);
+    const availableSources = useMemo(() => sortWiredSourceOptions(rawAvailableSources, 'users'), [rawAvailableSources]);
 
     useEffect(() => {
         if (!trigger) return;
 
         const data = trigger.intData ?? [];
         setAmount(data.length > 0 ? Math.max(1, data[0]) : 1);
-        setUserSource(data.length > 1 ? normalizeSource(data[1]) : SOURCE_TRIGGER);
+        setUserSource(data.length > 1 ? data[1] : SOURCE_TRIGGER);
     }, [trigger]);
+
+    // Fall back to the triggering user if the chosen source is no longer offered (e.g. click-user trigger removed).
+    useEffect(() => {
+        if (!availableSources.some((option) => option.value === userSource)) setUserSource(SOURCE_TRIGGER);
+    }, [availableSources, userSource]);
 
     const save = () => setIntParams([Math.max(1, amount), userSource]);
 
@@ -59,7 +57,7 @@ export const WiredActionGiveFurniFromChestView: FC<{}> = () => {
                 <div className="flex flex-col gap-1">
                     <Text bold>{localizeWithFallback('wiredfurni.params.give_to', 'Give to')}</Text>
                     <div className="flex flex-col gap-1">
-                        {SOURCE_OPTIONS.map((option) => (
+                        {availableSources.map((option) => (
                             <label key={option.value} className="flex items-center gap-2">
                                 <input
                                     type="radio"
@@ -68,7 +66,7 @@ export const WiredActionGiveFurniFromChestView: FC<{}> = () => {
                                     checked={userSource === option.value}
                                     onChange={() => setUserSource(option.value)}
                                 />
-                                <Text>{localizeWithFallback(option.key, option.fallback)}</Text>
+                                <Text>{LocalizeText(option.label)}</Text>
                             </label>
                         ))}
                     </div>
