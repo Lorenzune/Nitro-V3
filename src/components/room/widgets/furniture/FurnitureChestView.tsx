@@ -14,6 +14,7 @@ import {
     ChestWithdrawComposer,
     ChestWithdrawFurniComposer,
     FurnitureListComposer,
+    FurnitureListInvalidateEvent,
     FurnitureType,
     GetSessionDataManager,
     IChestFurniStoredItem,
@@ -174,6 +175,15 @@ export const FurnitureChestView: FC = () => {
         SendMessageComposer(new FurnitureListComposer());
         SendMessageComposer(new ChestStartDepositComposer(itemId));
     }, [depositFurniOpen, itemId]);
+
+    // Withdrawn items reach the inventory as a refresh push (FurnitureListInvalidate),
+    // not as list add/update events — useInventoryFurni only re-requests the list when
+    // the inventory window itself is open. Re-request here while the deposit panel is
+    // showing so its cells and counters stay live after a withdraw.
+    useMessageEvent<FurnitureListInvalidateEvent>(FurnitureListInvalidateEvent, () => {
+        if (!depositFurniOpen) return;
+        SendMessageComposer(new FurnitureListComposer());
+    });
 
     useEffect(() => {
         syncSelectedFurniKey(furniEntries);
