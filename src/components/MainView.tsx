@@ -50,6 +50,7 @@ import { RareValuesView } from './rare-values/RareValuesView';
 import { RightSideView } from './right-side/RightSideView';
 import { RoomView } from './room/RoomView';
 import { SoundboardView } from './soundboard/SoundboardView';
+import { TraxEditorView } from './trax-editor/TraxEditorView';
 import { ToolbarView } from './toolbar/ToolbarView';
 import { TranslationBootstrap } from './translation/TranslationBootstrap';
 import { TranslationSettingsView } from './translation/TranslationSettingsView';
@@ -60,7 +61,8 @@ import { VaultView } from './vault/VaultView';
 import { WiredView } from './wired/WiredView';
 import { WiredCreatorToolsView } from './wired-tools/WiredCreatorToolsView';
 
-export const MainView: FC<{}> = (props) => {
+export const MainView: FC<{}> = (props) =>
+{
     const [isReady, setIsReady] = useState(false);
     const [localizationVersion, setLocalizationVersion] = useState(0);
     const [mentionsVisible, setMentionsVisible] = useState(false);
@@ -76,12 +78,15 @@ export const MainView: FC<{}> = (props) => {
     // no session is active) is honored.
     const { landingViewVisible } = useNitroEventReducer<{ sessionId: number | null; landingViewVisible: boolean }, RoomSessionEvent>(
         [RoomSessionEvent.CREATED, RoomSessionEvent.ENDED],
-        (state, event) => {
-            if (event.type === RoomSessionEvent.CREATED) {
+        (state, event) =>
+        {
+            if (event.type === RoomSessionEvent.CREATED)
+            {
                 return { sessionId: event.session.roomId, landingViewVisible: false };
             }
 
-            if (state.sessionId !== null && event.session.roomId !== state.sessionId) {
+            if (state.sessionId !== null && event.session.roomId !== state.sessionId)
+            {
                 return state;
             }
 
@@ -90,7 +95,8 @@ export const MainView: FC<{}> = (props) => {
         { sessionId: null, landingViewVisible: true }
     );
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         setIsReady(true);
 
         GetRoomSessionManager().tryRestoreSession();
@@ -98,17 +104,22 @@ export const MainView: FC<{}> = (props) => {
         GetCommunication().connection.ready();
     }, []);
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         const linkTracker: ILinkEventTracker = {
-            linkReceived: (url: string) => {
+            linkReceived: (url: string) =>
+            {
                 const parts = url.split('/');
 
                 if (parts.length < 2) return;
 
-                switch (parts[1]) {
+                switch (parts[1])
+                {
                     case 'open':
-                        if (parts.length > 2) {
-                            switch (parts[2]) {
+                        if (parts.length > 2)
+                        {
+                            switch (parts[2])
+                            {
                                 case 'credits':
                                     //HabboWebTools.openWebPageAndMinimizeClient(this._windowManager.getProperty(ExternalVariables.WEB_SHOP_RELATIVE_URL));
                                     break;
@@ -129,21 +140,25 @@ export const MainView: FC<{}> = (props) => {
         return () => RemoveLinkEventTracker(linkTracker);
     }, []);
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         // Opening the inbox clears the unread badge both locally and
         // server-side so the toolbar count resets immediately.
-        const clearMentionsBadge = () => {
+        const clearMentionsBadge = () =>
+        {
             markAllRead();
             SendMessageComposer(new MarkMentionsReadComposer(0, 0));
         };
 
         const linkTracker: ILinkEventTracker = {
-            linkReceived: (url: string) => {
+            linkReceived: (url: string) =>
+            {
                 const parts = url.split('/');
 
                 if (parts.length < 2) return;
 
-                switch (parts[1]) {
+                switch (parts[1])
+                {
                     case 'show':
                         setMentionsVisible(true);
                         clearMentionsBadge();
@@ -152,7 +167,8 @@ export const MainView: FC<{}> = (props) => {
                         setMentionsVisible(false);
                         return;
                     case 'toggle':
-                        setMentionsVisible((prevValue) => {
+                        setMentionsVisible((prevValue) =>
+                        {
                             if (prevValue) return false;
 
                             // Side-effect-free in the updater: defer the
@@ -172,7 +188,8 @@ export const MainView: FC<{}> = (props) => {
         return () => RemoveLinkEventTracker(linkTracker);
     }, []);
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         const refreshLocalization = () => setLocalizationVersion((value) => value + 1);
 
         window.addEventListener('nitro-localization-updated', refreshLocalization);
@@ -232,6 +249,7 @@ export const MainView: FC<{}> = (props) => {
             <RareValuesView />
             <FortuneWheelView />
             <SoundboardView />
+            <TraxEditorView />
             {GetConfigurationValue<boolean>('radio_ui.enabled', false) && <RadioView />}
             {GetConfigurationValue<boolean>('mentions_ui.enabled', true) && mentionsVisible && <MentionsView onClose={() => setMentionsVisible(false)} />}
             <ExternalPluginLoader />
