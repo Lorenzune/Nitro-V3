@@ -204,7 +204,7 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = (props) => {
                         <label className="text-[9px] text-dark uppercase font-bold">{LocalizeText('widgets.petpackage.name.title')}</label>
                         <div className="relative">
                             <input
-                                className={`w-full text-[11px] border-2 rounded px-2 py-1.5 focus:outline-none transition-colors ${approvalResult > 0 ? 'border-danger bg-danger/5' : approvalResult === 0 ? 'border-success bg-success/5' : 'border-card-grid-item-border focus:border-primary bg-white'}`}
+                                className={`w-full text-[11px] text-black placeholder:text-black placeholder:italic border-2 rounded px-2 py-1.5 focus:outline-none transition-colors ${approvalResult > 0 ? 'border-danger bg-danger/5' : approvalResult === 0 ? 'border-success bg-success/5' : 'border-card-grid-item-border focus:border-primary bg-white'}`}
                                 placeholder={LocalizeText('widgets.petpackage.name.title')}
                                 type="text"
                                 value={petName}

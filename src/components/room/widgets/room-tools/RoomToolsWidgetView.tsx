@@ -263,7 +263,7 @@ export const RoomToolsWidgetView: FC<{}> = (props) => {
                 </button>
             </div>
             {!isCollapsed && (
-                <div className="flex flex-col justify-center">
+                <div className="flex flex-col justify-center ml-[26px]">
                     <AnimatePresence>
                         {isOpen && (
                             <motion.div initial={{ x: -100 }} animate={{ x: 0 }} exit={{ x: -100 }} transition={{ duration: 0.3 }}>
