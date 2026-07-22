@@ -1,6 +1,7 @@
 import { CreateLinkEvent, GetGuestRoomResultEvent, GetRoomEngine, NavigatorSearchComposer, RateFlatMessageComposer, RoomEngineEvent } from '@nitrots/nitro-renderer';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FC, useEffect, useState } from 'react';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { GetConfigurationValue, LocalizeText, SendMessageComposer, SetLocalStorage, TryVisitRoom } from '../../../../api';
 import { Text } from '../../../../common';
 import { useMessageEvent, useNavigatorData, useNitroEvent, useRoom } from '../../../../hooks';
@@ -61,6 +62,7 @@ export const RoomToolsWidgetView: FC<{}> = (props) => {
     const [zoomScale, setZoomScale] = useState<number>(1);
     const [hasLikedRoom, setHasLikedRoom] = useState<boolean>(false);
     const [isToolsOpen, setIsToolsOpen] = useState<boolean>(true);
+    const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
     const [roomName, setRoomName] = useState<string>(null);
     const [roomOwner, setRoomOwner] = useState<string>(null);
     const [roomTags, setRoomTags] = useState<string[]>(null);
@@ -342,6 +344,9 @@ export const RoomToolsWidgetView: FC<{}> = (props) => {
                                     onClick={() => canGoNext && handleToolClick('room_history_next')}
                                 />
                             </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
                 </div>
                 <button
                     type="button"
@@ -354,7 +359,6 @@ export const RoomToolsWidgetView: FC<{}> = (props) => {
                 >
                     {isCollapsed ? <FaChevronRight /> : <FaChevronLeft />}
                 </button>
-            </div>
             {!isCollapsed && (
                 <div className="flex flex-col justify-center ml-[26px]">
                     <AnimatePresence>
