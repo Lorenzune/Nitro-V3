@@ -15,6 +15,9 @@ export const SUBTURN_MS = SERVER_TICK_MS / SUBTURNS_PER_TICK;
 
 export const tileToWorld = (tile: number): number => (tile * TILE_SIZE_WORLD) | 0;
 
+export const THROW_RANGE_NORMAL = 5;
+export const THROW_RANGE_LONG = 15;
+
 export const worldToTile = (world: number): number => (((world + 1600) / 3200) | 0);
 
 export const validateDirection360 = (value: number): number =>

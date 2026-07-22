@@ -96,7 +96,57 @@ describe('SnowWarSimulation', () =>
         applyTick();
         applyTick();
         expect(avatar.worldX).toBe(tileToWorld(7));
-        expect(avatar.moveTargetX).toBeNull();
+        expect(avatar.walkGoalX).toBeNull();
+    });
+
+    it('paths around blocked tiles instead of walking through them', () =>
+    {
+        // 11x11 open map with a single wall tile at (6,5), directly between
+        // the avatar (5,5) and its goal (7,5).
+        const rows: string[] = [];
+        for (let y = 0; y < 11; y++)
+        {
+            rows.push(y === 5 ? '000000x0000' : '00000000000');
+        }
+        sim.setLevel(rows, [], []);
+
+        applyTick([event(SNOWWAR_EVENT_MOVE, 1, tileToWorld(7), tileToWorld(5))]);
+
+        const avatar = sim.avatars.get(1);
+        let steppedOnWall = false;
+        for (let i = 0; i < 10; i++)
+        {
+            applyTick();
+            if (avatar.tileX === 6 && avatar.tileY === 5) steppedOnWall = true;
+        }
+
+        expect(steppedOnWall).toBe(false);
+        expect(avatar.worldX).toBe(tileToWorld(7));
+        expect(avatar.worldY).toBe(tileToWorld(5));
+        expect(avatar.walkGoalX).toBeNull();
+    });
+
+    it('stops at the closest reachable tile instead of oscillating at an unreachable goal', () =>
+    {
+        // Goal tile (7,5) is fully walled in; the avatar at (5,5) cannot
+        // get closer than its own tile and must stop instead of bouncing
+        // between equally-distant neighbours.
+        const rows: string[] = [];
+        for (let y = 0; y < 11; y++)
+        {
+            if (y >= 4 && y <= 6) rows.push('000000xxx00');
+            else rows.push('00000000000');
+        }
+        sim.setLevel(rows, [], []);
+
+        applyTick([event(SNOWWAR_EVENT_MOVE, 1, tileToWorld(7), tileToWorld(5))]);
+
+        const avatar = sim.avatars.get(1);
+        for (let i = 0; i < 6; i++) applyTick();
+
+        expect(avatar.worldX).toBe(tileToWorld(5));
+        expect(avatar.worldY).toBe(tileToWorld(5));
+        expect(avatar.walkGoalX).toBeNull();
     });
 
     it('handles the create-snowball state machine', () =>

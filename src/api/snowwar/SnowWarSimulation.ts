@@ -71,8 +71,13 @@ export interface SnowWarAvatarState {
     activityState: number;
     activityTimer: number;
     score: number;
-    moveTargetX: number | null;
-    moveTargetY: number | null;
+    tileX: number;
+    tileY: number;
+    walkGoalX: number | null;
+    walkGoalY: number | null;
+    nextGoalX: number | null;
+    nextGoalY: number | null;
+    pathfindIterations: number;
     hitFlashUntilSubturn: number;
 }
 
@@ -126,11 +131,23 @@ interface FullStatusObject {
     parabolaOffset?: number;
 }
 
+const MAX_PATHFIND_ITERATIONS = 50;
+
+// Same order as the server's SnowWarPathfinder.DIAGONAL_MOVE_POINTS - the
+// greedy step tie-breaks by this order via stable sort on both sides.
+const DIAGONAL_MOVE_POINTS: [number, number][] = [
+    [0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1],
+];
+
 export class SnowWarSimulation
 {
     public readonly avatars: Map<number, SnowWarAvatarState> = new Map();
     public readonly snowballs: Map<number, SnowWarSnowballState> = new Map();
     public readonly machines: Map<number, SnowWarMachineState> = new Map();
+
+    private _blockedTiles: boolean[][] = [];
+    private _mapWidth = 0;
+    private _mapHeight = 0;
 
     private _pendingSubturns: SnowWarSimEvent[][] = [];
     private _subturnClock = 0; // ms accumulated toward the next subturn
@@ -157,6 +174,46 @@ export class SnowWarSimulation
         this._subturnClock = 0;
         this._subturnCount = 0;
         this._lastAdvanceAt = null;
+        this._blockedTiles = [];
+        this._mapWidth = 0;
+        this._mapHeight = 0;
+    }
+
+    /**
+     * Build the walkability grid from LevelData - the mirror of the server's
+     * SnowWarMap tile construction: heightmap x/X tiles are blocked, any tile
+     * carrying an item is blocked, and each machine occupies (x,y)..(x+2,y).
+     */
+    public setLevel(
+        heightmapRows: string[],
+        items: { x: number; y: number }[],
+        machines: { x: number; y: number }[]): void
+    {
+        this._mapHeight = heightmapRows.length;
+        this._mapWidth = this._mapHeight > 0 ? heightmapRows[0].length : 0;
+        this._blockedTiles = heightmapRows.map(row =>
+        {
+            const cells: boolean[] = [];
+            for (let x = 0; x < this._mapWidth; x++)
+            {
+                const tile = x < row.length ? row.charAt(x) : 'x';
+                cells.push(tile === 'x' || tile === 'X');
+            }
+            return cells;
+        });
+
+        const block = (x: number, y: number) =>
+        {
+            if (x >= 0 && y >= 0 && x < this._mapWidth && y < this._mapHeight) this._blockedTiles[y][x] = true;
+        };
+
+        for (const item of items) block(item.x, item.y);
+        for (const machine of machines)
+        {
+            block(machine.x, machine.y);
+            block(machine.x + 1, machine.y);
+            block(machine.x + 2, machine.y);
+        }
     }
 
     /** Rebuild the whole world from a FullGameStatus snapshot. */
@@ -189,8 +246,13 @@ export class SnowWarSimulation
                         activityState: object.activityState ?? SNOWWAR_STATE_NORMAL,
                         activityTimer: object.activityTimer ?? 0,
                         score: object.score ?? 0,
-                        moveTargetX: null,
-                        moveTargetY: null,
+                        tileX: worldToTile(object.worldX ?? 0),
+                        tileY: worldToTile(object.worldY ?? 0),
+                        walkGoalX: null,
+                        walkGoalY: null,
+                        nextGoalX: null,
+                        nextGoalY: null,
+                        pathfindIterations: 0,
                         hitFlashUntilSubturn: 0,
                     });
                     break;
@@ -275,10 +337,14 @@ export class SnowWarSimulation
             case SNOWWAR_EVENT_MOVE: {
                 const avatar = this.avatars.get(event.p1);
                 if (!avatar) return;
-                avatar.moveTargetX = event.p2;
-                avatar.moveTargetY = event.p3;
-                avatar.rotation = direction360To8(
-                    getAngleFromComponents(event.p2 - avatar.worldX, event.p3 - avatar.worldY));
+                const goalTileX = worldToTile(event.p2);
+                const goalTileY = worldToTile(event.p3);
+                if (avatar.walkGoalX !== goalTileX || avatar.walkGoalY !== goalTileY)
+                {
+                    avatar.walkGoalX = goalTileX;
+                    avatar.walkGoalY = goalTileY;
+                    avatar.pathfindIterations = 0;
+                }
                 return;
             }
             case SNOWWAR_EVENT_CREATE_SNOWBALL: {
@@ -286,8 +352,7 @@ export class SnowWarSimulation
                 if (!avatar) return;
                 avatar.activityState = SNOWWAR_STATE_CREATING;
                 avatar.activityTimer = CREATING_TIMER;
-                avatar.moveTargetX = null;
-                avatar.moveTargetY = null;
+                this.stopAvatarWalk(avatar);
                 return;
             }
             case SNOWWAR_EVENT_LAUNCH_SNOWBALL: {
@@ -303,8 +368,7 @@ export class SnowWarSimulation
                     thrower.snowballCount = Math.max(0, thrower.snowballCount - 1);
                     thrower.rotation = direction360To8(getAngleFromComponents(
                         event.p3 - thrower.worldX, event.p4 - thrower.worldY));
-                    thrower.moveTargetX = null;
-                    thrower.moveTargetY = null;
+                    this.stopAvatarWalk(thrower);
                 }
 
                 this.snowballs.set(event.p1, {
@@ -359,8 +423,7 @@ export class SnowWarSimulation
                     target.activityTimer = STUNNED_TIMER;
                     target.snowballCount = 0;
                     target.health = 0;
-                    target.moveTargetX = null;
-                    target.moveTargetY = null;
+                    this.stopAvatarWalk(target);
                 }
                 if (thrower) thrower.score += 5;
                 return;
@@ -397,17 +460,133 @@ export class SnowWarSimulation
             }
         }
 
-        if (avatar.moveTargetX === null || avatar.moveTargetY === null) return;
+        if (avatar.walkGoalX === null || avatar.walkGoalY === null) return;
         if (avatar.activityState === SNOWWAR_STATE_STUNNED) return;
 
-        avatar.worldX = moveTowards(avatar.worldX, avatar.moveTargetX, SUBTURN_MOVEMENT);
-        avatar.worldY = moveTowards(avatar.worldY, avatar.moveTargetY, SUBTURN_MOVEMENT);
+        // Mirror of the server's SnowWarAvatarObject.moveOneFrame: walk the
+        // tile grid via the same greedy pathfinder instead of sliding in a
+        // straight line, so avatars never cross blocked tiles ("walk in air")
+        // and the client position matches the server's path exactly.
+        const targetWorldX = tileToWorld(avatar.walkGoalX);
+        const targetWorldY = tileToWorld(avatar.walkGoalY);
 
-        if (avatar.worldX === avatar.moveTargetX && avatar.worldY === avatar.moveTargetY)
+        if (avatar.worldX === targetWorldX && avatar.worldY === targetWorldY)
         {
-            avatar.moveTargetX = null;
-            avatar.moveTargetY = null;
+            this.stopAvatarWalk(avatar);
+            return;
         }
+
+        if (avatar.nextGoalX === null || avatar.nextGoalY === null)
+        {
+            avatar.pathfindIterations++;
+            if (avatar.pathfindIterations > MAX_PATHFIND_ITERATIONS)
+            {
+                this.stopAvatarWalk(avatar);
+                return;
+            }
+
+            const next = this.getNextDirection(avatar);
+            if (!next)
+            {
+                this.stopAvatarWalk(avatar);
+                return;
+            }
+
+            avatar.nextGoalX = next.x;
+            avatar.nextGoalY = next.y;
+            avatar.rotation = direction360To8(getAngleFromComponents(
+                tileToWorld(next.x) - avatar.worldX, tileToWorld(next.y) - avatar.worldY));
+        }
+
+        const nextWorldX = tileToWorld(avatar.nextGoalX);
+        const nextWorldY = tileToWorld(avatar.nextGoalY);
+
+        avatar.worldX = moveTowards(avatar.worldX, nextWorldX, SUBTURN_MOVEMENT);
+        avatar.worldY = moveTowards(avatar.worldY, nextWorldY, SUBTURN_MOVEMENT);
+
+        avatar.tileX = worldToTile(avatar.worldX);
+        avatar.tileY = worldToTile(avatar.worldY);
+
+        if (avatar.worldX === nextWorldX && avatar.worldY === nextWorldY)
+        {
+            avatar.nextGoalX = null;
+            avatar.nextGoalY = null;
+        }
+
+        if (avatar.worldX === targetWorldX && avatar.worldY === targetWorldY)
+        {
+            this.stopAvatarWalk(avatar);
+        }
+    }
+
+    private stopAvatarWalk(avatar: SnowWarAvatarState): void
+    {
+        avatar.walkGoalX = null;
+        avatar.walkGoalY = null;
+        avatar.nextGoalX = null;
+        avatar.nextGoalY = null;
+    }
+
+    /** Mirror of the server's SnowWarPathfinder.getNextDirection. */
+    private getNextDirection(avatar: SnowWarAvatarState): { x: number; y: number } | null
+    {
+        if (avatar.walkGoalX === null || avatar.walkGoalY === null) return null;
+
+        const positions: { x: number; y: number }[] = [];
+
+        for (const [dx, dy] of DIAGONAL_MOVE_POINTS)
+        {
+            const x = avatar.tileX + dx;
+            const y = avatar.tileY + dy;
+            if (this.isValidStep(avatar, x, y)) positions.push({ x, y });
+        }
+
+        if (!positions.length) return null;
+
+        const goalX = avatar.walkGoalX;
+        const goalY = avatar.walkGoalY;
+        const distanceSquared = (p: { x: number; y: number }) =>
+            ((p.x - goalX) * (p.x - goalX)) + ((p.y - goalY) * (p.y - goalY));
+
+        // Stable sort keeps the server's neighbour-order tie-breaking.
+        positions.sort((a, b) => distanceSquared(a) - distanceSquared(b));
+
+        // Only step if it brings us strictly closer to the goal; otherwise
+        // stop where we are (mirrors the server's oscillation guard).
+        if (distanceSquared(positions[0]) >= distanceSquared({ x: avatar.tileX, y: avatar.tileY })) return null;
+
+        return positions[0];
+    }
+
+    /** Mirror of the server's SnowWarPathfinder.isValidTile. */
+    private isValidStep(avatar: SnowWarAvatarState, x: number, y: number): boolean
+    {
+        if (!this.isTileWalkable(x, y)) return false;
+
+        for (const other of this.avatars.values())
+        {
+            if (other.objectId === avatar.objectId) continue;
+
+            if (other.nextGoalX !== null && other.nextGoalY !== null)
+            {
+                if (other.nextGoalX === x && other.nextGoalY === y) return false;
+            }
+            else if (other.tileX === x && other.tileY === y)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private isTileWalkable(x: number, y: number): boolean
+    {
+        // Without level data (tests, pre-LevelData packets) fall back to the
+        // pre-map behaviour of unrestricted movement.
+        if (!this._mapHeight) return true;
+        if (x < 0 || y < 0 || x >= this._mapWidth || y >= this._mapHeight) return false;
+        return !this._blockedTiles[y][x];
     }
 
     private stepSnowball(ball: SnowWarSnowballState): void

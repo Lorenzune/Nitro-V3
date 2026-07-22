@@ -4,11 +4,14 @@ import {
     SNOWWAR_STATE_CREATING,
     SNOWWAR_STATE_INVINCIBLE,
     SNOWWAR_STATE_STUNNED,
+    THROW_RANGE_LONG,
+    THROW_RANGE_NORMAL,
     TILE_SIZE_WORLD,
     tileToWorld,
 } from '../../../../api/snowwar';
-import { LayoutAvatarImageView } from '../../../../common';
+import { LayoutFurniImageView } from '../../../../common';
 import { useSnowWar } from '../../../../hooks';
+import { SnowWarAvatarView } from './SnowWarAvatarView';
 
 const localizeWithFallback = (key: string, fallback: string) =>
 {
@@ -20,6 +23,22 @@ const TILE_HALF_W = 12;
 const TILE_HALF_H = 6;
 
 const TEAM_COLORS = ['#e64545', '#4577e6', '#3fb550', '#e6c245'];
+
+// Scale factor per zoom level: 0 = zoomed out, 1 = normal, 2 = zoomed in.
+const ZOOM_LEVELS = [1, 2, 3];
+
+/** Server rule: normal throws reach 5 tiles, long throws 15. */
+const isThrowInRange = (fromX: number, fromY: number, toX: number, toY: number, trajectory: number) =>
+{
+    const maxRange = (trajectory === 2) ? THROW_RANGE_LONG : THROW_RANGE_NORMAL;
+    const dx = toX - fromX;
+    const dy = toY - fromY;
+    return ((dx * dx) + (dy * dy)) <= (maxRange * maxRange);
+};
+
+/** Classic SnowWar props drawn as canvas shapes; everything else is furni. */
+const isClassicItem = (name: string) =>
+    name.startsWith('sw_') || name.startsWith('block_') || name.startsWith('obst_') || name.startsWith('snowball_machine');
 
 export const SnowWarArenaView: FC = () =>
 {
@@ -35,14 +54,27 @@ export const SnowWarArenaView: FC = () =>
         throwAtPlayer,
         createSnowball,
         exitGame,
+        editRoom,
         sendChat,
         requestFullStatus,
     } = useSnowWar();
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const viewportRef = useRef<HTMLDivElement>(null);
     // Wall-clock of the last animation frame; doubles as the re-render tick.
     const [frameNow, setFrameNow] = useState(0);
     const [chatInput, setChatInput] = useState('');
+    // Three zoom levels like the original game (:zoom 0/1/2); every game
+    // starts fully zoomed out.
+    const [zoomLevel, setZoomLevel] = useState(0);
+    const zoom = ZOOM_LEVELS[zoomLevel];
+    const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
+    // Bumped a few seconds after level load: remounts the furni images so
+    // any that rendered the "still downloading" placeholder retry against
+    // the now-cached assets.
+    const [furniRetryTick, setFurniRetryTick] = useState(0);
+    // Set when a throw is blocked for being out of range; shows a short hint.
+    const [rangeWarningAt, setRangeWarningAt] = useState(0);
     const ownUserId = GetSessionDataManager()?.userId ?? 0;
 
     const mapRows = useMemo(() => levelData?.heightmapRows ?? [], [levelData]);
@@ -103,6 +135,11 @@ export const SnowWarArenaView: FC = () =>
 
         for (const item of (levelData?.items ?? []))
         {
+            // Hotel furniture saved by the arena editor is rendered as its
+            // real furni image in the DOM layer below - only the classic
+            // SnowWar props are drawn as canvas shapes.
+            if (!isClassicItem(item.name)) continue;
+
             const { x: sx, y: sy } = toScreen(item.x, item.y);
             const centerY = sy + TILE_HALF_H;
 
@@ -176,6 +213,32 @@ export const SnowWarArenaView: FC = () =>
         };
     }, [simulation]);
 
+    // Track the viewport size; the camera transform is computed from it.
+    useEffect(() =>
+    {
+        const viewport = viewportRef.current;
+        if (!viewport) return;
+
+        const update = () => setViewportSize({ width: viewport.clientWidth, height: viewport.clientHeight });
+        update();
+
+        const observer = new ResizeObserver(update);
+        observer.observe(viewport);
+        return () => observer.disconnect();
+    }, [levelData]);
+
+    // Furni image retry passes (see furniRetryTick).
+    useEffect(() =>
+    {
+        if (!levelData) return;
+        setFurniRetryTick(0);
+        const timers = [
+            setTimeout(() => setFurniRetryTick(1), 4000),
+            setTimeout(() => setFurniRetryTick(2), 10000),
+        ];
+        return () => timers.forEach(timer => clearTimeout(timer));
+    }, [levelData]);
+
     // Periodic authoritative resync.
     useEffect(() =>
     {
@@ -186,8 +249,15 @@ export const SnowWarArenaView: FC = () =>
 
     const screenToTile = useCallback((event: MouseEvent<HTMLDivElement>) =>
     {
-        const bounds = (event.currentTarget).getBoundingClientRect();
-        const scaleX = canvasWidth / bounds.width;
+        // Measure the floor canvas itself, NOT the viewport: the world is
+        // centered inside a scrollable viewport, so the viewport rect is
+        // offset from the isometric origin and clicks landed on the wrong
+        // tile (or outside the map) whenever the arena didn't exactly fill it.
+        const canvas = canvasRef.current;
+        if (!canvas) return { tileX: -1, tileY: -1 };
+
+        const bounds = canvas.getBoundingClientRect();
+        const scaleX = bounds.width > 0 ? canvasWidth / bounds.width : 1;
         const px = (event.clientX - bounds.left) * scaleX - originX;
         const py = (event.clientY - bounds.top) * scaleX;
 
@@ -204,15 +274,47 @@ export const SnowWarArenaView: FC = () =>
         if (event.shiftKey || event.type === 'contextmenu')
         {
             event.preventDefault();
-            throwAtLocation(tileToWorld(tileX), tileToWorld(tileY), event.type === 'contextmenu' ? 2 : 1);
+            const trajectory = event.type === 'contextmenu' ? 2 : 1;
+            const own = simulation.getAvatarByUserId(ownUserId);
+            if (own && !isThrowInRange(own.tileX, own.tileY, tileX, tileY, trajectory))
+            {
+                setRangeWarningAt(Date.now());
+                return;
+            }
+            throwAtLocation(tileToWorld(tileX), tileToWorld(tileY), trajectory);
             return;
         }
 
         walkTo(tileToWorld(tileX), tileToWorld(tileY));
-    }, [mapHeight, mapWidth, screenToTile, throwAtLocation, walkTo]);
+    }, [mapHeight, mapWidth, screenToTile, simulation, ownUserId, throwAtLocation, walkTo]);
 
     const ownAvatar = simulation.getAvatarByUserId(ownUserId);
     const alpha = simulation.interpolationAlpha;
+
+    // Camera as a GPU transform (translate + scale) instead of scrolling the
+    // viewport: no per-frame layout work, so walking stays smooth. Level 0
+    // centers the whole floor; levels 1-2 follow the own avatar, clamped to
+    // the world edges.
+    const scaledWidth = canvasWidth * zoom;
+    const scaledHeight = canvasHeight * zoom;
+    let cameraX = (viewportSize.width - scaledWidth) / 2;
+    let cameraY = (viewportSize.height - scaledHeight) / 2;
+
+    if (zoomLevel > 0 && ownAvatar && viewportSize.width > 0)
+    {
+        const followX = ownAvatar.prevWorldX + (ownAvatar.worldX - ownAvatar.prevWorldX) * alpha;
+        const followY = ownAvatar.prevWorldY + (ownAvatar.worldY - ownAvatar.prevWorldY) * alpha;
+        const { x, y } = worldToScreen(followX, followY);
+
+        if (scaledWidth > viewportSize.width)
+        {
+            cameraX = Math.min(0, Math.max(viewportSize.width - scaledWidth, (viewportSize.width / 2) - (x * zoom)));
+        }
+        if (scaledHeight > viewportSize.height)
+        {
+            cameraY = Math.min(0, Math.max(viewportSize.height - scaledHeight, (viewportSize.height / 2) - (y * zoom)));
+        }
+    }
 
     const teamScores = useMemo(() =>
     {
@@ -265,6 +367,19 @@ export const SnowWarArenaView: FC = () =>
                         <span>{localizeWithFallback('snowwar.hud.score', 'Score')}: {ownAvatar.score}</span>
                     </div>
                 )}
+                <div className="snowwar-hud__zoom" title={localizeWithFallback('snowwar.hud.zoom', 'Zoom')}>
+                    <span>🔍</span>
+                    {ZOOM_LEVELS.map((factor, level) => (
+                        <button
+                            key={level}
+                            className={'snowwar-hud__zoom-level' + (zoomLevel === level ? ' snowwar-hud__zoom-level--active' : '')}
+                            type="button"
+                            onClick={() => setZoomLevel(level)}
+                        >
+                            {level}
+                        </button>
+                    ))}
+                </div>
                 <div className="snowwar-hud__actions">
                     <button
                         type="button"
@@ -274,6 +389,11 @@ export const SnowWarArenaView: FC = () =>
                     >
                         {localizeWithFallback('snowwar.make_snowball', 'Make snowball')}
                     </button>
+                    {levelData.canEditRoom && (
+                        <button type="button" className="snowwar-button" onClick={() => editRoom()}>
+                            {localizeWithFallback('snowwar.edit_room', 'Edit Room')}
+                        </button>
+                    )}
                     <button type="button" className="snowwar-button snowwar-button--danger" onClick={() => exitGame()}>
                         {localizeWithFallback('snowwar.leave', 'Leave game')}
                     </button>
@@ -285,6 +405,11 @@ export const SnowWarArenaView: FC = () =>
                     {localizeWithFallback('snowwar.get_ready', 'Get ready!')} {preparingSeconds > 0 ? preparingSeconds : ''}
                 </div>
             )}
+            {(frameNow - rangeWarningAt) < 2000 && rangeWarningAt > 0 && (
+                <div className="snowwar-banner snowwar-banner--warning">
+                    {localizeWithFallback('snowwar.throw.too_far', 'Too far away! Use a long throw or move closer.')}
+                </div>
+            )}
             {phase === 'ending' && (
                 <div className="snowwar-banner snowwar-banner--countdown">
                     {localizeWithFallback('snowwar.time_up', 'Time is up!')}
@@ -292,12 +417,38 @@ export const SnowWarArenaView: FC = () =>
             )}
 
             <div
+                ref={viewportRef}
                 className="snowwar-viewport"
                 onClick={onArenaClick}
                 onContextMenu={onArenaClick}
             >
-                <div className="snowwar-world" style={{ width: canvasWidth, height: canvasHeight }}>
+                <div
+                    className="snowwar-world"
+                    style={{ width: canvasWidth, height: canvasHeight, transform: `translate(${cameraX}px, ${cameraY}px) scale(${zoom})`, transformOrigin: '0 0' }}
+                >
                     <canvas ref={canvasRef} width={canvasWidth} height={canvasHeight} className="snowwar-floor" />
+
+                    {levelData.items.filter(item => !isClassicItem(item.name)).map((item, index) =>
+                    {
+                        const furniData = GetSessionDataManager()?.getFloorItemDataByName?.(item.name);
+                        const { x, y } = toScreen(item.x, item.y);
+                        return (
+                            <div
+                                key={`furni-${index}-${furniRetryTick}`}
+                                className="snowwar-furni"
+                                style={{ left: x, top: y + (TILE_HALF_H * 2), zIndex: 100 + Math.round(y + TILE_HALF_H) }}
+                            >
+                                {furniData
+                                    ? <LayoutFurniImageView
+                                        direction={item.rotation}
+                                        productClassId={furniData.id}
+                                        productType="s"
+                                        style={{ position: 'absolute', transform: 'translate(-50%, -80%) scale(0.375)' }}
+                                    />
+                                    : <div className="snowwar-furni__fallback" />}
+                            </div>
+                        );
+                    })}
 
                     {levelData.machines.map(machine =>
                     {
@@ -317,10 +468,20 @@ export const SnowWarArenaView: FC = () =>
                         const ly = ball.prevLocV + (ball.locV - ball.prevLocV) * alpha;
                         const lh = Math.max(0, ball.prevHeight + (ball.height - ball.prevHeight) * alpha);
                         const { x, y } = worldToScreen(lx, ly);
+                        // Rendered arc = height above the throwing hand (world
+                        // 3000), amplified so the 10x flatter/steeper parabola
+                        // between normal (traj 1) and long (traj 2) throws is
+                        // actually visible; the ball also grows near its peak.
+                        const rise = 6 + Math.min(120, Math.max(0, lh - 3000) / 60);
+                        const peakScale = 1 + Math.min(0.8, Math.max(0, lh - 3000) / 8000);
                         return (
-                            <div key={ball.objectId} className="snowwar-snowball" style={{ left: x, top: y }}>
+                            <div
+                                key={ball.objectId}
+                                className={'snowwar-snowball' + (ball.trajectory === 2 ? ' snowwar-snowball--long' : '')}
+                                style={{ left: x, top: y }}
+                            >
                                 <div className="snowwar-snowball__shadow" />
-                                <div className="snowwar-snowball__ball" style={{ transform: `translateY(${-6 - (lh / 250)}px)` }} />
+                                <div className="snowwar-snowball__ball" style={{ transform: `translateY(${-rise}px) scale(${peakScale})` }} />
                             </div>
                         );
                     })}
@@ -331,6 +492,7 @@ export const SnowWarArenaView: FC = () =>
                         const ay = avatar.prevWorldY + (avatar.worldY - avatar.prevWorldY) * alpha;
                         const { x, y } = worldToScreen(ax, ay);
                         const isOwn = avatar.userId === ownUserId;
+                        const walking = (avatar.worldX !== avatar.prevWorldX) || (avatar.worldY !== avatar.prevWorldY);
                         const stunned = avatar.activityState === SNOWWAR_STATE_STUNNED;
                         const invincible = avatar.activityState === SNOWWAR_STATE_INVINCIBLE;
                         const chat = chatMessages.filter(message => message.objectId === avatar.objectId).slice(-1)[0];
@@ -350,7 +512,13 @@ export const SnowWarArenaView: FC = () =>
                                 {
                                     if (isOwn || !ownAvatar || avatar.teamId === ownAvatar.teamId) return;
                                     event.stopPropagation();
-                                    throwAtPlayer(avatar.objectId, event.shiftKey ? 2 : 1);
+                                    const trajectory = event.shiftKey ? 2 : 1;
+                                    if (!isThrowInRange(ownAvatar.tileX, ownAvatar.tileY, avatar.tileX, avatar.tileY, trajectory))
+                                    {
+                                        setRangeWarningAt(Date.now());
+                                        return;
+                                    }
+                                    throwAtPlayer(avatar.objectId, trajectory);
                                 }}
                             >
                                 {showChat && <div className="snowwar-avatar__chat">{chat.message}</div>}
@@ -360,10 +528,12 @@ export const SnowWarArenaView: FC = () =>
                                 >
                                     {avatar.name}
                                 </div>
-                                <LayoutAvatarImageView
+                                <SnowWarAvatarView
                                     figure={avatar.figure}
                                     gender={avatar.gender}
                                     direction={avatar.rotation}
+                                    walking={walking && !stunned}
+                                    frameNow={frameNow}
                                     scale={0.5}
                                 />
                                 {stunned && <div className="snowwar-avatar__stars">{'⭐⭐⭐'}</div>}

@@ -5,9 +5,10 @@ import {
     GameListMessageEvent,
     GameStatusMessageEvent,
     GetGameListMessageComposer,
-    LoadGameUrlEvent
+    LoadGameUrlEvent,
+    RoomEnterEvent
 } from '@nitrots/nitro-renderer';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useBetween } from 'use-between';
 import { SendMessageComposer, VisitDesktop } from '../../api';
 import { useMessageEvent } from '../events';
@@ -45,6 +46,10 @@ const useGameCenterState = () => {
 
         setGameOffline(parser.isInMaintenance);
     });
+
+    const onRoomEnter = useCallback(() => setIsVisible(false), []);
+
+    useMessageEvent<RoomEnterEvent>(RoomEnterEvent, onRoomEnter);
 
     useMessageEvent<LoadGameUrlEvent>(LoadGameUrlEvent, (event) => {
         let parser = event.getParser();

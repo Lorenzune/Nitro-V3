@@ -668,6 +668,7 @@ export class SnowWarGenericErrorEvent extends MessageEvent {}
 export class SnowWarUserRematchedEvent extends MessageEvent {}
 
 export class SnowWarLoadStageReadyComposer extends StubClass {}
+export class SnowWarEditRoomComposer extends StubClass {}
 export class SnowWarExitGameComposer extends StubClass {}
 export class SnowWarWalkComposer extends StubClass {}
 export class SnowWarThrowAtLocationComposer extends StubClass {}

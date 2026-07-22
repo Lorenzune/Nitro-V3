@@ -1,5 +1,6 @@
 import {
     SnowWarCreateSnowballComposer,
+    SnowWarEditRoomComposer,
     SnowWarExitGameComposer,
     SnowWarFullGameStatusEvent,
     SnowWarGameChatComposer,
@@ -47,6 +48,7 @@ export type SnowWarPhase =
 
 export interface SnowWarLevelState {
     gameLengthSeconds: number;
+    canEditRoom: boolean;
     mapId: number;
     teamCount: number;
     heightmapRows: string[];
@@ -145,9 +147,9 @@ const useSnowWarState = () =>
         setRematchedUserIds([]);
     }, []);
 
-    // Lobby / preparing countdowns tick locally between server packets.
     const lobbyTicking = (phase === 'lobby') && (lobbySeconds > 0);
     const preparingTicking = (phase === 'preparing') && (preparingSeconds > 0);
+    const clockTicking = (phase === 'playing') && (secondsLeft > 0);
 
     useEffect(() =>
     {
@@ -162,6 +164,13 @@ const useSnowWarState = () =>
         const interval = setInterval(() => setPreparingSeconds(seconds => Math.max(0, seconds - 1)), 1000);
         return () => clearInterval(interval);
     }, [preparingTicking]);
+
+    useEffect(() =>
+    {
+        if (!clockTicking) return;
+        const interval = setInterval(() => setSecondsLeft(seconds => Math.max(0, seconds - 1)), 1000);
+        return () => clearInterval(interval);
+    }, [clockTicking]);
 
     useEffect(() =>
     {
@@ -210,8 +219,12 @@ const useSnowWarState = () =>
     {
         const parser = event.getParser();
         if (!parser) return;
+        // The simulation needs the walkability grid to replay the server's
+        // tile pathfinding for avatar movement.
+        SNOWWAR_SIMULATION.setLevel(parser.heightmapRows, parser.items, parser.machines);
         setLevelData({
             gameLengthSeconds: parser.gameLengthSeconds,
+            canEditRoom: parser.canEditRoom,
             mapId: parser.mapId,
             teamCount: parser.teamCount,
             heightmapRows: parser.heightmapRows,
@@ -355,6 +368,13 @@ const useSnowWarState = () =>
         resetToIdle();
     }, [resetToIdle]);
 
+    const editRoom = useCallback(() =>
+    {
+        // Server verifies acc_snowwar_edit, removes us from the game and
+        // forwards into the editor room; the exit packets reset our state.
+        SendMessageComposer(new SnowWarEditRoomComposer());
+    }, []);
+
     const exitGame = useCallback(() =>
     {
         SendMessageComposer(new SnowWarExitGameComposer());
@@ -402,6 +422,7 @@ const useSnowWarState = () =>
         joinQueue,
         leaveQueue,
         exitGame,
+        editRoom,
         playAgain,
         walkTo,
         throwAtLocation,
