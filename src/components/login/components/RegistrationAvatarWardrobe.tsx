@@ -1,5 +1,6 @@
 import { AvatarDirectionAngle, GetAvatarRenderManager, IPartColor } from '@nitrots/nitro-renderer';
 import { FC, KeyboardEvent, useEffect, useMemo, useState } from 'react';
+import { FaUndoAlt } from 'react-icons/fa';
 import { AvatarEditorThumbnailsHelper } from '../../../api';
 import faceTabIcon from '../../../assets/images/wardrobe/hd.png';
 import headTabIcon from '../../../assets/images/wardrobe/head.png';
@@ -200,7 +201,7 @@ export const RegistrationAvatarWardrobe: FC<RegistrationAvatarWardrobeProps> = (
             <div className="registration-wardrobe-main">
                 <div className="avatar-preview-panel registration-wardrobe-preview">
                     <div className="avatar-preview" aria-label={t('nitro.login.register.avatar.preview', 'Your Habbo preview')}>
-                        <LayoutAvatarImageView direction={direction} figure={figure} gender={gender} />
+                        <LayoutAvatarImageView direction={direction} figure={figure} gender={gender} scale={1.7} />
                         <div className="registration-avatar-shadow" />
                     </div>
                     <div className="registration-wardrobe-rotation">
@@ -210,15 +211,7 @@ export const RegistrationAvatarWardrobe: FC<RegistrationAvatarWardrobeProps> = (
                             title={t('nitro.login.register.wardrobe.rotate_left', 'Rotate left')}
                             onClick={() => rotateAvatar(1)}
                         >
-                            <AvatarEditorIcon icon="arrow-left" />
-                        </button>
-                        <button
-                            type="button"
-                            aria-label={t('nitro.login.register.wardrobe.rotate_right', 'Rotate right')}
-                            title={t('nitro.login.register.wardrobe.rotate_right', 'Rotate right')}
-                            onClick={() => rotateAvatar(-1)}
-                        >
-                            <AvatarEditorIcon icon="arrow-right" />
+                            <FaUndoAlt aria-hidden="true" />
                         </button>
                     </div>
                 </div>

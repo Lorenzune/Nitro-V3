@@ -698,7 +698,7 @@
 
 .nitro-login-card .registration-wardrobe-main {
     display: grid;
-    grid-template-columns: 150px minmax(0, 1fr);
+    grid-template-columns: 170px minmax(0, 1fr);
     gap: 10px;
     height: 318px;
     padding: 9px;
@@ -707,8 +707,8 @@
 
 .nitro-login-card .registration-wardrobe-preview {
     align-self: center;
-    width: 150px;
-    height: 202px;
+    width: 170px;
+    height: 270px;
     min-height: 0;
     justify-content: flex-start;
 }
@@ -716,22 +716,23 @@
 .nitro-login-card .registration-wardrobe-preview .avatar-preview {
     position: relative;
     width: 100%;
-    min-height: 162px;
-    height: 162px;
-    padding-top: 22px;
+    min-height: 230px;
+    height: 230px;
     background: radial-gradient(circle at 50% 42%, #8792a3 0%, #677181 66%);
 }
 
 .nitro-login-card .registration-wardrobe-preview .avatar-image {
     z-index: 2;
+    margin-bottom: 8px;
+    transform-origin: center bottom;
 }
 
 .nitro-login-card .registration-avatar-shadow {
     position: absolute;
     left: 50%;
-    bottom: 17px;
-    width: 54px;
-    height: 16px;
+    bottom: 9px;
+    width: 72px;
+    height: 20px;
     border-radius: 50%;
     background: rgba(44, 58, 65, 0.18);
     transform: translateX(-50%);
@@ -741,7 +742,7 @@
 .nitro-login-card .registration-wardrobe-rotation {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     width: 100%;
     height: 39px;
     padding: 4px 14px;
@@ -753,8 +754,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    height: 30px;
+    width: 54px;
+    height: 34px;
     padding: 0;
     border: 1px solid transparent;
     border-radius: 4px;
@@ -762,9 +763,11 @@
     cursor: pointer;
 }
 
-.nitro-login-card .registration-wardrobe-rotation button img {
-    filter: brightness(0) saturate(100%);
-    opacity: 0.72;
+.nitro-login-card .registration-wardrobe-rotation button svg {
+    width: 36px;
+    height: 30px;
+    color: #278fca;
+    filter: drop-shadow(0 1px 0 #0e3f52);
 }
 
 .nitro-login-card .registration-wardrobe-rotation button:hover,
@@ -774,9 +777,9 @@
     outline: none;
 }
 
-.nitro-login-card .registration-wardrobe-rotation button:hover img,
-.nitro-login-card .registration-wardrobe-rotation button:focus-visible img {
-    opacity: 1;
+.nitro-login-card .registration-wardrobe-rotation button:hover svg,
+.nitro-login-card .registration-wardrobe-rotation button:focus-visible svg {
+    color: #1476ae;
 }
 
 .nitro-login-card .registration-wardrobe-editor {
