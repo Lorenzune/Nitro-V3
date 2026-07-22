@@ -291,6 +291,9 @@ export const SnowWarArenaView: FC = () =>
     const ownAvatar = simulation.getAvatarByUserId(ownUserId);
     const alpha = simulation.interpolationAlpha;
 
+    // First room-ad furni's image becomes the full-arena backdrop.
+    const arenaBackground = levelData?.items.find(item => item.imageUrl)?.imageUrl ?? null;
+
     // Camera as a GPU transform (translate + scale) instead of scrolling the
     // viewport: no per-frame layout work, so walking stays smooth. Level 0
     // centers the whole floor; levels 1-2 follow the own avatar, clamped to
@@ -422,16 +425,27 @@ export const SnowWarArenaView: FC = () =>
                 onClick={onArenaClick}
                 onContextMenu={onArenaClick}
             >
+                {arenaBackground && (
+                    <img
+                        alt=""
+                        className="snowwar-arena-bg"
+                        draggable={false}
+                        src={arenaBackground}
+                    />
+                )}
                 <div
                     className="snowwar-world"
                     style={{ width: canvasWidth, height: canvasHeight, transform: `translate(${cameraX}px, ${cameraY}px) scale(${zoom})`, transformOrigin: '0 0' }}
                 >
                     <canvas ref={canvasRef} width={canvasWidth} height={canvasHeight} className="snowwar-floor" />
 
-                    {levelData.items.filter(item => !isClassicItem(item.name)).map((item, index) =>
+                    {levelData.items.filter(item => !isClassicItem(item.name) && !item.imageUrl).map((item, index) =>
                     {
-                        const furniData = GetSessionDataManager()?.getFloorItemDataByName?.(item.name);
                         const { x, y } = toScreen(item.x, item.y);
+
+                        // Room-ad (ads_bg) furni are drawn as the full-arena
+                        // backdrop (arenaBackground) rather than a tile sprite.
+                        const furniData = GetSessionDataManager()?.getFloorItemDataByName?.(item.name);
                         return (
                             <div
                                 key={`furni-${index}-${furniRetryTick}`}

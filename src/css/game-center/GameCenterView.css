@@ -279,6 +279,7 @@
   position: absolute;
   left: 0;
   top: 0;
+  z-index: 1;
   will-change: transform;
 }
 
@@ -579,4 +580,14 @@
   top: 110px;
   border-color: #b9322a;
   font-size: 14px;
+}
+
+.snowwar-arena-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  z-index: 0;
 }

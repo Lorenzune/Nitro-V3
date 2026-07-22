@@ -52,7 +52,7 @@ export interface SnowWarLevelState {
     mapId: number;
     teamCount: number;
     heightmapRows: string[];
-    items: { name: string; x: number; y: number; rotation: number }[];
+    items: { name: string; x: number; y: number; rotation: number; imageUrl: string }[];
     machines: { objectId: number; x: number; y: number }[];
     players: { objectId: number; userId: number; teamId: number; name: string; figure: string; gender: string }[];
 }
@@ -147,6 +147,9 @@ const useSnowWarState = () =>
         setRematchedUserIds([]);
     }, []);
 
+    // Lobby / preparing / game-clock countdowns tick locally between server
+    // packets; the server value (lobby broadcasts, 5024 stage-running, 5016
+    // full status) overwrites the local tick whenever it arrives.
     const lobbyTicking = (phase === 'lobby') && (lobbySeconds > 0);
     const preparingTicking = (phase === 'preparing') && (preparingSeconds > 0);
     const clockTicking = (phase === 'playing') && (secondsLeft > 0);

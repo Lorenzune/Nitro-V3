@@ -47,6 +47,10 @@ const useGameCenterState = () => {
         setGameOffline(parser.isInMaintenance);
     });
 
+    // Entering a room while the hub is open (e.g. the SnowWar arena editor
+    // forwarding the player) must close the fullscreen hub overlay, or the
+    // loaded room sits invisible behind it. Normal hub usage never enters a
+    // room (opening it calls VisitDesktop), so this only fires on forwards.
     const onRoomEnter = useCallback(() => setIsVisible(false), []);
 
     useMessageEvent<RoomEnterEvent>(RoomEnterEvent, onRoomEnter);
