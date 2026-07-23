@@ -355,7 +355,8 @@
     display: block;
     text-align: center;
     margin-top: 6px;
-    font-size: 13px;
+    font-size: 11px;
+    line-height: 14px;
     color: var(--habbo-blue-dark, #2e6f8a);
     text-decoration: underline;
     cursor: pointer;
