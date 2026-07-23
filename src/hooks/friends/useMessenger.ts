@@ -1,6 +1,7 @@
 import {
     ConsoleReadReceiptEvent,
     ConsoleTypingComposer,
+    FriendListUpdateEvent,
     FriendIsTypingEvent,
     GetSessionDataManager,
     MarkConsoleReadComposer,
@@ -43,9 +44,11 @@ const useMessengerState = () => {
 
     const [typingUserIds, setTypingUserIds] = useState<number[]>([]);
     const typingTimersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+    const hiddenThreadIdsRef = useRef(hiddenThreadIds);
 
     const messageThreadsRef = useRef(messageThreads);
     messageThreadsRef.current = messageThreads;
+    hiddenThreadIdsRef.current = hiddenThreadIds;
 
     const visibleThreads = useMemo(() => messageThreads.filter((thread) => hiddenThreadIds.indexOf(thread.threadId) === -1), [messageThreads, hiddenThreadIds]);
     const activeThread = useMemo(
@@ -54,7 +57,7 @@ const useMessengerState = () => {
     );
 
     const getMessageThread = (userId: number) => {
-        let thread = messageThreads.find((thread) => thread.participant && thread.participant.id === userId);
+        let thread = messageThreadsRef.current.find((thread) => thread.participant && thread.participant.id === userId);
 
         if (!thread) {
             const friend = getFriend(userId);
@@ -67,15 +70,10 @@ const useMessengerState = () => {
 
             thread.setRead();
 
-            setMessageThreads((prevValue) => {
-                const newValue = [...prevValue];
-
-                newValue.push(thread);
-
-                return newValue;
-            });
+            messageThreadsRef.current = [...messageThreadsRef.current, thread];
+            setMessageThreads((prevValue) => prevValue.some((existing) => existing.threadId === thread.threadId) ? prevValue : [...prevValue, thread]);
         } else {
-            const hiddenIndex = hiddenThreadIds.indexOf(thread.threadId);
+            const hiddenIndex = hiddenThreadIdsRef.current.indexOf(thread.threadId);
 
             if (hiddenIndex >= 0) {
                 setHiddenThreadIds((prevValue) => {
@@ -132,8 +130,9 @@ const useMessengerState = () => {
 
             if (ownMessage && thread.groups.length === 1) PlaySound(SoundNames.MESSENGER_NEW_THREAD);
 
+            const isNotification = messageType === MessengerThreadChat.ROOM_INVITE || messageType === MessengerThreadChat.STATUS_NOTIFICATION;
             const addedChat = thread.addMessage(
-                messageType === MessengerThreadChat.ROOM_INVITE ? null : senderId,
+                isNotification ? null : senderId,
                 messageText,
                 secondsSinceSent,
                 extraData,
@@ -149,7 +148,7 @@ const useMessengerState = () => {
 
             newValue[index] = thread;
 
-            if (!ownMessage && thread.unread) PlaySound(SoundNames.MESSENGER_MESSAGE_RECEIVED);
+            if (!ownMessage && messageType !== MessengerThreadChat.STATUS_NOTIFICATION && thread.unread) PlaySound(SoundNames.MESSENGER_MESSAGE_RECEIVED);
 
             return newValue;
         });
@@ -192,8 +191,52 @@ const useMessengerState = () => {
 
         if (!thread) return;
 
+        if (parser.extraData === 'offline-sent') {
+            sendMessage(thread, null, LocalizeText('messenger.notification.persisted_message_sent'), 0, null, MessengerThreadChat.STATUS_NOTIFICATION);
+            return;
+        }
+
         sendMessage(thread, parser.senderId, parser.messageText, parser.secondsSinceSent, parser.extraData);
         if (thread.threadId === activeThreadId && parser.senderId > 0) SendMessageComposer(new MarkConsoleReadComposer(parser.senderId));
+    });
+
+    useMessageEvent<FriendListUpdateEvent>(FriendListUpdateEvent, (event) => {
+        const parser = event.getParser();
+
+        if (!parser.updatedFriends.length) return;
+
+        setMessageThreads((prevValue) => {
+            const newValue = [...prevValue];
+            let changed = false;
+
+            for (const updatedFriend of parser.updatedFriends) {
+                const index = newValue.findIndex((thread) => thread.participant?.id === updatedFriend.id);
+
+                if (index === -1) continue;
+
+                const thread = CloneObject(newValue[index]);
+                const wasOnline = thread.participant.online;
+
+                thread.participant.online = updatedFriend.online;
+
+                if (wasOnline !== updatedFriend.online && hiddenThreadIdsRef.current.indexOf(thread.threadId) === -1) {
+                    thread.addMessage(
+                        null,
+                        LocalizeText(updatedFriend.online ? 'messenger.notification.online' : 'messenger.notification.offline'),
+                        0,
+                        null,
+                        MessengerThreadChat.STATUS_NOTIFICATION
+                    );
+
+                    if (activeThreadId === thread.threadId) thread.setRead();
+                }
+
+                newValue[index] = thread;
+                changed = true;
+            }
+
+            return changed ? newValue : prevValue;
+        });
     });
 
     useMessageEvent<RoomInviteEvent>(RoomInviteEvent, (event) => {
