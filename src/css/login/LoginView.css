@@ -706,7 +706,7 @@
 }
 
 .nitro-login-card .registration-wardrobe-preview {
-    align-self: center;
+    align-self: end;
     width: 170px;
     height: 270px;
     min-height: 0;
@@ -833,8 +833,12 @@
 
 .nitro-login-card .registration-wardrobe-part {
     min-height: 48px;
-    background-size: 88% auto !important;
+    background-size: 75% auto !important;
     background-position: center !important;
+}
+
+.nitro-login-card .registration-wardrobe-part.wardrobe-part-hd {
+    background-size: 64% auto !important;
 }
 
 .nitro-login-card .registration-wardrobe-part:focus-visible {
